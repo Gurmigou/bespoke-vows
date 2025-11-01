@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const Landing = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen font-geologica">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-background to-primary/5 py-20 px-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(340,65%,75%,0.1),transparent_50%)]" />
@@ -13,45 +13,29 @@ const Landing = () => {
           <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary border border-primary/20">
               <Sparkles className="w-4 h-4" />
-              <span className="font-medium">Створіть запрошення вашої мрії</span>
+              <span>Створіть запрошення вашої мрії</span> 
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
-              Чудові весільні запрошення,
+            <h1 className="text-5xl md:text-8xl font-bold text-foreground leading-tight font-geologica">
+              Запрошення на весілля
               <br />
-              <span className="text-primary">Легко і просто</span>
+              <span className="text-primary md:text-8xl">Твій ідеальний дизайн</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Створюйте приголомшливі персоналізовані весільні запрошення без стресу, складного програмного забезпечення чи високих витрат.
-              Ваш ідеальний дизайн — всього за кілька хвилин.
+            <p className="text-xl md:text-1xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+            Без складні програми та зайві витрати на розробку. Наш онлайн-конструктор дозволяє 
+            створити ідеальний дизайн всього за кілька хвилин. Просто оберіть стиль, додайте 
+            деталі свого свята — і надішліть запрошення своїм гостям
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Link to="/builder">
-                <Button size="lg" className="text-lg px-8 py-6 shadow-elegant hover:shadow-soft transition-all">
-                  Почати безкоштовно
+                <Button className="h-14 rounded-md text-2xl px-10 py-6 shadow-elegant hover:shadow-soft transition-all">
+                  Створити зараз
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-                Переглянути приклади
-              </Button>
             </div>
 
-            <div className="flex flex-wrap gap-6 justify-center pt-8 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-secondary" />
-                <span>Навички дизайну не потрібні</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-secondary" />
-                <span>Цифровий та друк готовий</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-secondary" />
-                <span>Безкоштовний старт</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
