@@ -51,23 +51,32 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Three Steps Section */}
+      <section className="py-16 px-4 bg-gray-900">
+        <div className="container mx-auto max-w-6xl text-center">
+          <h2 className="text-3xl md:text-5xl font-bold text-white font-geologica">
+            Всього 3 кроки до мрії
+          </h2>
+        </div>
+      </section>
+
       {/* Alternating Content Blocks Section */}
       <AlternatingContentBlocks
         blocks={[
           {
-            title: "Перший блок",
+            title: "👉 Обери шаблон",
             description: "",
             imageUrl: preview1,
             imageAlt: "App screen showing invitation design interface",
           },
           {
-            title: "Другий блок",
+            title: "👉 Кастомізуй його повністю під себе",
             description: "",
             imageUrl: preview1,
             imageAlt: "App screen showing customization options",
           },
           {
-            title: "Третій блок",
+            title: "👉 Отримай ідеальне запрошення",
             description: "",
             imageUrl: preview1,
             imageAlt: "App screen showing final invitation preview",
@@ -75,11 +84,11 @@ const Landing = () => {
         ]}
       />
 
-            {/* Responsive Design Section */} 
-            <section className="py-16 px-4">
+      {/* Responsive Design Section */} 
+      <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="space-y-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-center font-geologica">
+            <h2 className="text-4xl md:text-5xl font-bold text-center font-geologica mb-6 md:mb-8">
               Адаптивний дизайн для всіх пристроїв
             </h2>
             <div className="flex flex-row items-center justify-center gap-8">
@@ -109,28 +118,48 @@ const Landing = () => {
         <div className="container mx-auto max-w-6xl space-y-12">
           <div className="text-center space-y-4">
             <h2 className="text-4xl md:text-5xl font-bold font-geologica">Все, що потрібно для створення магії</h2>
-            <p className="text-xl text-muted-foreground">Потужні функції, які роблять дизайн приємним</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { icon: Sparkles, title: "Конструктор перетягування", desc: "Інтуїтивний інтерфейс, яким може користуватися кожен" },
               { icon: Palette, title: "Широкий вибір шаблонів", desc: "Красиві дизайни готові до налаштування" },
               { icon: Heart, title: "Завантаження фото", desc: "Додайте свої фотографії з легкістю" },
-              { icon: Check, title: "Відстеження RSVP", desc: "Вбудовані інструменти управління гостями" },
+              { icon: Check, title: "Можливість редагування скільки загодно раз", desc: "Відредагуйте ваш запрошення будь-коли, скільки завгодно разів" },
               { icon: Clock, title: "Попередній перегляд у реальному часі", desc: "Бачте зміни миттєво під час дизайну" },
-              { icon: Star, title: "Кілька форматів", desc: "Експорт для цифрового поширення або друку" },
+              { icon: Star, title: "Повна кастомізація", desc: "Налаштуйте кожну деталь за вашими побажаннями" },
             ].map((feature, idx) => (
               <div
                 key={idx}
-                className="bg-card p-6 rounded-xl border hover:border-primary/50 transition-all hover:shadow-soft space-y-3"
+                className="bg-card p-8 md:p-10 rounded-xl border shadow-lg space-y-4 min-h-[200px] md:min-h-[220px] flex flex-col"
               >
-                <feature.icon className="w-10 h-10 text-primary" />
-                <h3 className="text-xl font-semibold font-geologica">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.desc}</p>
+                <feature.icon className="w-12 h-12 text-primary" />
+                <h3 className="text-xl md:text-2xl font-semibold font-geologica">{feature.title}</h3>
+                <p className="text-muted-foreground text-base md:text-lg leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-24 px-4 bg-gradient-to-b from-primary/5 to-background">
+        <div className="container mx-auto max-w-4xl text-center space-y-12 md:space-y-16">
+          <h2 className="text-4xl md:text-6xl font-bold leading-tight font-geologica">
+            Готові вразити гостей
+            <br />
+            <span className="text-primary">Ідеальним запрошенням?</span>
+          </h2>
+          
+          <p className="text-sm text-muted-foreground">
+            Приєднуйтесь до сотень щасливих пар, які створили запрошення своєї мрії
+          </p>
+          
+          <Link to="/builder" className="inline-block mt-8 md:mt-12">
+            <Button size="lg" className="text-xl px-12 py-7 shadow-elegant hover:shadow-soft transition-all">
+              Створити запрошення зараз
+            </Button>
+          </Link>
         </div>
       </section>
 
