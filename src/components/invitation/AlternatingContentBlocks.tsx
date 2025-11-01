@@ -39,7 +39,7 @@ const AlternatingContentBlocks = ({ blocks }: AlternatingContentBlocksProps) => 
                   <img
                     src={block.imageUrl}
                     alt={block.imageAlt}
-                    className="w-full max-w-sm h-auto object-contain relative z-10"
+                    className="w-full max-w-[350px] md:max-w-[380px] h-auto object-contain relative z-10"
                     style={{
                       filter: "drop-shadow(0 15px 40px rgba(0, 0, 0, 0.4))",
                     }}
