@@ -39,7 +39,7 @@ const Landing = () => {
       {/* Value Proposition Section */}
       <section className="py-20 px-4 bg-card">
         <div className="container mx-auto max-w-4xl text-center space-y-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground font-geologica">
             Створюйте унікальні запрошення, що розповідають вашу історію
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
@@ -58,7 +58,7 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
                   <Palette className="w-7 h-7 text-primary" />
                 </div>
-                <h3 className="text-2xl font-bold">Ваш особистий стиль</h3>
+                <h3 className="text-2xl font-bold font-geologica">Ваш особистий стиль</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Налаштуйте кожну деталь, щоб відобразити вашу унікальну історію кохання. Виберіть кольори, шрифти та макети, які ідеально відображають ваш стиль.
                 </p>
@@ -70,7 +70,7 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Sparkles className="w-7 h-7 text-secondary" />
                 </div>
-                <h3 className="text-2xl font-bold">Неймовірно легко</h3>
+                <h3 className="text-2xl font-bold font-geologica">Неймовірно легко</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Інтуїтивно зрозумілий конструктор для вашого ідеального запрошення. Навички дизайну не потрібні — просто налаштовуйте з легкістю.
                 </p>
@@ -82,7 +82,7 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
                   <DollarSign className="w-7 h-7 text-accent" />
                 </div>
-                <h3 className="text-2xl font-bold">Економія часу та грошей</h3>
+                <h3 className="text-2xl font-bold font-geologica">Економія часу та грошей</h3>
                 <p className="text-muted-foreground leading-relaxed">
                   Отримайте професійні результати за частку вартості. Цифрові та готові до друку формати включені, тому у вас є варіанти.
                 </p>
@@ -96,7 +96,7 @@ const Landing = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold">Все, що потрібно для створення магії</h2>
+            <h2 className="text-4xl md:text-5xl font-bold font-geologica">Все, що потрібно для створення магії</h2>
             <p className="text-xl text-muted-foreground">Потужні функції, які роблять дизайн приємним</p>
           </div>
 
@@ -114,7 +114,7 @@ const Landing = () => {
                 className="bg-card p-6 rounded-xl border hover:border-primary/50 transition-all hover:shadow-soft space-y-3"
               >
                 <feature.icon className="w-10 h-10 text-primary" />
-                <h3 className="text-xl font-semibold">{feature.title}</h3>
+                <h3 className="text-xl font-semibold font-geologica">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.desc}</p>
               </div>
             ))}
@@ -135,7 +135,7 @@ const Landing = () => {
                 </div>
               </div>
               
-              <blockquote className="text-2xl md:text-3xl text-center font-serif italic text-foreground leading-relaxed">
+              <blockquote className="text-2xl md:text-3xl text-center font-geologica italic text-foreground leading-relaxed">
                 "Цей конструктор заощадив мені стільки часу та грошей! Наші запрошення виглядали професійно розробленими,
                 і всі запитували, де ми їх замовили. Не можу повірити, наскільки це було легко!"
               </blockquote>
@@ -153,12 +153,12 @@ const Landing = () => {
       <section className="py-20 px-4 bg-background">
         <div className="container mx-auto max-w-4xl space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold">У вас є питання, у нас є відповіді</h2>
+            <h2 className="text-4xl md:text-5xl font-bold font-geologica">У вас є питання, у нас є відповіді</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-primary">"Я не дизайнер..."</h3>
+              <h3 className="text-xl font-bold text-primary font-geologica">"Я не дизайнер..."</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Чудово! Наш конструктор створений спеціально для не-дизайнерів. З нашим інтуїтивним інтерфейсом та красивими шаблонами
                 ви створите щось дивовижне за лічені хвилини.
@@ -166,7 +166,7 @@ const Landing = () => {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-secondary">"Чи виглядатиме це дешево?"</h3>
+              <h3 className="text-xl font-bold text-secondary font-geologica">"Чи виглядатиме це дешево?"</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Абсолютно ні. Ми зосереджуємося на преміум-дизайнах професійної якості, які суперничають з дорогими індивідуальними канцтоварами.
                 Ваші гості будуть вражені.
@@ -174,7 +174,7 @@ const Landing = () => {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-accent">"Чи варто воно зусиль?"</h3>
+              <h3 className="text-xl font-bold text-accent font-geologica">"Чи варто воно зусиль?"</h3>
               <p className="text-muted-foreground leading-relaxed">
                 Це на диво просто! Більшість пар завершують свій дизайн менш ніж за 30 хвилин.
                 Ви заощадите сотні порівняно з традиційними дизайнерами.
@@ -187,7 +187,7 @@ const Landing = () => {
       {/* Final CTA Section */}
       <section className="py-24 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-4xl text-center space-y-8">
-          <h2 className="text-4xl md:text-6xl font-bold leading-tight">
+          <h2 className="text-4xl md:text-6xl font-bold leading-tight font-geologica">
             Готові створити своє
             <br />
             <span className="text-primary">Ідеальне запрошення?</span>
