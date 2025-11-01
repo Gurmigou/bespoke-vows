@@ -1,9 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Sparkles, Palette, Clock, DollarSign, Heart, Star } from "lucide-react";
+import { Check, Sparkles, Palette, Clock, DollarSign, Heart, Star, Instagram } from "lucide-react";
 import { Link } from "react-router-dom";
 import AlternatingContentBlocks from "@/components/invitation/AlternatingContentBlocks";
 import preview1 from "@/img/preview_1.png";
+
+// TikTok Icon SVG Component
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+  </svg>
+);
 
 const Landing = () => {
   return (
@@ -221,6 +233,107 @@ const Landing = () => {
           </p>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-300 py-12 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand Column */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-white font-geologica">Beloved</h3>
+              <p className="text-sm leading-relaxed">
+                Створюйте ідеальні запрошення на весілля з легкістю та стилем
+              </p>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white font-geologica">Навігація</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/about" className="text-sm hover:text-pink-400 transition-colors">
+                    Про нас
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/invites" className="text-sm hover:text-pink-400 transition-colors">
+                    Про запрошення
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/pricing" className="text-sm hover:text-pink-400 transition-colors">
+                    Ціна
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/builder" className="text-sm hover:text-pink-400 transition-colors">
+                    Конструктор
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Information Links */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white font-geologica">Інформація</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-sm hover:text-pink-400 transition-colors">
+                    Довідка
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm hover:text-pink-400 transition-colors">
+                    Контакти
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm hover:text-pink-400 transition-colors">
+                    Політика конфіденційності
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-sm hover:text-pink-400 transition-colors">
+                    Умови використання
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Social Media */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white font-geologica">Соціальні мережі</h4>
+              <div className="flex gap-4">
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://tiktok.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-colors"
+                  aria-label="TikTok"
+                >
+                  <TikTokIcon className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-800 pt-8 mt-8 text-center">
+            <p className="text-sm text-gray-400">
+              Rights reserved © {new Date().getFullYear()}
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
