@@ -16,17 +16,17 @@ export const LoveStoryForm = ({ data, setData }: LoveStoryFormProps) => {
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Love Story</h3>
+        <h3 className="text-lg font-semibold">Історія кохання</h3>
         <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4 pt-4">
         <div className="space-y-2">
-          <Label htmlFor="loveStory">Your Story (Optional)</Label>
+          <Label htmlFor="loveStory">Ваша історія (необов'язково)</Label>
           <Textarea
             id="loveStory"
             value={data.loveStory}
             onChange={(e) => setData({ ...data, loveStory: e.target.value })}
-            placeholder="Tell your love story..."
+            placeholder="Розкажіть свою історію кохання..."
             rows={6}
             className="resize-none"
           />

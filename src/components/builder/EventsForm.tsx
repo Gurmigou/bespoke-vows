@@ -37,7 +37,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Order of Events</h3>
+        <h3 className="text-lg font-semibold">Порядок подій</h3>
         <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4 pt-4">
@@ -54,20 +54,20 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
 
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <Label className="text-xs">Time</Label>
+                <Label className="text-xs">Час</Label>
                 <Input
                   value={event.time}
                   onChange={(e) => updateEvent(event.id, "time", e.target.value)}
-                  placeholder="4:00 PM"
+                  placeholder="16:00"
                   className="h-9"
                 />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Event Name</Label>
+                <Label className="text-xs">Назва події</Label>
                 <Input
                   value={event.eventName}
                   onChange={(e) => updateEvent(event.id, "eventName", e.target.value)}
-                  placeholder="Ceremony"
+                  placeholder="Церемонія"
                   className="h-9"
                 />
               </div>
@@ -77,7 +77,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
 
         <Button variant="outline" onClick={addEvent} className="w-full">
           <Plus className="w-4 h-4 mr-2" />
-          Add Event
+          Додати подію
         </Button>
       </CollapsibleContent>
     </Collapsible>

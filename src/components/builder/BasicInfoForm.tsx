@@ -16,47 +16,47 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Couple & Date</h3>
+        <h3 className="text-lg font-semibold">Пара та дата</h3>
         <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4 pt-4">
         <div className="space-y-2">
-          <Label htmlFor="herName">Her Name</Label>
+          <Label htmlFor="herName">Її ім'я</Label>
           <Input
             id="herName"
             value={data.herName}
             onChange={(e) => setData({ ...data, herName: e.target.value })}
-            placeholder="Sarah"
+            placeholder="Софія"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="hisName">His Name</Label>
+          <Label htmlFor="hisName">Його ім'я</Label>
           <Input
             id="hisName"
             value={data.hisName}
             onChange={(e) => setData({ ...data, hisName: e.target.value })}
-            placeholder="James"
+            placeholder="Михайло"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="weddingDate">Wedding Date</Label>
+          <Label htmlFor="weddingDate">Дата весілля</Label>
           <Input
             id="weddingDate"
             value={data.weddingDate}
             onChange={(e) => setData({ ...data, weddingDate: e.target.value })}
-            placeholder="June 15th, 2025"
+            placeholder="15 червня 2025"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="weddingPlace">Wedding Place</Label>
+          <Label htmlFor="weddingPlace">Місце весілля</Label>
           <Input
             id="weddingPlace"
             value={data.weddingPlace}
             onChange={(e) => setData({ ...data, weddingPlace: e.target.value })}
-            placeholder="The Rosewood Estate"
+            placeholder="Палац Розвуд"
           />
         </div>
       </CollapsibleContent>

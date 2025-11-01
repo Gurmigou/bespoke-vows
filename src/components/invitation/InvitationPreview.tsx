@@ -40,7 +40,7 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
                 className="text-sm tracking-[0.3em] uppercase transition-all duration-500"
                 style={{ color: data.templateColors.text }}
               >
-                Request the pleasure of your company
+                Запрошуємо на наше весілля
               </p>
               <p 
                 className="text-2xl tracking-wide transition-all duration-500"
@@ -86,7 +86,7 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
                 className="text-4xl font-serif italic text-center transition-all duration-500"
                 style={{ color: data.templateColors.primary }}
               >
-                Order of Events
+                Порядок подій
               </h2>
 
               <div className="space-y-4 max-w-md mx-auto">
@@ -118,7 +118,7 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
                   className="text-2xl font-serif italic transition-all duration-500"
                   style={{ color: data.templateColors.primary }}
                 >
-                  The Venue
+                  Місце проведення
                 </h3>
                 <div 
                   className="text-sm uppercase tracking-wider space-y-1 transition-all duration-500"
@@ -128,12 +128,12 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
                   <p>{data.weddingPlace.split(',')[1]}</p>
                   <p>{data.weddingPlace.split(',')[2]}</p>
                 </div>
-                {data.weddingPlace.includes("Rosewood") && (
+                {data.weddingPlace.includes("Розвуд") && (
                   <p 
                     className="text-xs italic pt-4 max-w-sm mx-auto transition-all duration-500"
                     style={{ color: data.templateColors.text }}
                   >
-                    Garden ceremony to be held on the south lawn, followed by reception in the grand conservatory
+                    Церемонія у саду відбудеться на південній галявині, за якою послідує прийом у великому зимовому саду
                   </p>
                 )}
               </div>

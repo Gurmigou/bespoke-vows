@@ -13,43 +13,43 @@ const Landing = () => {
           <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary border border-primary/20">
               <Sparkles className="w-4 h-4" />
-              <span className="font-medium">Design Your Dream Invitation</span>
+              <span className="font-medium">Створіть запрошення вашої мрії</span>
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
-              Beautiful Wedding Invitations,
+              Чудові весільні запрошення,
               <br />
-              <span className="text-primary">Made Simple</span>
+              <span className="text-primary">Легко і просто</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Create stunning, personalized wedding invitations without the stress, complex software, or high costs. 
-              Your perfect design is just minutes away.
+              Створюйте приголомшливі персоналізовані весільні запрошення без стресу, складного програмного забезпечення чи високих витрат.
+              Ваш ідеальний дизайн — всього за кілька хвилин.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Link to="/builder">
                 <Button size="lg" className="text-lg px-8 py-6 shadow-elegant hover:shadow-soft transition-all">
-                  Start Designing Free
+                  Почати безкоштовно
                 </Button>
               </Link>
               <Button variant="outline" size="lg" className="text-lg px-8 py-6">
-                View Examples
+                Переглянути приклади
               </Button>
             </div>
 
             <div className="flex flex-wrap gap-6 justify-center pt-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-secondary" />
-                <span>No design skills needed</span>
+                <span>Навички дизайну не потрібні</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-secondary" />
-                <span>Digital & print ready</span>
+                <span>Цифровий та друк готовий</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-secondary" />
-                <span>Free to start</span>
+                <span>Безкоштовний старт</span>
               </div>
             </div>
           </div>
@@ -60,11 +60,11 @@ const Landing = () => {
       <section className="py-20 px-4 bg-card">
         <div className="container mx-auto max-w-4xl text-center space-y-6">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-            Design Unique Invitations That Tell Your Story
+            Створюйте унікальні запрошення, що розповідають вашу історію
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            For couples seeking an elegant, stress-free creation process. 
-            Deliver personalized beauty without the hassle or high cost.
+            Для пар, які шукають елегантний процес створення без стресу.
+            Надайте персоналізовану красу без клопоту чи високих витрат.
           </p>
         </div>
       </section>
@@ -78,9 +78,9 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
                   <Palette className="w-7 h-7 text-primary" />
                 </div>
-                <h3 className="text-2xl font-bold">Your Personal Touch</h3>
+                <h3 className="text-2xl font-bold">Ваш особистий стиль</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Customize every detail to reflect your unique love story. Choose colors, fonts, and layouts that perfectly capture your style.
+                  Налаштуйте кожну деталь, щоб відобразити вашу унікальну історію кохання. Виберіть кольори, шрифти та макети, які ідеально відображають ваш стиль.
                 </p>
               </CardContent>
             </Card>
@@ -90,9 +90,9 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Sparkles className="w-7 h-7 text-secondary" />
                 </div>
-                <h3 className="text-2xl font-bold">Effortlessly Easy</h3>
+                <h3 className="text-2xl font-bold">Неймовірно легко</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  An intuitive builder for your perfect invitation. No design skills needed—just drag, drop, and customize with ease.
+                  Інтуїтивно зрозумілий конструктор для вашого ідеального запрошення. Навички дизайну не потрібні — просто налаштовуйте з легкістю.
                 </p>
               </CardContent>
             </Card>
@@ -102,9 +102,9 @@ const Landing = () => {
                 <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
                   <DollarSign className="w-7 h-7 text-accent" />
                 </div>
-                <h3 className="text-2xl font-bold">Save Time & Money</h3>
+                <h3 className="text-2xl font-bold">Економія часу та грошей</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Get professional results at a fraction of the cost. Digital and print-ready formats included, so you have options.
+                  Отримайте професійні результати за частку вартості. Цифрові та готові до друку формати включені, тому у вас є варіанти.
                 </p>
               </CardContent>
             </Card>
@@ -116,18 +116,18 @@ const Landing = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold">Everything You Need to Create Magic</h2>
-            <p className="text-xl text-muted-foreground">Powerful features that make designing delightful</p>
+            <h2 className="text-4xl md:text-5xl font-bold">Все, що потрібно для створення магії</h2>
+            <p className="text-xl text-muted-foreground">Потужні функції, які роблять дизайн приємним</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: Sparkles, title: "Drag-and-Drop Builder", desc: "Intuitive interface that anyone can use" },
-              { icon: Palette, title: "Extensive Templates", desc: "Beautiful designs ready to customize" },
-              { icon: Heart, title: "Photo Uploads", desc: "Add your engagement photos with ease" },
-              { icon: Check, title: "RSVP Tracking", desc: "Built-in guest management tools" },
-              { icon: Clock, title: "Real-Time Preview", desc: "See changes instantly as you design" },
-              { icon: Star, title: "Multiple Formats", desc: "Export for digital sharing or printing" },
+              { icon: Sparkles, title: "Конструктор перетягування", desc: "Інтуїтивний інтерфейс, яким може користуватися кожен" },
+              { icon: Palette, title: "Широкий вибір шаблонів", desc: "Красиві дизайни готові до налаштування" },
+              { icon: Heart, title: "Завантаження фото", desc: "Додайте свої фотографії з легкістю" },
+              { icon: Check, title: "Відстеження RSVP", desc: "Вбудовані інструменти управління гостями" },
+              { icon: Clock, title: "Попередній перегляд у реальному часі", desc: "Бачте зміни миттєво під час дизайну" },
+              { icon: Star, title: "Кілька форматів", desc: "Експорт для цифрового поширення або друку" },
             ].map((feature, idx) => (
               <div
                 key={idx}
@@ -156,13 +156,13 @@ const Landing = () => {
               </div>
               
               <blockquote className="text-2xl md:text-3xl text-center font-serif italic text-foreground leading-relaxed">
-                "This builder saved me so much time and money! Our invitations looked professionally designed, 
-                and everyone asked where we got them made. I can't believe how easy it was!"
+                "Цей конструктор заощадив мені стільки часу та грошей! Наші запрошення виглядали професійно розробленими,
+                і всі запитували, де ми їх замовили. Не можу повірити, наскільки це було легко!"
               </blockquote>
               
               <div className="text-center">
-                <p className="font-semibold text-lg">Emily & Michael</p>
-                <p className="text-muted-foreground">Married June 2024</p>
+                <p className="font-semibold text-lg">Еміля та Михайло</p>
+                <p className="text-muted-foreground">Одружилися у червні 2024</p>
               </div>
             </CardContent>
           </Card>
@@ -173,31 +173,31 @@ const Landing = () => {
       <section className="py-20 px-4 bg-background">
         <div className="container mx-auto max-w-4xl space-y-12">
           <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold">You Have Questions, We Have Answers</h2>
+            <h2 className="text-4xl md:text-5xl font-bold">У вас є питання, у нас є відповіді</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-primary">"I'm not a designer..."</h3>
+              <h3 className="text-xl font-bold text-primary">"Я не дизайнер..."</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Perfect! Our builder is designed specifically for non-designers. With our intuitive interface and beautiful templates, 
-                you'll create something amazing in minutes.
+                Чудово! Наш конструктор створений спеціально для не-дизайнерів. З нашим інтуїтивним інтерфейсом та красивими шаблонами
+                ви створите щось дивовижне за лічені хвилини.
               </p>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-secondary">"Will it look cheap?"</h3>
+              <h3 className="text-xl font-bold text-secondary">"Чи виглядатиме це дешево?"</h3>
               <p className="text-muted-foreground leading-relaxed">
-                Absolutely not. We focus on premium, professional-quality designs that rival expensive custom stationery. 
-                Your guests will be impressed.
+                Абсолютно ні. Ми зосереджуємося на преміум-дизайнах професійної якості, які суперничають з дорогими індивідуальними канцтоварами.
+                Ваші гості будуть вражені.
               </p>
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-xl font-bold text-accent">"Is it worth the effort?"</h3>
+              <h3 className="text-xl font-bold text-accent">"Чи варто воно зусиль?"</h3>
               <p className="text-muted-foreground leading-relaxed">
-                It's surprisingly simple! Most couples finish their design in under 30 minutes. 
-                You'll save hundreds compared to traditional designers.
+                Це на диво просто! Більшість пар завершують свій дизайн менш ніж за 30 хвилин.
+                Ви заощадите сотні порівняно з традиційними дизайнерами.
               </p>
             </div>
           </div>
@@ -208,23 +208,23 @@ const Landing = () => {
       <section className="py-24 px-4 bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-4xl text-center space-y-8">
           <h2 className="text-4xl md:text-6xl font-bold leading-tight">
-            Ready to Create Your
+            Готові створити своє
             <br />
-            <span className="text-primary">Perfect Invitation?</span>
+            <span className="text-primary">Ідеальне запрошення?</span>
           </h2>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Wedding planning made easier, more personal, and affordable. Start designing in minutes—no credit card required.
+            Планування весілля стало простішим, більш персональним та доступним. Почніть дизайн за кілька хвилин — кредитна картка не потрібна.
           </p>
           
           <Link to="/builder">
             <Button size="lg" className="text-xl px-12 py-7 shadow-elegant hover:shadow-soft transition-all">
-              Create Your Invitation Now
+              Створіть своє запрошення зараз
             </Button>
           </Link>
 
           <p className="text-sm text-muted-foreground pt-4">
-            Join thousands of happy couples who designed their dream invitations
+            Приєднуйтесь до тисяч щасливих пар, які створили запрошення своєї мрії
           </p>
         </div>
       </section>

@@ -32,7 +32,7 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Wedding Colors</h3>
+        <h3 className="text-lg font-semibold">Весільні кольори</h3>
         <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4 pt-4">
@@ -59,7 +59,7 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
 
         <Button variant="outline" onClick={addColor} className="w-full">
           <Plus className="w-4 h-4 mr-2" />
-          Add Color
+          Додати колір
         </Button>
       </CollapsibleContent>
     </Collapsible>

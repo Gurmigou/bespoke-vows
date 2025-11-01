@@ -25,13 +25,13 @@ export const TemplateColorPicker = ({ data, setData }: TemplateColorPickerProps)
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Template Design</h3>
+        <h3 className="text-lg font-semibold">Дизайн шаблону</h3>
         <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </CollapsibleTrigger>
       <CollapsibleContent className="space-y-4 pt-4">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="primaryColor">Primary Color</Label>
+            <Label htmlFor="primaryColor">Основний колір</Label>
             <div className="flex gap-2 items-center">
               <input
                 type="color"
@@ -45,7 +45,7 @@ export const TemplateColorPicker = ({ data, setData }: TemplateColorPickerProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="textColor">Text Color</Label>
+            <Label htmlFor="textColor">Колір тексту</Label>
             <div className="flex gap-2 items-center">
               <input
                 type="color"
@@ -59,7 +59,7 @@ export const TemplateColorPicker = ({ data, setData }: TemplateColorPickerProps)
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="accentColor">Accent Color</Label>
+            <Label htmlFor="accentColor">Акцентний колір</Label>
             <div className="flex gap-2 items-center">
               <input
                 type="color"
@@ -74,7 +74,7 @@ export const TemplateColorPicker = ({ data, setData }: TemplateColorPickerProps)
         </div>
 
         <p className="text-xs text-muted-foreground">
-          These colors will theme both your invitation and this builder interface
+          Ці кольори стилізують як ваше запрошення, так і інтерфейс конструктора
         </p>
       </CollapsibleContent>
     </Collapsible>

@@ -45,7 +45,7 @@ export const BuilderPanel = ({ data, setData }: BuilderPanelProps) => {
               {data.herName[0]}{data.hisName[0]}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium text-sm">Your Invitation</span>
+          <span className="font-medium text-sm">Ваше запрошення</span>
         </div>
         <Button 
           onClick={handlePublish}
@@ -55,7 +55,7 @@ export const BuilderPanel = ({ data, setData }: BuilderPanelProps) => {
             color: '#fff',
           }}
         >
-          Publish
+          Опублікувати
         </Button>
       </div>
 
