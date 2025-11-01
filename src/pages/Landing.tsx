@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Sparkles, Palette, Clock, DollarSign, Heart, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import AlternatingContentBlocks from "@/components/invitation/AlternatingContentBlocks";
+import preview1 from "@/img/preview_1.png";
 
 const Landing = () => {
   return (
@@ -36,18 +38,29 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Value Proposition Section */}
-      <section className="py-20 px-4 bg-card">
-        <div className="container mx-auto max-w-4xl text-center space-y-6">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground font-geologica">
-            Створюйте унікальні запрошення, що розповідають вашу історію
-          </h2>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            Для пар, які шукають елегантний процес створення без стресу.
-            Надайте персоналізовану красу без клопоту чи високих витрат.
-          </p>
-        </div>
-      </section>
+      {/* Alternating Content Blocks Section */}
+      <AlternatingContentBlocks
+        blocks={[
+          {
+            title: "Перший блок",
+            description: "",
+            imageUrl: preview1,
+            imageAlt: "App screen showing invitation design interface",
+          },
+          {
+            title: "Другий блок",
+            description: "",
+            imageUrl: preview1,
+            imageAlt: "App screen showing customization options",
+          },
+          {
+            title: "Третій блок",
+            description: "",
+            imageUrl: preview1,
+            imageAlt: "App screen showing final invitation preview",
+          },
+        ]}
+      />
 
       {/* Core Benefits Section */}
       <section className="py-20 px-4 bg-background">
