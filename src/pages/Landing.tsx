@@ -11,10 +11,6 @@ const Landing = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(340,65%,75%,0.1),transparent_50%)]" />
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary border border-primary/20">
-              <Sparkles className="w-4 h-4" />
-              <span>Створіть запрошення вашої мрії</span> 
-            </div>
             
             <h1 className="text-5xl md:text-8xl font-bold text-foreground leading-tight font-geologica">
               Запрошення на весілля
@@ -23,7 +19,7 @@ const Landing = () => {
             </h1>
             
             <p className="text-xl md:text-1xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
-            Без складні програми та зайві витрати на розробку. Наш онлайн-конструктор дозволяє 
+            Без складних програми та зайвих витрат на розробку. Наш онлайн-конструктор дозволяє 
             створити ідеальний дизайн всього за кілька хвилин. Просто оберіть стиль, додайте 
             деталі свого свята — і надішліть запрошення своїм гостям
             </p>
