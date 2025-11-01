@@ -17,7 +17,7 @@ const Landing = () => {
             <h1 className="text-5xl md:text-8xl font-bold text-foreground leading-tight font-geologica">
               Запрошення на весілля
               <br />
-              <span className="text-primary md:text-8xl">Твій ідеальний дизайн</span>
+              <span className="bg-gradient-to-r from-pink-400 via-pink-450 to-pink-500 bg-clip-text text-transparent md:text-8xl">Твій ідеальний дизайн</span>
             </h1>
             
             <p className="text-xl md:text-1xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
