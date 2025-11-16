@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { BuilderPanel } from "@/components/builder/BuilderPanel";
-import { InvitationPreview_1 } from "@/components/invitation/InvitationPreview_1";
+import { InvitationPreview } from "@/components/invitation/InvitationPreview";
 
 export interface WeddingEvent {
   id: string;
@@ -82,7 +82,7 @@ const Builder = () => {
 
         {/* Right Panel - InvitationPreview */}
         <Panel>
-          <InvitationPreview_1 data={invitationData} />
+          <InvitationPreview data={invitationData} />
         </Panel>
       </PanelGroup>
     </div>
