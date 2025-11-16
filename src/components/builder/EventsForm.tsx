@@ -3,7 +3,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvitationData, WeddingEvent } from "@/pages/Builder";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronDown, Plus, Trash2, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface EventsFormProps {
@@ -30,6 +37,10 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
         --tw-ring-color: ${data.templateColors.accent} !important;
         box-shadow: 0 0 0 2px ${data.templateColors.accent} !important;
       }
+      .accent-focus-ring-events[data-state="open"] {
+        border-color: ${data.templateColors.accent} !important;
+        box-shadow: 0 0 0 2px ${data.templateColors.accent}20 !important;
+      }
     `;
   }, [data.templateColors.accent]);
 
@@ -53,41 +64,111 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
     });
   };
 
+  // Parse time string (HH:MM) into hours and minutes
+  const parseTime = (timeString: string) => {
+    if (!timeString || !timeString.includes(':')) {
+      return { hour: '', minute: '' };
+    }
+    const [hour, minute] = timeString.split(':');
+    return { hour: hour || '', minute: minute || '' };
+  };
+
+  // Format hours and minutes into HH:MM string
+  const formatTime = (hour: string, minute: string) => {
+    if (!hour || !minute) return '';
+    return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+  };
+
+  // Generate time options
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')); // 0, 5, 10, 15, ..., 55
+
+  // TimePicker component
+  const TimePicker = ({ eventId, timeValue }: { eventId: string; timeValue: string }) => {
+    const { hour, minute } = parseTime(timeValue);
+
+    const handleHourChange = (newHour: string) => {
+      const newTime = formatTime(newHour, minute || '00');
+      updateEvent(eventId, 'time', newTime);
+    };
+
+    const handleMinuteChange = (newMinute: string) => {
+      const newTime = formatTime(hour || '00', newMinute);
+      updateEvent(eventId, 'time', newTime);
+    };
+
+    return (
+      <div className="flex gap-1.5 items-center">
+        <Select value={hour} onValueChange={handleHourChange}>
+          <SelectTrigger className="h-10 w-[70px] accent-focus-ring-events">
+            <SelectValue placeholder="00" />
+          </SelectTrigger>
+          <SelectContent>
+            {hours.map((h) => (
+              <SelectItem key={h} value={h}>
+                {h}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-muted-foreground font-semibold text-base">:</span>
+        <Select value={minute} onValueChange={handleMinuteChange}>
+          <SelectTrigger className="h-10 w-[70px] accent-focus-ring-events">
+            <SelectValue placeholder="00" />
+          </SelectTrigger>
+          <SelectContent>
+            {minutes.map((m) => (
+              <SelectItem key={m} value={m}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  };
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Порядок подій</h3>
-        <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pt-4">
+    <div 
+      className="border rounded-lg p-4 transition-all duration-500"
+      style={{
+        borderColor: `${data.templateColors.primary}20`,
+      }}
+    >
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger className="flex items-center justify-between w-full group">
+          <h3 className="text-lg font-semibold">Порядок подій</h3>
+          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pt-4">
         {data.events.map((event) => (
-          <div key={event.id} className="space-y-2 p-3 border rounded-lg relative group">
+          <div key={event.id} className="space-y-3 p-4 border rounded-lg relative group">
             <Button
               variant="ghost"
               size="sm"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => removeEvent(event.id)}
             >
               <Trash2 className="w-4 h-4 text-destructive" />
             </Button>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <Label className="text-xs">Час</Label>
-                <Input
-                  value={event.time}
-                  onChange={(e) => updateEvent(event.id, "time", e.target.value)}
-                  placeholder="16:00"
-                  className="h-9 accent-focus-ring-events"
-                />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 flex flex-col">
+                <Label className="text-sm flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  Час
+                </Label>
+                <div className="flex items-center">
+                  <TimePicker eventId={event.id} timeValue={event.time} />
+                </div>
               </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Назва події</Label>
+              <div className="space-y-2 flex flex-col">
+                <Label className="text-sm">Назва події</Label>
                 <Input
                   value={event.eventName}
                   onChange={(e) => updateEvent(event.id, "eventName", e.target.value)}
                   placeholder="Церемонія"
-                  className="h-9 accent-focus-ring-events"
+                  className="h-10 accent-focus-ring-events"
                 />
               </div>
             </div>
@@ -100,5 +181,6 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
         </Button>
       </CollapsibleContent>
     </Collapsible>
+    </div>
   );
 };

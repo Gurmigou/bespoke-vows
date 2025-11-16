@@ -9,8 +9,18 @@ interface InvitationPreviewProps {
   }
 
 export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
-    // Wedding Countdown Logic
-    const weddingDate = new Date("2025-06-15T16:00:00");
+    // Wedding Countdown Logic - Parse the wedding date from data
+    const parseWeddingDate = (dateString: string) => {
+      // Try to create a date object from the string
+      // Default to a future date if parsing fails
+      const parsed = new Date(dateString);
+      if (isNaN(parsed.getTime())) {
+        return new Date("2025-06-15T16:00:00");
+      }
+      return parsed;
+    };
+
+    const weddingDate = parseWeddingDate(data.weddingDate);
     
     const calculateTimeLeft = () => {
       const difference = weddingDate.getTime() - new Date().getTime();
@@ -35,39 +45,27 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
       }, 1000);
 
       return () => clearInterval(timer);
-    }, []);
+    }, [data.weddingDate]);
 
-    // Love Story Data
+    // Love Story Data - Use from data prop
     const storyMoments = [
       {
-        image: storyPhoto1,
-        text: "Ми зустрілися дощовим післяобіднім часом у жовтні 2019 року в маленькій кав'ярні у Вест-Вілліджі. Те, що почалося як випадкова зустріч біля спільного столика, перетворилося на години розмов про мистецтво, подорожі та мрії, які ми ще не знали, що будуємо разом.",
+        image: data.loveStory.image1 || storyPhoto1,
+        text: data.loveStory.moment1,
         reverse: false,
       },
       {
-        image: storyPhoto2,
-        text: "Три роки потому, на тій самій вулиці, де ми вперше зустрілися, Джеймс став на одне коліно. Дощ повернувся, як і того першого дня, але цього разу здавалося, що всесвіт змовляється, щоб завершити нашу історію повним колом.",
+        image: data.loveStory.image2 || storyPhoto2,
+        text: data.loveStory.moment2,
         reverse: true,
       },
     ];
 
-    // Wedding Colours Data
-    const colours = [
-      { name: "Теплий беж", hex: "#D4C4B0" },
-      { name: "М'який голубий сірий", hex: "#C9C5C1" },
-      { name: "Приглушений тауп", hex: "#B8ADA0" },
-      { name: "Медовий беж", hex: "#E5D5C3" },
-      { name: "Приглушений шалфей", hex: "#B8BCAA" },
-    ];
-
-    // Order of Events Data
-    const events = [
-      { time: "16:00", title: "Церемонія" },
-      { time: "17:00", title: "Коктейльна година" },
-      { time: "18:30", title: "Прийом" },
-      { time: "19:00", title: "Вечеря" },
-      { time: "21:00", title: "Танці" },
-    ];
+    // Wedding Colours Data - Use from data prop
+    const colours = data.weddingColors.map((hex, index) => ({
+      name: `Колір ${index + 1}`,
+      hex: hex,
+    }));
 
     return (
         <>
@@ -113,29 +111,41 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
             <div className="max-w-2xl mx-auto space-y-12 animate-in fade-in duration-1000">
                 {/* Couple Names */}
                 <div className="space-y-6">
-                <h1 className="great-vibes-regular font-script text-7xl md:text-8xl lg:text-9xl text-foreground">
-                    Сара та Джеймс
+                <h1 
+                  className="great-vibes-regular font-script text-7xl md:text-8xl lg:text-9xl transition-colors duration-500"
+                  style={{ color: data.templateColors.text }}
+                >
+                    {data.herName} та {data.hisName}
                 </h1>
-                <div className="h-px w-24 mx-auto bg-foreground opacity-20"></div>
+                <div 
+                  className="h-px w-24 mx-auto transition-colors duration-500" 
+                  style={{ backgroundColor: data.templateColors.text, opacity: 0.2 }}
+                ></div>
                 </div>
 
                 {/* Date */}
                 <div className="space-y-2">
-                <p className="font-sans text-xs md:text-sm tracking-[0.3em] uppercase font-light text-muted">
+                <p 
+                  className="font-sans text-xs md:text-sm tracking-[0.3em] uppercase font-light transition-colors duration-500"
+                  style={{ color: data.templateColors.text, opacity: 0.6 }}
+                >
                     Просимо честі вашої присутності
                 </p>
-                <p className="font-sans text-base md:text-lg tracking-[0.2em] uppercase font-normal text-foreground mt-6">
-                    15 червня 2025
+                <p 
+                  className="font-sans text-base md:text-lg tracking-[0.2em] uppercase font-normal mt-6 transition-colors duration-500"
+                  style={{ color: data.templateColors.text }}
+                >
+                    {data.weddingDate}
                 </p>
                 </div>
 
                 {/* Venue Preview */}
                 <div className="pt-8">
-                <p className="font-sans text-xs md:text-sm tracking-[0.25em] uppercase font-light text-muted">
-                    Маєток Роузвуд
-                </p>
-                <p className="font-sans text-xs tracking-[0.2em] uppercase font-light text-muted mt-2">
-                    Санта-Барбара, Каліфорнія
+                <p 
+                  className="font-sans text-xs md:text-sm tracking-[0.25em] uppercase font-light transition-colors duration-500"
+                  style={{ color: data.templateColors.text, opacity: 0.6 }}
+                >
+                    {data.weddingPlace}
                 </p>
                 </div>
             </div>
@@ -155,41 +165,68 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
               
               <div className="relative max-w-2xl mx-auto text-center space-y-8">
                 {/* Script Headline */}
-                <h2 className="great-vibes-regular font-script text-5xl md:text-6xl text-foreground">
+                <h2 
+                  className="great-vibes-regular font-script text-5xl md:text-6xl transition-colors duration-500"
+                  style={{ color: data.templateColors.text }}
+                >
                   Пригода починається
                 </h2>
 
                 {/* Countdown */}
                 <div className="grid grid-cols-4 gap-4 md:gap-8 max-w-xl mx-auto">
                   <div className="space-y-2">
-                    <div className="font-sans text-3xl md:text-4xl font-light text-foreground tabular-nums">
+                    <div 
+                      className="font-sans text-3xl md:text-4xl font-light tabular-nums transition-colors duration-500"
+                      style={{ color: data.templateColors.text }}
+                    >
                       {timeLeft.days}
                     </div>
-                    <div className="font-sans text-xs tracking-[0.25em] uppercase font-medium text-muted">
+                    <div 
+                      className="font-sans text-xs tracking-[0.25em] uppercase font-medium transition-colors duration-500"
+                      style={{ color: data.templateColors.text, opacity: 0.6 }}
+                    >
                       Днів
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="font-sans text-3xl md:text-4xl font-light text-foreground tabular-nums">
+                    <div 
+                      className="font-sans text-3xl md:text-4xl font-light tabular-nums transition-colors duration-500"
+                      style={{ color: data.templateColors.text }}
+                    >
                       {timeLeft.hours}
                     </div>
-                    <div className="font-sans text-xs tracking-[0.25em] uppercase font-medium text-muted">
+                    <div 
+                      className="font-sans text-xs tracking-[0.25em] uppercase font-medium transition-colors duration-500"
+                      style={{ color: data.templateColors.text, opacity: 0.6 }}
+                    >
                       Годин
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="font-sans text-3xl md:text-4xl font-light text-foreground tabular-nums">
+                    <div 
+                      className="font-sans text-3xl md:text-4xl font-light tabular-nums transition-colors duration-500"
+                      style={{ color: data.templateColors.text }}
+                    >
                       {timeLeft.minutes}
                     </div>
-                    <div className="font-sans text-xs tracking-[0.25em] uppercase font-medium text-muted">
+                    <div 
+                      className="font-sans text-xs tracking-[0.25em] uppercase font-medium transition-colors duration-500"
+                      style={{ color: data.templateColors.text, opacity: 0.6 }}
+                    >
                       Хвилин
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="font-sans text-3xl md:text-4xl font-light text-foreground tabular-nums">
+                    <div 
+                      className="font-sans text-3xl md:text-4xl font-light tabular-nums transition-colors duration-500"
+                      style={{ color: data.templateColors.text }}
+                    >
                       {timeLeft.seconds}
                     </div>
-                    <div className="font-sans text-xs tracking-[0.25em] uppercase font-medium text-muted">
+                    <div 
+                      className="font-sans text-xs tracking-[0.25em] uppercase font-medium transition-colors duration-500"
+                      style={{ color: data.templateColors.text, opacity: 0.6 }}
+                    >
                       Секунд
                     </div>
                   </div>
@@ -198,127 +235,150 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
             </section>
 
             {/* Love Story */}
-            <section className="py-16 px-6">
-              <div className="max-w-5xl mx-auto space-y-12">
-                {/* Section Title */}
-                <h2 className="great-vibes-regular font-script text-5xl md:text-6xl text-center text-foreground">
-                  Наша історія кохання
-                </h2>
+            {(data.loveStory.moment1 || data.loveStory.moment2) && (
+              <section className="py-16 px-6">
+                <div className="max-w-5xl mx-auto space-y-12">
+                  {/* Section Title */}
+                  <h2 
+                    className="great-vibes-regular font-script text-5xl md:text-6xl text-center transition-colors duration-500"
+                    style={{ color: data.templateColors.text }}
+                  >
+                    Наша історія кохання
+                  </h2>
 
-                {/* Story Moments */}
-                <div className="space-y-16 md:space-y-20">
-                  {storyMoments.map((moment, index) => (
-                    <div
-                      key={index}
-                      className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${
-                        moment.reverse ? "md:flex-row-reverse" : ""
-                      }`}
-                    >
-                      {/* Image */}
-                      <div className={`${moment.reverse ? "md:order-2" : ""}`}>
-                        <img
-                          src={moment.image}
-                          alt={`Момент історії кохання ${index + 1}`}
-                          className="w-full h-auto aspect-[3/4] object-cover"
-                        />
-                      </div>
+                  {/* Story Moments */}
+                  <div className="space-y-16 md:space-y-20">
+                    {storyMoments.filter(moment => moment.text.trim()).map((moment, index) => (
+                      <div
+                        key={index}
+                        className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${
+                          moment.reverse ? "md:flex-row-reverse" : ""
+                        }`}
+                      >
+                        {/* Image */}
+                        <div className={`${moment.reverse ? "md:order-2" : ""}`}>
+                          <img
+                            src={moment.image}
+                            alt={`Момент історії кохання ${index + 1}`}
+                            className="w-full h-auto aspect-[3/4] object-cover"
+                          />
+                        </div>
 
-                      {/* Text */}
-                      <div className={`flex items-center ${moment.reverse ? "md:order-1" : ""}`}>
-                        <p className="font-sans text-xs tracking-[0.2em] uppercase font-light text-muted leading-relaxed text-justify">
-                          {moment.text}
-                        </p>
+                        {/* Text */}
+                        <div className={`flex items-center ${moment.reverse ? "md:order-1" : ""}`}>
+                          <p 
+                            className="font-sans text-xs tracking-[0.2em] uppercase font-light leading-relaxed text-justify transition-colors duration-500"
+                            style={{ color: data.templateColors.text, opacity: 0.6 }}
+                          >
+                            {moment.text}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Wedding Colours */}
-            <section className="py-16 px-6">
-              <div className="max-w-2xl mx-auto text-center space-y-10">
-                {/* Section Title */}
-                <h2 className="great-vibes-regular font-script text-5xl md:text-6xl text-foreground">
-                  Весняні нейтральні
-                </h2>
+            {data.weddingColors.length > 0 && (
+              <section className="py-16 px-6">
+                <div className="max-w-2xl mx-auto text-center space-y-10">
+                  {/* Section Title */}
+                  <h2 
+                    className="great-vibes-regular font-script text-5xl md:text-6xl transition-colors duration-500"
+                    style={{ color: data.templateColors.text }}
+                  >
+                    Кольори весілля
+                  </h2>
 
-                {/* Colour Swatches */}
-                <div className="flex justify-center items-center gap-6 md:gap-8">
-                  {colours.map((colour, index) => (
-                    <div
-                      key={index}
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full"
-                      style={{ backgroundColor: colour.hex }}
-                      aria-label={colour.name}
-                    />
-                  ))}
+                  {/* Colour Swatches */}
+                  <div className="flex justify-center items-center gap-6 md:gap-8">
+                    {colours.map((colour, index) => (
+                      <div
+                        key={index}
+                        className="w-16 h-16 md:w-20 md:h-20 rounded-full transition-all duration-500"
+                        style={{ backgroundColor: colour.hex }}
+                        aria-label={colour.name}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Order of Events */}
-            <section className="py-14 px-6">
-              <div className="max-w-xl mx-auto">
-                {/* Section Title */}
-                <h2 className="great-vibes-regular font-script text-5xl md:text-6xl text-center text-foreground mb-16">
-                  Програма подій
-                </h2>
+            {data.events.length > 0 && (
+              <section className="py-14 px-6">
+                <div className="max-w-xl mx-auto">
+                  {/* Section Title */}
+                  <h2 
+                    className="great-vibes-regular font-script text-5xl md:text-6xl text-center mb-16 transition-colors duration-500"
+                    style={{ color: data.templateColors.text }}
+                  >
+                    Програма подій
+                  </h2>
 
-                {/* Timeline */}
-                <div className="space-y-8">
-                  {events.map((event, index) => (
-                    <div
-                      key={index}
-                      className="flex items-baseline justify-between border-b border-border pb-6 animate-in fade-in duration-700"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      {/* Time - slightly heavier weight */}
-                      <span className="font-sans text-sm md:text-base tracking-[0.2em] uppercase font-medium text-foreground">
-                        {event.time}
-                      </span>
-                      
-                      {/* Event Title - lighter weight */}
-                      <span className="font-sans text-sm md:text-base tracking-[0.25em] uppercase font-light text-foreground">
-                        {event.title}
-                      </span>
-                    </div>
-                  ))}
+                  {/* Timeline */}
+                  <div className="space-y-8">
+                    {data.events.map((event, index) => (
+                      <div
+                        key={event.id}
+                        className="flex items-baseline justify-between pb-6 animate-in fade-in duration-700 transition-all duration-500"
+                        style={{ 
+                          animationDelay: `${index * 100}ms`,
+                          borderBottom: `1px solid ${data.templateColors.text}20`,
+                        }}
+                      >
+                        {/* Time - slightly heavier weight */}
+                        <span 
+                          className="font-sans text-sm md:text-base tracking-[0.2em] uppercase font-medium transition-colors duration-500"
+                          style={{ color: data.templateColors.text }}
+                        >
+                          {event.time}
+                        </span>
+                        
+                        {/* Event Title - lighter weight */}
+                        <span 
+                          className="font-sans text-sm md:text-base tracking-[0.25em] uppercase font-light transition-colors duration-500"
+                          style={{ color: data.templateColors.text }}
+                        >
+                          {event.eventName}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
 
             {/* Venue Details */}
             <section className="py-14 px-6">
               <div className="max-w-xl mx-auto text-center space-y-12">
                 {/* Section Title */}
-                <h2 className="great-vibes-regular font-script text-5xl md:text-6xl text-foreground">
+                <h2 
+                  className="great-vibes-regular font-script text-5xl md:text-6xl transition-colors duration-500"
+                  style={{ color: data.templateColors.text }}
+                >
                   Місце проведення
                 </h2>
 
                 {/* Venue Info */}
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <p className="font-sans text-sm md:text-base tracking-[0.2em] uppercase font-normal text-foreground">
-                      Маєток Роузвуд
-                    </p>
-                    <p className="font-sans text-xs tracking-[0.25em] uppercase font-light text-muted">
-                      Вулиця Виноградників, 1234
-                    </p>
-                    <p className="font-sans text-xs tracking-[0.25em] uppercase font-light text-muted">
-                      Санта-Барбара, Каліфорнія 93108
+                    <p 
+                      className="font-sans text-sm md:text-base tracking-[0.2em] uppercase font-normal transition-colors duration-500"
+                      style={{ color: data.templateColors.text }}
+                    >
+                      {data.weddingPlace}
                     </p>
                   </div>
 
                   {/* Divider */}
-                  <div className="h-px w-16 mx-auto bg-foreground opacity-20"></div>
-
-                  {/* Additional Info */}
-                  <div className="space-y-4 pt-4">
-                    <p className="font-sans text-xs tracking-[0.2em] uppercase font-light text-muted leading-relaxed max-w-md mx-auto">
-                      Церемонія в саду на Південному газоні, після чого прийом у Великій консерваторії
-                    </p>
-                  </div>
+                  <div 
+                    className="h-px w-16 mx-auto transition-colors duration-500" 
+                    style={{ backgroundColor: data.templateColors.text, opacity: 0.2 }}
+                  ></div>
                 </div>
               </div>
             </section>

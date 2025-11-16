@@ -31,12 +31,18 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Весільні кольори</h3>
-        <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pt-4">
+    <div 
+      className="border rounded-lg p-4 transition-all duration-500"
+      style={{
+        borderColor: `${data.templateColors.primary}20`,
+      }}
+    >
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger className="flex items-center justify-between w-full group">
+          <h3 className="text-lg font-semibold">Весільні кольори</h3>
+          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pt-4">
         <div className="grid grid-cols-3 gap-3">
           {data.weddingColors.map((color, index) => (
             <div key={index} className="flex flex-col items-center gap-2">
@@ -69,5 +75,6 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
         </Button>
       </CollapsibleContent>
     </Collapsible>
+    </div>
   );
 };

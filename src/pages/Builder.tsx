@@ -14,7 +14,12 @@ export interface InvitationData {
   herName: string;
   weddingDate: string;
   weddingPlace: string;
-  loveStory: string;
+  loveStory: {
+    moment1: string;
+    moment2: string;
+    image1: string;
+    image2: string;
+  };
   events: WeddingEvent[];
   weddingColors: string[];
   templateColors: {
@@ -30,7 +35,12 @@ const Builder = () => {
     herName: "Софія",
     weddingDate: "15 червня 2025",
     weddingPlace: "Палац Розвуд, Київ, Україна",
-    loveStory: "",
+    loveStory: {
+      moment1: "Ми зустрілися дощовим післяобіднім часом у жовтні 2019 року в маленькій кав'ярні у Вест-Вілліджі. Те, що почалося як випадкова зустріч біля спільного столика, перетворилося на години розмов про мистецтво, подорожі та мрії, які ми ще не знали, що будуємо разом.",
+      moment2: "Три роки потому, на тій самій вулиці, де ми вперше зустрілися, Джеймс став на одне коліно. Дощ повернувся, як і того першого дня, але цього разу здавалося, що всесвіт змовляється, щоб завершити нашу історію повним колом.",
+      image1: "",
+      image2: "",
+    },
     events: [
       { id: "1", time: "16:00", eventName: "Церемонія" },
       { id: "2", time: "17:00", eventName: "Коктейль" },

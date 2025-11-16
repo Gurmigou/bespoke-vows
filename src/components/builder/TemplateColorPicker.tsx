@@ -24,12 +24,18 @@ export const TemplateColorPicker = ({ data, setData }: TemplateColorPickerProps)
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full group">
-        <h3 className="text-lg font-semibold">Дизайн шаблону</h3>
-        <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pt-4">
+    <div 
+      className="border rounded-lg p-4 transition-all duration-500"
+      style={{
+        borderColor: `${data.templateColors.primary}20`,
+      }}
+    >
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+        <CollapsibleTrigger className="flex items-center justify-between w-full group">
+          <h3 className="text-lg font-semibold">Дизайн шаблону</h3>
+          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pt-4">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="primaryColor">Основний колір</Label>
@@ -81,5 +87,6 @@ export const TemplateColorPicker = ({ data, setData }: TemplateColorPickerProps)
         </div>
       </CollapsibleContent>
     </Collapsible>
+    </div>
   );
 };
