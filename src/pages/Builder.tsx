@@ -1,6 +1,7 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { BuilderPanel } from "@/components/builder/BuilderPanel";
-import { InvitationPreview } from "@/components/invitation/InvitationPreview";
+import { InvitationPreview_1 } from "@/components/invitation/InvitationPreview_1";
 
 export interface WeddingEvent {
   id: string;
@@ -45,10 +46,45 @@ const Builder = () => {
     },
   });
 
+  // Create a style tag for dynamic accent color divider
+  useEffect(() => {
+    const styleId = 'accent-color-divider-style';
+    let styleElement = document.getElementById(styleId);
+    
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+    
+    styleElement.textContent = `
+      .accent-divider {
+        background-color: ${invitationData.templateColors.accent}20 !important;
+      }
+      .accent-divider:hover {
+        background-color: ${invitationData.templateColors.accent} !important;
+      }
+    `;
+  }, [invitationData.templateColors.accent]);
+
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
-      <BuilderPanel data={invitationData} setData={setInvitationData} />
-      <InvitationPreview data={invitationData} />
+    <div className="min-h-screen">
+      <PanelGroup direction="horizontal">
+        {/* Left Panel - BuilderPanel with min 20% and max 70% */}
+        <Panel defaultSize={40} minSize={30} maxSize={60}>
+          <BuilderPanel data={invitationData} setData={setInvitationData} />
+        </Panel>
+
+        {/* Draggable Divider */}
+        <PanelResizeHandle 
+          className="w-1 transition-colors cursor-col-resize accent-divider" 
+        />
+
+        {/* Right Panel - InvitationPreview */}
+        <Panel>
+          <InvitationPreview_1 data={invitationData} />
+        </Panel>
+      </PanelGroup>
     </div>
   );
 };

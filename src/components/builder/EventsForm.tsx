@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { InvitationData, WeddingEvent } from "@/pages/Builder";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface EventsFormProps {
   data: InvitationData;
@@ -13,6 +13,25 @@ interface EventsFormProps {
 
 export const EventsForm = ({ data, setData }: EventsFormProps) => {
   const [isOpen, setIsOpen] = useState(true);
+
+  // Create a style tag for dynamic accent color
+  useEffect(() => {
+    const styleId = 'accent-color-input-style-events';
+    let styleElement = document.getElementById(styleId);
+    
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+    
+    styleElement.textContent = `
+      .accent-focus-ring-events:focus-visible {
+        --tw-ring-color: ${data.templateColors.accent} !important;
+        box-shadow: 0 0 0 2px ${data.templateColors.accent} !important;
+      }
+    `;
+  }, [data.templateColors.accent]);
 
   const addEvent = () => {
     const newEvent: WeddingEvent = {
@@ -59,7 +78,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
                   value={event.time}
                   onChange={(e) => updateEvent(event.id, "time", e.target.value)}
                   placeholder="16:00"
-                  className="h-9"
+                  className="h-9 accent-focus-ring-events"
                 />
               </div>
               <div className="space-y-1">
@@ -68,7 +87,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
                   value={event.eventName}
                   onChange={(e) => updateEvent(event.id, "eventName", e.target.value)}
                   placeholder="Церемонія"
-                  className="h-9"
+                  className="h-9 accent-focus-ring-events"
                 />
               </div>
             </div>

@@ -3,6 +3,7 @@ import { InvitationData } from "@/pages/Builder";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { darkenColor } from "@/lib/utils";
 
 interface ColorsFormProps {
   data: InvitationData;
@@ -38,21 +39,26 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
       <CollapsibleContent className="space-y-4 pt-4">
         <div className="grid grid-cols-3 gap-3">
           {data.weddingColors.map((color, index) => (
-            <div key={index} className="relative group">
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => updateColor(index, e.target.value)}
-                className="w-full h-20 rounded-lg cursor-pointer border-2"
-              />
-              <Button
-                variant="destructive"
-                size="sm"
-                className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                onClick={() => removeColor(index)}
-              >
-                <Trash2 className="w-3 h-3" />
-              </Button>
+            <div key={index} className="flex flex-col items-center gap-2">
+              <div className="relative group">
+                <label className="block w-20 h-20 rounded-full cursor-pointer border-2 transition-colors overflow-hidden" style={{ backgroundColor: color, borderColor: darkenColor(color, 35) }}>
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => updateColor(index, e.target.value)}
+                    className="w-full h-full opacity-0 cursor-pointer"
+                  />
+                </label>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-full"
+                  onClick={() => removeColor(index)}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </Button>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">{color}</span>
             </div>
           ))}
         </div>

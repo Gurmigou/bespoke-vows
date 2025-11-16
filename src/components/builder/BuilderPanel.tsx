@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { LoveStoryForm } from "./LoveStoryForm";
 import { EventsForm } from "./EventsForm";
@@ -21,7 +20,7 @@ export const BuilderPanel = ({ data, setData }: BuilderPanelProps) => {
 
   return (
     <div 
-      className="w-full lg:w-[480px] border-r flex flex-col transition-all duration-500"
+      className="w-full h-screen border-r flex flex-col transition-all duration-500"
       style={{
         backgroundColor: `${data.templateColors.primary}08`,
         borderColor: `${data.templateColors.primary}20`,
@@ -34,18 +33,7 @@ export const BuilderPanel = ({ data, setData }: BuilderPanelProps) => {
         }}
       >
         <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarFallback 
-              className="transition-all duration-500"
-              style={{ 
-                backgroundColor: data.templateColors.accent,
-                color: '#fff'
-              }}
-            >
-              {data.herName[0]}{data.hisName[0]}
-            </AvatarFallback>
-          </Avatar>
-          <span className="font-medium text-sm">Ваше запрошення</span>
+          <span className="font-medium text-sm">Налаштування запрошення</span>
         </div>
         <Button 
           onClick={handlePublish}
