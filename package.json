@@ -3,7 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "packageManager": "npm@10.9.2",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo run dev",
     "dev:web": "npm run dev --workspace=apps/web",
@@ -15,5 +18,8 @@
   },
   "devDependencies": {
     "turbo": "^2.5.4"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2"
   }
 }

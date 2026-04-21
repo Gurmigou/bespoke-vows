@@ -1,5 +1,5 @@
 export type TemplateId = 'classic' | 'modern' | 'floral';
-export type InvitationStatus = 'draft' | 'active' | 'expired';
+export type DerivedStatus = 'draft' | 'active_free' | 'active_paid' | 'expired' | 'locked';
 
 export interface LoveStory {
   moment1: string;
@@ -33,11 +33,32 @@ export interface InvitationData {
   templateColors: TemplateColors;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
 export interface Invitation {
   id: string;
   userId: string;
   templateId: TemplateId;
-  status: InvitationStatus;
+  derivedStatus: DerivedStatus;
+  publishedAt: string | null;
+  lastPublishedAt: string | null;
+  freeActiveDaysUsed: number;
   paidUntil: string | null;
-  data: InvitationData;
+  config: InvitationData;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateInvitationBody {
+  templateId: TemplateId;
+  config?: Partial<InvitationData>;
+}
+
+export interface UpdateInvitationBody {
+  config: Partial<InvitationData>;
 }
