@@ -76,7 +76,7 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
     >
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="flex items-center justify-between w-full group">
-          <h3 className="text-lg font-semibold">Пара та дата</h3>
+          <h3 className="text-lg font-semibold">Основна інформація</h3>
           <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 pt-4">
@@ -87,7 +87,7 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
             value={data.herName}
             onChange={(e) => setData({ ...data, herName: e.target.value })}
             placeholder="Софія"
-            className="accent-focus-ring"
+            className="h-11 accent-focus-ring"
           />
         </div>
 
@@ -98,7 +98,7 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
             value={data.hisName}
             onChange={(e) => setData({ ...data, hisName: e.target.value })}
             placeholder="Михайло"
-            className="accent-focus-ring"
+            className="h-11 accent-focus-ring"
           />
         </div>
 
@@ -110,7 +110,7 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
                 id="weddingDate"
                 variant={"outline"}
                 className={cn(
-                  "w-full justify-start text-left font-normal",
+                  "h-11 w-full justify-start text-left font-normal",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
@@ -140,10 +140,10 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
             id="weddingPlace"
             value={data.weddingPlace}
             onChange={(e) => setData({ ...data, weddingPlace: e.target.value })}
-            placeholder="Палац Розвуд"
-            className="accent-focus-ring"
+            placeholder="Ресторан Маяк"
+            className="h-11 accent-focus-ring"
           />
-        </div>
+        </div>  
       </CollapsibleContent>
     </Collapsible>
     </div>

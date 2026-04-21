@@ -379,6 +379,14 @@ export const InvitationPreview = ({ data }: InvitationPreviewProps) => {
                     className="h-px w-16 mx-auto transition-colors duration-500" 
                     style={{ backgroundColor: data.templateColors.text, opacity: 0.2 }}
                   ></div>
+
+                  {/* Closing Message */}
+                  <p 
+                    className="font-sans text-sm md:text-base tracking-[0.2em] uppercase font-light transition-colors duration-500"
+                    style={{ color: data.templateColors.text, opacity: 0.7 }}
+                  >
+                    Чекаємо на вас!
+                  </p>
                 </div>
               </div>
             </section>

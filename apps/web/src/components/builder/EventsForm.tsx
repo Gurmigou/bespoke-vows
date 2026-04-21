@@ -100,7 +100,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
     return (
       <div className="flex gap-1.5 items-center">
         <Select value={hour} onValueChange={handleHourChange}>
-          <SelectTrigger className="h-10 w-[70px] accent-focus-ring-events">
+          <SelectTrigger className="h-11 w-[70px] accent-focus-ring-events">
             <SelectValue placeholder="00" />
           </SelectTrigger>
           <SelectContent>
@@ -113,7 +113,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
         </Select>
         <span className="text-muted-foreground font-semibold text-base">:</span>
         <Select value={minute} onValueChange={handleMinuteChange}>
-          <SelectTrigger className="h-10 w-[70px] accent-focus-ring-events">
+          <SelectTrigger className="h-11 w-[70px] accent-focus-ring-events">
             <SelectValue placeholder="00" />
           </SelectTrigger>
           <SelectContent>
@@ -137,7 +137,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
     >
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="flex items-center justify-between w-full group">
-          <h3 className="text-lg font-semibold">Порядок подій</h3>
+          <h3 className="text-lg font-semibold">Програма подій</h3>
           <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 pt-4">
@@ -168,7 +168,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
                   value={event.eventName}
                   onChange={(e) => updateEvent(event.id, "eventName", e.target.value)}
                   placeholder="Церемонія"
-                  className="h-10 accent-focus-ring-events"
+                  className="h-11 accent-focus-ring-events"
                 />
               </div>
             </div>

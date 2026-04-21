@@ -11,7 +11,7 @@ interface ColorsFormProps {
 }
 
 export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const addColor = () => {
     setData({ ...data, weddingColors: [...data.weddingColors, "#F5E6D3"] });
@@ -39,7 +39,7 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
     >
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="flex items-center justify-between w-full group">
-          <h3 className="text-lg font-semibold">Весільні кольори</h3>
+          <h3 className="text-lg font-semibold">Кольори весілля</h3>
           <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 pt-4">

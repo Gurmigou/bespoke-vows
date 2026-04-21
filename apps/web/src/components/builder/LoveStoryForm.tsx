@@ -12,7 +12,7 @@ interface LoveStoryFormProps {
 }
 
 export const LoveStoryForm = ({ data, setData }: LoveStoryFormProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const fileInputRef1 = useRef<HTMLInputElement>(null);
   const fileInputRef2 = useRef<HTMLInputElement>(null);
 

@@ -49,11 +49,11 @@ export const BuilderPanel = ({ data, setData }: BuilderPanelProps) => {
 
       <ScrollArea className="flex-1">
         <div className="p-6 space-y-8">
+          <TemplateColorPicker data={data} setData={setData} />
           <BasicInfoForm data={data} setData={setData} />
           <LoveStoryForm data={data} setData={setData} />
           <EventsForm data={data} setData={setData} />
           <ColorsForm data={data} setData={setData} />
-          <TemplateColorPicker data={data} setData={setData} />
         </div>
       </ScrollArea>
     </div>
