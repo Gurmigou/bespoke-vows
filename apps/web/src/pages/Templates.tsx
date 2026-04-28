@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { TEMPLATES, type TemplateMeta } from "@/components/invitation/templates/registry";
+import type { TemplateDefinition } from "@bespoke-vows/shared";
+import { TEMPLATES } from "@/components/invitation/templates/registry";
 import { Button } from "@/components/ui/button";
 
-const TemplateThumbnail = ({ template }: { template: TemplateMeta }) => {
+const TemplateThumbnail = ({ template }: { template: TemplateDefinition }) => {
   const t = template.thumbnail;
   return (
     <>

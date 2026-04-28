@@ -13,7 +13,10 @@ type Variables = { user: JwtPayload };
 const FREE_INVITATION_LIMIT = 3;
 const FREE_DAYS_LIMIT = 7;
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-const VALID_TEMPLATE_IDS = new Set(['classic', 'modern', 'floral']);
+// Templates are defined on the frontend (`apps/web/src/components/invitation/templates/definitions/`).
+// The API only validates that a templateId is a sane slug — adding a new template doesn't require
+// a backend change. Unknown IDs simply fall back to the default template at render time.
+const TEMPLATE_ID_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
 
 function formatInvitation(row: typeof invitations.$inferSelect) {
   return {
@@ -40,8 +43,8 @@ invitationRoutes.post('/', requireAuth, async (c) => {
   const user = c.get('user');
   const body = await c.req.json<{ templateId?: string; config?: unknown }>();
 
-  if (!body.templateId || !VALID_TEMPLATE_IDS.has(body.templateId)) {
-    return c.json({ error: 'templateId must be classic, modern, or floral' }, 400);
+  if (!body.templateId || !TEMPLATE_ID_PATTERN.test(body.templateId)) {
+    return c.json({ error: 'templateId is required and must be a slug (lowercase, alphanumeric, dashes)' }, 400);
   }
 
   const now = new Date();

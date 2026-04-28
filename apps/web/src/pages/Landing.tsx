@@ -22,13 +22,13 @@ const Landing = () => {
   return (
     <div className="min-h-screen font-geologica">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-background to-primary/5 h-[600px] flex items-center py-20 px-4">
+      <section className="relative overflow-hidden bg-gradient-to-b from-background to-primary/5 h-[800px] flex items-center py-20 px-4">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(237,76,156,0.1),transparent_50%)]" />
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
             
             <h1 className="text-5xl md:text-8xl font-bold text-foreground leading-tight font-geologica">
-              Запрошення на весілля
+              Цифрове запрошення на весілля
               <br />
               <span className="bg-gradient-to-r from-pink-400 via-pink-450 to-pink-500 bg-clip-text text-transparent md:text-8xl">Твій ідеальний дизайн</span>
             </h1>
@@ -46,6 +46,47 @@ const Landing = () => {
               </Link>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* Three Steps Section */}
+      <section className="py-16 px-4 bg-gray-900">
+        <div className="container mx-auto max-w-6xl text-center">
+          <h2 className="text-3xl md:text-5xl font-bold text-white font-geologica">
+            Всього 3 кроки до готового запрошення
+          </h2>
+        </div>
+      </section>
+
+      {/* Three Steps Blocks */}
+      <section className="py-16 md:py-20 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 md:gap-4">
+            {[
+              { title: "1. Обери шаблон", alt: "Step 1 — choose template" },
+              { title: "2. Кастомізуй його повністю під себе", alt: "Step 2 — customize" },
+              { title: "3. Отримай ідеальне запрошення", alt: "Step 3 — get invitation" },
+            ].map((step, idx, arr) => (
+              <div key={idx} className="flex flex-col md:flex-row items-stretch gap-6 md:gap-4 md:flex-1">
+                <div className="flex flex-col items-center gap-6 flex-1">
+                  <img
+                    src={preview1}
+                    alt={step.alt}
+                    className="w-[200px] md:w-[230px] h-auto object-contain"
+                  />
+                  <h3 className="text-xl md:text-2xl font-semibold text-foreground text-center font-geologica leading-snug px-2 md:min-h-[4rem] flex items-start justify-center">
+                    {step.title}
+                  </h3>
+                </div>
+                {idx < arr.length - 1 && (
+                  <div className="flex items-center justify-center text-foreground/40 flex-shrink-0 self-center md:self-start md:mt-[170px]">
+                    <ArrowRight className="hidden md:block w-8 h-8" strokeWidth={1.5} />
+                    <ArrowDown className="md:hidden w-7 h-7" strokeWidth={1.5} />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -118,71 +159,34 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Three Steps Section */}
+      {/* Responsive Design Heading */}
       <section className="py-16 px-4 bg-gray-900">
         <div className="container mx-auto max-w-6xl text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-white font-geologica">
-            Всього 3 кроки до готового запрошення
+            Адаптивний дизайн для всіх пристроїв
           </h2>
         </div>
       </section>
 
-      {/* Three Steps Blocks */}
-      <section className="py-16 md:py-20 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row items-stretch justify-center gap-6 md:gap-4">
-            {[
-              { title: "1. Обери шаблон", alt: "Step 1 — choose template" },
-              { title: "2. Кастомізуй його повністю під себе", alt: "Step 2 — customize" },
-              { title: "3. Отримай ідеальне запрошення", alt: "Step 3 — get invitation" },
-            ].map((step, idx, arr) => (
-              <div key={idx} className="flex flex-col md:flex-row items-stretch gap-6 md:gap-4 md:flex-1">
-                <div className="flex flex-col items-center gap-6 flex-1">
-                  <img
-                    src={preview1}
-                    alt={step.alt}
-                    className="w-[200px] md:w-[230px] h-auto object-contain"
-                  />
-                  <h3 className="text-xl md:text-2xl font-semibold text-foreground text-center font-geologica leading-snug px-2 md:min-h-[4rem] flex items-start justify-center">
-                    {step.title}
-                  </h3>
-                </div>
-                {idx < arr.length - 1 && (
-                  <div className="flex items-center justify-center text-foreground/40 flex-shrink-0 self-center md:self-start md:mt-[170px]">
-                    <ArrowRight className="hidden md:block w-8 h-8" strokeWidth={1.5} />
-                    <ArrowDown className="md:hidden w-7 h-7" strokeWidth={1.5} />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Responsive Design Section */}
+      {/* Responsive Design Images */}
       <section className="py-16 px-4 bg-[hsl(28,30%,93%)] border-y border-foreground/5">
         <div className="container mx-auto max-w-6xl">
-          <div className="space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold text-center font-geologica mb-9 md:mb-12 bg-gradient-to-r from-pink-400 via-pink-450 to-pink-500 bg-clip-text text-transparent">
-              Адаптивний дизайн для всіх пристроїв
-            </h2>
-            <div className="flex flex-row items-center justify-center gap-8 max-w-4xl mx-auto">
-              {/* iPhone Image - 30% */}
-              <div className="w-[30%]">
-                <img
-                  src={section1Iphone}
-                  alt="iPhone view of invitation"
-                  className="w-full h-auto object-contain"
-                />
-              </div>
-              {/* Mac Image - 70% */}
-              <div className="w-[70%]">
-                <img
-                  src={section1Mac}
-                  alt="Mac view of invitation"
-                  className="w-full h-auto object-contain"
-                />
-              </div>
+          <div className="flex flex-row items-center justify-center gap-8 max-w-4xl mx-auto">
+            {/* iPhone Image - 30% */}
+            <div className="w-[30%]">
+              <img
+                src={section1Iphone}
+                alt="iPhone view of invitation"
+                className="w-full h-auto object-contain"
+              />
+            </div>
+            {/* Mac Image - 70% */}
+            <div className="w-[70%]">
+              <img
+                src={section1Mac}
+                alt="Mac view of invitation"
+                className="w-full h-auto object-contain"
+              />
             </div>
           </div>
         </div>

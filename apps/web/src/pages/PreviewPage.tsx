@@ -1,14 +1,14 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { TEMPLATE_REGISTRY } from "@/components/invitation/templates/registry";
-import type { TemplateId } from "@/components/invitation/templates/registry";
-import type { InvitationData } from "@/pages/Builder";
+import type { InvitationData } from "@bespoke-vows/shared";
+import { TemplateRenderer } from "@/components/invitation/TemplateRenderer";
+import { getTemplateDefinition } from "@/components/invitation/templates/registry";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2 } from "lucide-react";
 
 const PreviewPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as { data: InvitationData; templateId: TemplateId } | null;
+  const state = location.state as { data: InvitationData; templateId: string } | null;
 
   if (!state?.data) {
     return (
@@ -21,7 +21,7 @@ const PreviewPage = () => {
     );
   }
 
-  const Template = TEMPLATE_REGISTRY[state.templateId] ?? TEMPLATE_REGISTRY.classic;
+  const template = getTemplateDefinition(state.templateId);
 
   return (
     <div className="relative">
@@ -46,7 +46,7 @@ const PreviewPage = () => {
           Зробити видимим для гостей
         </Button>
       </div>
-      <Template data={state.data} />
+      <TemplateRenderer template={template} data={state.data} />
     </div>
   );
 };

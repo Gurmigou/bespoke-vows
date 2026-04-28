@@ -1,12 +1,13 @@
-import type { InvitationData } from "@/pages/Builder";
-import { TEMPLATE_REGISTRY, type TemplateId } from "./templates/registry";
+import type { InvitationData } from "@bespoke-vows/shared";
+import { TemplateRenderer } from "./TemplateRenderer";
+import { getTemplateDefinition } from "./templates/registry";
 
 interface InvitationPreviewProps {
   data: InvitationData;
-  templateId: TemplateId;
+  templateId: string;
 }
 
 export const InvitationPreview = ({ data, templateId }: InvitationPreviewProps) => {
-  const Template = TEMPLATE_REGISTRY[templateId] ?? TEMPLATE_REGISTRY.classic;
-  return <Template data={data} />;
+  const template = getTemplateDefinition(templateId);
+  return <TemplateRenderer template={template} data={data} />;
 };

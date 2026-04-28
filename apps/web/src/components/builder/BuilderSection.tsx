@@ -23,7 +23,7 @@ export const BuilderSection = ({ title, icon: Icon, hue, defaultOpen = true, chi
     >
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger
-          className="flex items-center justify-between w-full px-4 py-3 group transition-colors"
+          className="flex items-center justify-between w-full px-6 py-4 group transition-colors"
           style={{
             backgroundColor: `${hue}14`,
             borderBottom: isOpen ? `1px solid ${hue}26` : "1px solid transparent",
@@ -46,7 +46,7 @@ export const BuilderSection = ({ title, icon: Icon, hue, defaultOpen = true, chi
           />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="px-4 py-6">{children}</div>
+          <div className="px-6 py-8">{children}</div>
         </CollapsibleContent>
       </Collapsible>
     </div>

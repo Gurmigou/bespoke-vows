@@ -1,47 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import type {
+  InvitationData,
+  LoveStoryMoment,
+  WeddingEvent,
+} from "@bespoke-vows/shared";
 import { BuilderPanel } from "@/components/builder/BuilderPanel";
 import { InvitationPreview } from "@/components/invitation/InvitationPreview";
-import { TEMPLATES, getTemplate, type TemplateId } from "@/components/invitation/templates/registry";
+import { getTemplateDefinition, getTemplateId } from "@/components/invitation/templates/registry";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-export interface WeddingEvent {
-  id: string;
-  time: string;
-  eventName: string;
-  comment?: string;
-}
-
-export interface LoveStoryMoment {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  imagePosition: { x: number; y: number };
-}
-
-export interface InvitationData {
-  hisName: string;
-  herName: string;
-  weddingDate: string;
-  weddingPlace: string;
-  venue: {
-    label: string;
-    mapsUrl: string;
-  };
-  loveStory: {
-    moments: LoveStoryMoment[];
-  };
-  events: WeddingEvent[];
-  weddingColors: string[];
-  templateColors: {
-    primary: string;
-    text: string;
-    accent: string;
-  };
-}
+// Re-export shared types so existing builder forms keep importing from this module.
+export type { InvitationData, LoveStoryMoment, WeddingEvent };
 
 // Normalize legacy loveStory shape ({ moment1, moment2, image1, image2, ... }) to moments[]
 const normalizeLoveStory = (raw: unknown): { moments: LoveStoryMoment[] } => {
@@ -81,20 +53,19 @@ const Builder = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const invitationId = searchParams.get("id");
-  const templateId: TemplateId = useMemo(
-    () => getTemplate(searchParams.get("template")),
+  const templateId = useMemo(
+    () => getTemplateId(searchParams.get("template")),
     [searchParams]
   );
 
-  const templateMeta = useMemo(
-    () => TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[0],
-    [templateId]
-  );
+  const template = useMemo(() => getTemplateDefinition(templateId), [templateId]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isActiveInvitation, setIsActiveInvitation] = useState(false);
 
-  const [invitationData, setInvitationData] = useState<InvitationData>(() => ({
+  const buildDefaultInvitationData = (
+    tpl: ReturnType<typeof getTemplateDefinition>
+  ): InvitationData => ({
     hisName: "Михайло",
     herName: "Софія",
     weddingDate: "15 червня 2025",
@@ -130,19 +101,27 @@ const Builder = () => {
       { id: "4", time: "19:00", eventName: "Вечеря" },
       { id: "5", time: "21:00", eventName: "Танці" },
     ],
-    weddingColors: ["#F5E6D3", "#D4A574", "#8B7355"],
-    templateColors: { ...templateMeta.defaultColors },
-  }));
+    weddingColors: ["#2E4D3A", "#6B8F71", "#A7BFA3", "#E8DCC4"],
+    templateColors: { ...tpl.defaultColors },
+  });
+
+  const [invitationData, setInvitationData] = useState<InvitationData>(() =>
+    buildDefaultInvitationData(template)
+  );
+
+  const handleResetToDefault = () => {
+    setInvitationData(buildDefaultInvitationData(template));
+  };
 
   // When template changes (via URL), reset template-driven defaults (only for new invitations)
   useEffect(() => {
     if (!invitationId) {
       setInvitationData((prev) => ({
         ...prev,
-        templateColors: { ...templateMeta.defaultColors },
+        templateColors: { ...template.defaultColors },
       }));
     }
-  }, [templateMeta, invitationId]);
+  }, [template, invitationId]);
 
   // Load existing invitation when ?id= is present
   useEffect(() => {
@@ -228,6 +207,7 @@ const Builder = () => {
             isEditing={isEditing}
             isActiveInvitation={isActiveInvitation}
             onPublish={() => navigate("/preview", { state: { data: invitationData, templateId } })}
+            onReset={handleResetToDefault}
           />
         </Panel>
 
