@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { InvitationData, WeddingEvent } from "@/pages/Builder";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Select,
   SelectContent,
@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, Plus, Trash2, Clock } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Plus, Trash2, Clock, CalendarClock } from "lucide-react";
+import { useEffect } from "react";
+import { BuilderSection, SECTION_HUES } from "./BuilderSection";
 
 interface EventsFormProps {
   data: InvitationData;
@@ -19,8 +20,6 @@ interface EventsFormProps {
 }
 
 export const EventsForm = ({ data, setData }: EventsFormProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-
   // Create a style tag for dynamic accent color
   useEffect(() => {
     const styleId = 'accent-color-input-style-events';
@@ -129,18 +128,8 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
   };
 
   return (
-    <div 
-      className="border rounded-lg p-4 transition-all duration-500"
-      style={{
-        borderColor: `${data.templateColors.primary}20`,
-      }}
-    >
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full group">
-          <h3 className="text-lg font-semibold">Програма подій</h3>
-          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pt-4">
+    <BuilderSection title="Програма подій" icon={CalendarClock} hue={SECTION_HUES.events}>
+      <div className="space-y-4">
         {data.events.map((event) => (
           <div key={event.id} className="space-y-3 p-4 border rounded-lg relative group">
             <Button
@@ -172,6 +161,16 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
                 />
               </div>
             </div>
+            <div className="space-y-2">
+              <Label className="text-sm">Коментар (необов'язково)</Label>
+              <Textarea
+                value={event.comment ?? ""}
+                onChange={(e) => updateEvent(event.id, "comment", e.target.value)}
+                placeholder="Коротка нотатка до події…"
+                className="resize-y text-sm accent-focus-ring-events"
+                rows={2}
+              />
+            </div>
           </div>
         ))}
 
@@ -179,8 +178,7 @@ export const EventsForm = ({ data, setData }: EventsFormProps) => {
           <Plus className="w-4 h-4 mr-2" />
           Додати подію
         </Button>
-      </CollapsibleContent>
-    </Collapsible>
-    </div>
+      </div>
+    </BuilderSection>
   );
 };

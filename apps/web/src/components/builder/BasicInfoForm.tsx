@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvitationData } from "@/pages/Builder";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, CalendarIcon } from "lucide-react";
+import { CalendarIcon, UserCircle2 } from "lucide-react";
 import { format, parse } from "date-fns";
 import { uk } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { BuilderSection, SECTION_HUES } from "./BuilderSection";
 
 interface BasicInfoFormProps {
   data: InvitationData;
@@ -17,20 +17,18 @@ interface BasicInfoFormProps {
 }
 
 export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
-  const [isOpen, setIsOpen] = useState(true);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  // Create a style tag for dynamic accent color
   useEffect(() => {
-    const styleId = 'accent-color-input-style';
+    const styleId = "accent-color-input-style";
     let styleElement = document.getElementById(styleId);
-    
+
     if (!styleElement) {
-      styleElement = document.createElement('style');
+      styleElement = document.createElement("style");
       styleElement.id = styleId;
       document.head.appendChild(styleElement);
     }
-    
+
     styleElement.textContent = `
       .accent-focus-ring:focus-visible {
         --tw-ring-color: ${data.templateColors.accent} !important;
@@ -39,15 +37,12 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
     `;
   }, [data.templateColors.accent]);
 
-  // Parse the date string or use undefined
-  const selectedDate = data.weddingDate 
+  const selectedDate = data.weddingDate
     ? (() => {
         try {
-          // Try to parse Ukrainian date format: "15 червня 2025"
           const parsed = parse(data.weddingDate, "d MMMM yyyy", new Date(), { locale: uk });
           return isNaN(parsed.getTime()) ? undefined : parsed;
         } catch {
-          // Fallback to standard Date parsing
           try {
             const parsed = new Date(data.weddingDate);
             return isNaN(parsed.getTime()) ? undefined : parsed;
@@ -60,7 +55,6 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Format date in Ukrainian: "15 червня 2025"
       const formattedDate = format(date, "d MMMM yyyy", { locale: uk });
       setData({ ...data, weddingDate: formattedDate });
       setDatePickerOpen(false);
@@ -68,18 +62,8 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
   };
 
   return (
-    <div 
-      className="border rounded-lg p-4 transition-all duration-500"
-      style={{
-        borderColor: `${data.templateColors.primary}20`,
-      }}
-    >
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full group">
-          <h3 className="text-lg font-semibold">Основна інформація</h3>
-          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pt-4">
+    <BuilderSection title="Основна інформація" icon={UserCircle2} hue={SECTION_HUES.basic}>
+      <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="herName">Імʼя нареченої</Label>
           <Input
@@ -115,21 +99,11 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? (
-                  format(selectedDate, "d MMMM yyyy", { locale: uk })
-                ) : (
-                  <span>Оберіть дату</span>
-                )}
+                {selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: uk }) : <span>Оберіть дату</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                locale={uk}
-                initialFocus
-              />
+              <Calendar mode="single" selected={selectedDate} onSelect={handleDateSelect} locale={uk} initialFocus />
             </PopoverContent>
           </Popover>
         </div>
@@ -143,9 +117,8 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
             placeholder="Ресторан Маяк"
             className="h-11 accent-focus-ring"
           />
-        </div>  
-      </CollapsibleContent>
-    </Collapsible>
-    </div>
+        </div>
+      </div>
+    </BuilderSection>
   );
 };

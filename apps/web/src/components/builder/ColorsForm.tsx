@@ -1,9 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { InvitationData } from "@/pages/Builder";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Plus, Trash2, Palette } from "lucide-react";
 import { darkenColor } from "@/lib/utils";
+import { BuilderSection, SECTION_HUES } from "./BuilderSection";
 
 interface ColorsFormProps {
   data: InvitationData;
@@ -11,8 +10,6 @@ interface ColorsFormProps {
 }
 
 export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-
   const addColor = () => {
     setData({ ...data, weddingColors: [...data.weddingColors, "#F5E6D3"] });
   };
@@ -31,50 +28,40 @@ export const ColorsForm = ({ data, setData }: ColorsFormProps) => {
   };
 
   return (
-    <div 
-      className="border rounded-lg p-4 transition-all duration-500"
-      style={{
-        borderColor: `${data.templateColors.primary}20`,
-      }}
-    >
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full group">
-          <h3 className="text-lg font-semibold">Кольори весілля</h3>
-          <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pt-4">
-        <div className="grid grid-cols-3 gap-3">
+    <BuilderSection title="Кольори весілля" icon={Palette} hue={SECTION_HUES.colors}>
+      <div className="space-y-4">
+        <div className="flex flex-wrap justify-center gap-6">
           {data.weddingColors.map((color, index) => (
-            <div key={index} className="flex flex-col items-center gap-2">
-              <div className="relative group">
-                <label className="block w-20 h-20 rounded-full cursor-pointer border-2 transition-colors overflow-hidden" style={{ backgroundColor: color, borderColor: darkenColor(color, 35) }}>
-                  <input
-                    type="color"
-                    value={color}
-                    onChange={(e) => updateColor(index, e.target.value)}
-                    className="w-full h-full opacity-0 cursor-pointer"
-                  />
-                </label>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-full"
-                  onClick={() => removeColor(index)}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
-              <span className="text-xs text-muted-foreground font-mono">{color}</span>
+            <div key={index} className="relative group flex flex-col items-center gap-2">
+              <label
+                className="block w-14 h-14 rounded-full cursor-pointer border-2 transition-colors overflow-hidden"
+                style={{ backgroundColor: color, borderColor: darkenColor(color, 35) }}
+              >
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => updateColor(index, e.target.value)}
+                  className="w-full h-full opacity-0 cursor-pointer"
+                />
+              </label>
+              <span className="text-[10px] text-muted-foreground font-mono">{color}</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 p-0 rounded-full"
+                onClick={() => removeColor(index)}
+              >
+                <Trash2 className="w-2.5 h-2.5" />
+              </Button>
             </div>
           ))}
         </div>
 
-        <Button variant="outline" onClick={addColor} className="w-full">
+        <Button variant="outline" onClick={addColor} className="w-full" size="sm">
           <Plus className="w-4 h-4 mr-2" />
           Додати колір
         </Button>
-      </CollapsibleContent>
-    </Collapsible>
-    </div>
+      </div>
+    </BuilderSection>
   );
 };

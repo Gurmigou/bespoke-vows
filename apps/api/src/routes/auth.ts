@@ -4,6 +4,22 @@ import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { signJwt, verifyJwt } from '../lib/jwt.js';
 import { eq } from 'drizzle-orm';
+import { scrypt, randomBytes, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString('hex');
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString('hex')}.${salt}`;
+}
+
+async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  const [hash, salt] = stored.split('.');
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return timingSafeEqual(Buffer.from(hash, 'hex'), buf);
+}
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -82,9 +98,65 @@ authRoutes.get('/google/callback', async (c) => {
   return c.redirect(process.env.WEB_ORIGIN ?? 'http://localhost:8080');
 });
 
+authRoutes.post('/dev-login', async (c) => {
+  if (process.env.NODE_ENV !== 'development') {
+    return c.json({ error: 'Not found' }, 404);
+  }
+
+  const body = await c.req.json<{ email?: string; name?: string }>();
+  if (!body.email || !body.name) {
+    return c.json({ error: 'email and name are required' }, 400);
+  }
+
+  const [user] = await db
+    .insert(users)
+    .values({
+      googleId: `dev:${body.email}`,
+      email: body.email,
+      name: body.name,
+      avatarUrl: null,
+    })
+    .onConflictDoUpdate({
+      target: users.googleId,
+      set: { name: body.name },
+    })
+    .returning();
+
+  const token = await signJwt({
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    avatarUrl: user.avatarUrl ?? null,
+  });
+
+  setCookie(c, 'session', token, {
+    httpOnly: true,
+    sameSite: 'Lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+    secure: false,
+  });
+
+  return c.json({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl });
+});
+
 authRoutes.post('/logout', (c) => {
   deleteCookie(c, 'session', { path: '/' });
   return c.json({ ok: true });
+});
+
+authRoutes.delete('/account', async (c) => {
+  const token = getCookie(c, 'session');
+  if (!token) return c.json({ error: 'Unauthorized' }, 401);
+
+  try {
+    const payload = await verifyJwt(token);
+    await db.delete(users).where(eq(users.id, payload.sub));
+    deleteCookie(c, 'session', { path: '/' });
+    return c.json({ ok: true });
+  } catch {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
 });
 
 authRoutes.get('/me', async (c) => {
@@ -95,8 +167,80 @@ authRoutes.get('/me', async (c) => {
     const payload = await verifyJwt(token);
     const [user] = await db.select().from(users).where(eq(users.id, payload.sub));
     if (!user) return c.json({ error: 'User not found' }, 404);
-    return c.json({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl });
+    return c.json({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, createdAt: user.createdAt.toISOString() });
   } catch {
     return c.json({ error: 'Unauthorized' }, 401);
   }
+});
+
+authRoutes.post('/register', async (c) => {
+  const body = await c.req.json<{ email?: string; password?: string; name?: string }>();
+  if (!body.email || !body.password || !body.name) {
+    return c.json({ error: 'Email, password and name are required' }, 400);
+  }
+  if (body.password.length < 8) {
+    return c.json({ error: 'Password must be at least 8 characters' }, 400);
+  }
+
+  const existing = await db.select().from(users).where(eq(users.email, body.email));
+  if (existing.length > 0) {
+    return c.json({ error: 'Email already in use' }, 409);
+  }
+
+  const passwordHash = await hashPassword(body.password);
+  const [user] = await db
+    .insert(users)
+    .values({ email: body.email, name: body.name, passwordHash })
+    .returning();
+
+  const token = await signJwt({
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    avatarUrl: user.avatarUrl ?? null,
+  });
+
+  setCookie(c, 'session', token, {
+    httpOnly: true,
+    sameSite: 'Lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+    secure: process.env.NODE_ENV !== 'development',
+  });
+
+  return c.json({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl });
+});
+
+authRoutes.post('/login', async (c) => {
+  const body = await c.req.json<{ email?: string; password?: string }>();
+  if (!body.email || !body.password) {
+    return c.json({ error: 'Email and password are required' }, 400);
+  }
+
+  const [user] = await db.select().from(users).where(eq(users.email, body.email));
+  if (!user || !user.passwordHash) {
+    return c.json({ error: 'Invalid credentials' }, 401);
+  }
+
+  const valid = await verifyPassword(body.password, user.passwordHash);
+  if (!valid) {
+    return c.json({ error: 'Invalid credentials' }, 401);
+  }
+
+  const token = await signJwt({
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    avatarUrl: user.avatarUrl ?? null,
+  });
+
+  setCookie(c, 'session', token, {
+    httpOnly: true,
+    sameSite: 'Lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+    secure: process.env.NODE_ENV !== 'development',
+  });
+
+  return c.json({ id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl });
 });

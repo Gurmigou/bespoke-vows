@@ -38,6 +38,7 @@ export interface User {
   email: string;
   name: string;
   avatarUrl: string | null;
+  createdAt: string;
 }
 
 export interface Invitation {
@@ -50,6 +51,8 @@ export interface Invitation {
   freeActiveDaysUsed: number;
   paidUntil: string | null;
   config: InvitationData;
+  hidden: boolean;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

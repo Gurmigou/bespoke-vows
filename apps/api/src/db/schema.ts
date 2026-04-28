@@ -1,11 +1,12 @@
-import { pgTable, uuid, text, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  googleId: text('google_id').unique().notNull(),
+  googleId: text('google_id').unique(),
   email: text('email').unique().notNull(),
   name: text('name').notNull(),
   avatarUrl: text('avatar_url'),
+  passwordHash: text('password_hash'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -18,6 +19,8 @@ export const invitations = pgTable('invitations', {
   freeActiveDaysUsed: integer('free_active_days_used').notNull().default(0),
   paidUntil: timestamp('paid_until'),
   config: jsonb('config').notNull().default({}),
+  hidden: boolean('hidden').default(false).notNull(),
+  deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

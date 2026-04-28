@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, CircleUser } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { featureFlags } from "@/lib/featureFlags";
 
 type Locale = "uk" | "en";
 
 const navItems = [
-  { label: { uk: "Про нас", en: "About Us" }, path: "/about" },
-  { label: { uk: "Про запрошення", en: "About Invitations" }, path: "/invites" },
+  { label: { uk: "Головна", en: "Home" }, path: "/" },
+  { label: { uk: "Про нас", en: "About" }, path: "/about" },
   { label: { uk: "Ціна", en: "Pricing" }, path: "/pricing" },
+  { label: { uk: "Блог", en: "Blog" }, path: "/blog" },
 ];
 
 const Header = () => {
@@ -110,7 +112,7 @@ const Header = () => {
           </div>
         )}
 
-        {/* Right: Menu Button (mobile) + Language Switcher (always on the right) */}
+        {/* Right: Account + Menu Button (mobile) + Language Switcher */}
         <div className="flex items-center gap-2 md:gap-4">
           {isMobile && (
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -156,36 +158,45 @@ const Header = () => {
             </Sheet>
           )}
           
-          {/* Language Switcher - Always on the right */}
-          <button
-            onClick={handleLanguageToggle}
-            className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm px-2 py-1"
-            aria-label="Switch language"
+          <Link
+            to="/account"
+            className="flex items-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm p-1"
+            aria-label="Account"
           >
-            <span
-              className={cn(
-                "transition-colors",
-                locale === "uk"
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
-              )}
-              aria-current={locale === "uk" ? "true" : undefined}
+            <CircleUser className="h-5 w-5" />
+          </Link>
+
+          {featureFlags.languageSwitcher && (
+            <button
+              onClick={handleLanguageToggle}
+              className="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm px-2 py-1"
+              aria-label="Switch language"
             >
-              Укр
-            </span>
-            <span className="text-muted-foreground">|</span>
-            <span
-              className={cn(
-                "transition-colors",
-                locale === "en"
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
-              )}
-              aria-current={locale === "en" ? "true" : undefined}
-            >
-              Eng
-            </span>
-          </button>
+              <span
+                className={cn(
+                  "transition-colors",
+                  locale === "uk"
+                    ? "text-foreground font-semibold"
+                    : "text-muted-foreground"
+                )}
+                aria-current={locale === "uk" ? "true" : undefined}
+              >
+                Укр
+              </span>
+              <span className="text-muted-foreground">|</span>
+              <span
+                className={cn(
+                  "transition-colors",
+                  locale === "en"
+                    ? "text-foreground font-semibold"
+                    : "text-muted-foreground"
+                )}
+                aria-current={locale === "en" ? "true" : undefined}
+              >
+                Eng
+              </span>
+            </button>
+          )}
         </div>
       </nav>
     </header>

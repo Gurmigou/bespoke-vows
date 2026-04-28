@@ -11,8 +11,11 @@ export function deriveStatus(inv: InvitationRow): DerivedStatus {
   if (inv.freeActiveDaysUsed >= FREE_DAYS_LIMIT) return 'locked';
 
   if (inv.lastPublishedAt) {
-    const expiresAt = new Date(inv.lastPublishedAt.getTime() + ONE_DAY_MS);
-    if (expiresAt > now) return 'active_free';
+    const lastPublishWasPaid = inv.paidUntil && inv.paidUntil > inv.lastPublishedAt;
+    if (!lastPublishWasPaid) {
+      const expiresAt = new Date(inv.lastPublishedAt.getTime() + ONE_DAY_MS);
+      if (expiresAt > now) return 'active_free';
+    }
     return 'expired';
   }
 

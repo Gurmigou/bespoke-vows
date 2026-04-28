@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -19,7 +19,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 24 20% 20%;
 
-    --primary: 340 65% 75%;
+    --primary: 330 82% 61%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 140 25% 70%;
@@ -36,14 +36,14 @@ All colors MUST be HSL.
 
     --border: 32 20% 88%;
     --input: 32 20% 88%;
-    --ring: 340 65% 75%;
+    --ring: 330 82% 61%;
 
     --radius: 0.75rem;
 
-    --gradient-romantic: linear-gradient(135deg, hsl(340 65% 85%), hsl(140 25% 80%));
-    --gradient-hero: linear-gradient(180deg, hsl(32 30% 97%), hsl(340 65% 95%));
-    --shadow-soft: 0 10px 40px -10px hsl(340 65% 75% / 0.15);
-    --shadow-elegant: 0 20px 60px -15px hsl(340 65% 75% / 0.25);
+    --gradient-romantic: linear-gradient(135deg, hsl(330 82% 75%), hsl(140 25% 80%));
+    --gradient-hero: linear-gradient(180deg, hsl(32 30% 97%), hsl(330 82% 95%));
+    --shadow-soft: 0 10px 40px -10px hsl(330 82% 61% / 0.15);
+    --shadow-elegant: 0 20px 60px -15px hsl(330 82% 61% / 0.25);
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
@@ -73,7 +73,7 @@ All colors MUST be HSL.
     --popover: 24 20% 15%;
     --popover-foreground: 32 30% 95%;
 
-    --primary: 340 65% 75%;
+    --primary: 330 82% 61%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 140 25% 50%;
@@ -90,7 +90,7 @@ All colors MUST be HSL.
 
     --border: 24 20% 25%;
     --input: 24 20% 25%;
-    --ring: 340 65% 75%;
+    --ring: 330 82% 61%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

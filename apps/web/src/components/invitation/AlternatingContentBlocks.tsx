@@ -18,14 +18,14 @@ interface AlternatingContentBlocksProps {
 const AlternatingContentBlocks = ({ blocks }: AlternatingContentBlocksProps) => {
   return (
     <section className="py-20 px-4 bg-muted/30">
-      <div className="container mx-auto max-w-6xl space-y-16 md:space-y-24">
+      <div className="container mx-auto max-w-6xl space-y-24 md:space-y-24">
         {blocks.map((block, index) => {
           const isEven = index % 2 === 1; // Block 1 (index 0) is left-right, Block 2 (index 1) is right-left, etc.
           
           return (
             <article
               key={index}
-              className="flex flex-col md:flex-row items-center md:items-center gap-4 md:gap-6 max-w-4xl mx-auto"
+              className="flex flex-col md:flex-row items-center md:items-center gap-4 md:gap-0 max-w-4xl mx-auto"
             >
               {/* Mobile: Image first, then text */}
               {/* Desktop: Image position based on alternation */}
@@ -39,7 +39,7 @@ const AlternatingContentBlocks = ({ blocks }: AlternatingContentBlocksProps) => 
                   <img
                     src={block.imageUrl}
                     alt={block.imageAlt}
-                    className="w-full max-w-[300px] md:max-w-[330px] h-auto object-contain relative z-10"
+                    className="w-full max-w-[220px] md:max-w-[260px] h-auto object-contain relative z-10"
                     style={{
                       filter: "drop-shadow(0 15px 40px rgba(0, 0, 0, 0.4))",
                     }}
