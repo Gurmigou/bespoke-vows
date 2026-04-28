@@ -5,7 +5,7 @@ import { InvitationData } from "@/pages/Builder";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, UserCircle2 } from "lucide-react";
+import { CalendarIcon, MapPin, UserCircle2, Heart } from "lucide-react";
 import { format, parse } from "date-fns";
 import { uk } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -62,39 +62,55 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
   };
 
   return (
-    <BuilderSection title="Основна інформація" icon={UserCircle2} hue={SECTION_HUES.basic}>
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="herName">Імʼя нареченої</Label>
-          <Input
-            id="herName"
-            value={data.herName}
-            onChange={(e) => setData({ ...data, herName: e.target.value })}
-            placeholder="Софія"
-            className="h-11 accent-focus-ring"
-          />
+    <BuilderSection
+      title="Основна інформація"
+      description="Імена пари, дата та місце урочистості"
+      icon={UserCircle2}
+      hue={SECTION_HUES.basic}
+    >
+      <div className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="herName" className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+              <Heart className="w-3 h-3" strokeWidth={2.5} />
+              Імʼя нареченої
+            </Label>
+            <Input
+              id="herName"
+              value={data.herName}
+              onChange={(e) => setData({ ...data, herName: e.target.value })}
+              placeholder="Софія"
+              className="h-11 accent-focus-ring bg-white border-slate-200/80 focus:border-slate-300 transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="hisName" className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+              <Heart className="w-3 h-3" strokeWidth={2.5} />
+              Імʼя нареченого
+            </Label>
+            <Input
+              id="hisName"
+              value={data.hisName}
+              onChange={(e) => setData({ ...data, hisName: e.target.value })}
+              placeholder="Михайло"
+              className="h-11 accent-focus-ring bg-white border-slate-200/80 focus:border-slate-300 transition-colors"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="hisName">Імʼя нареченого</Label>
-          <Input
-            id="hisName"
-            value={data.hisName}
-            onChange={(e) => setData({ ...data, hisName: e.target.value })}
-            placeholder="Михайло"
-            className="h-11 accent-focus-ring"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="weddingDate">Дата весілля</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="weddingDate" className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+            <CalendarIcon className="w-3 h-3" strokeWidth={2.5} />
+            Дата весілля
+          </Label>
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger asChild>
               <Button
                 id="weddingDate"
                 variant={"outline"}
                 className={cn(
-                  "h-11 w-full justify-start text-left font-normal",
+                  "h-11 w-full justify-start text-left font-normal bg-white border-slate-200/80 hover:bg-white hover:border-slate-300 transition-colors",
                   !selectedDate && "text-muted-foreground"
                 )}
               >
@@ -108,14 +124,17 @@ export const BasicInfoForm = ({ data, setData }: BasicInfoFormProps) => {
           </Popover>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="weddingPlace">Місце весілля</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="weddingPlace" className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+            <MapPin className="w-3 h-3" strokeWidth={2.5} />
+            Місце весілля
+          </Label>
           <Input
             id="weddingPlace"
             value={data.weddingPlace}
             onChange={(e) => setData({ ...data, weddingPlace: e.target.value })}
             placeholder="Ресторан Маяк"
-            className="h-11 accent-focus-ring"
+            className="h-11 accent-focus-ring bg-white border-slate-200/80 focus:border-slate-300 transition-colors"
           />
         </div>
       </div>

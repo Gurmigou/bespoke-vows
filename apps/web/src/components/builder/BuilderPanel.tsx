@@ -45,27 +45,38 @@ export const BuilderPanel = ({
 
   return (
     <div
-      className="w-full h-screen border-r flex flex-col transition-all duration-500 bg-slate-50/60"
-      style={{ borderColor: `${primary}20` }}
+      className="w-full h-screen border-r flex flex-col transition-colors duration-500"
+      style={{
+        borderColor: `${primary}33`,
+        backgroundImage: `linear-gradient(170deg, #ebecee 0%, #dee0e3 60%, #cfd2d6 100%)`,
+      }}
     >
-      <div
-        className="px-5 py-4 border-b sticky top-0 z-10 backdrop-blur-md bg-white/80 transition-all duration-500"
-        style={{ borderColor: `${primary}20` }}
+      <header
+        className="px-6 py-4 border-b sticky top-0 z-10 backdrop-blur-xl bg-white/70 transition-colors duration-500"
+        style={{ borderColor: `${primary}26` }}
       >
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
             <span
-              className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 transition-colors duration-500"
-              style={{ backgroundColor: `${accent}18`, color: accent }}
+              className="flex items-center justify-center w-10 h-10 rounded-2xl shrink-0 transition-colors duration-500 ring-1 ring-inset"
+              style={{
+                backgroundColor: `${accent}14`,
+                color: accent,
+                boxShadow: `inset 0 0 0 1px ${accent}22`,
+              }}
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-[18px] h-[18px]" />
             </span>
             <div className="flex flex-col min-w-0">
-              <span className="font-semibold text-sm leading-tight truncate">
+              <span className="font-semibold text-[15px] leading-tight truncate text-slate-900">
                 Налаштування запрошення
               </span>
-              <span className="text-[11px] text-muted-foreground leading-tight">
-                {isUpdate ? "Редагування активного запрошення" : "Чернетка"}
+              <span className="text-[11.5px] text-slate-500 leading-tight mt-0.5 flex items-center gap-1.5">
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full"
+                  style={{ backgroundColor: isUpdate ? "#10b981" : "#94a3b8" }}
+                />
+                {isUpdate ? "Активне запрошення" : "Чернетка"}
               </span>
             </div>
           </div>
@@ -76,14 +87,17 @@ export const BuilderPanel = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+                      <button
+                        type="button"
                         aria-label="Скинути до початкового"
+                        className="group relative inline-flex items-center justify-center h-10 w-10 rounded-full border bg-white text-slate-600 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:text-slate-900 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                        style={{
+                          borderColor: `${accent}40`,
+                          ['--tw-ring-color' as string]: accent,
+                        }}
                       >
-                        <RotateCcw className="w-4 h-4" />
-                      </Button>
+                        <RotateCcw className="w-[17px] h-[17px] transition-transform duration-300 group-hover:-rotate-[60deg]" />
+                      </button>
                     </AlertDialogTrigger>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">Скинути до початкового</TooltipContent>
@@ -105,30 +119,33 @@ export const BuilderPanel = ({
 
             <Button
               onClick={onPublish}
-              className="h-9 rounded-full px-4 font-semibold text-white shadow-sm hover:shadow-md hover:brightness-105 transition-all duration-300 gap-1.5"
-              style={{ backgroundColor: accent }}
+              className="h-10 rounded-full px-5 font-semibold text-white shadow-md hover:shadow-lg hover:brightness-105 transition-all duration-300 gap-2"
+              style={{
+                backgroundColor: accent,
+                boxShadow: `0 8px 20px -8px ${accent}80`,
+              }}
             >
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-4 h-4" />
               {isUpdate ? "Оновити" : "Опублікувати"}
             </Button>
           </div>
         </div>
 
         {isUpdate && (
-          <p className="mt-2 text-[11px] text-muted-foreground text-right">
+          <p className="mt-2 text-[11px] text-slate-500 text-right">
             посилання залишиться тим самим
           </p>
         )}
-      </div>
+      </header>
 
       <ScrollArea className="flex-1">
-        <div className="p-6 space-y-8 mx-auto" style={{ maxWidth: "95%" }}>
+        <div className="px-6 py-7 space-y-5 mx-auto max-w-[680px]">
           <TemplateColorPicker data={data} setData={setData} />
           <BasicInfoForm data={data} setData={setData} />
-          <LoveStoryForm data={data} setData={setData} />
-          <ColorsForm data={data} setData={setData} />
-          <EventsForm data={data} setData={setData} />
           <VenueForm data={data} setData={setData} />
+          <LoveStoryForm data={data} setData={setData} />
+          <EventsForm data={data} setData={setData} />
+          <ColorsForm data={data} setData={setData} />
         </div>
       </ScrollArea>
     </div>

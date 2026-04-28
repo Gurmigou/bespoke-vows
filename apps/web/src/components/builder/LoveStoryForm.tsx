@@ -3,8 +3,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { InvitationData, LoveStoryMoment } from "@/pages/Builder";
-import { Heart, Plus, Upload, X, MoveHorizontal, MoveVertical, Trash2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Heart, Plus, Upload, X, MoveHorizontal, MoveVertical, Trash2, ImageIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { BuilderSection, SECTION_HUES } from "./BuilderSection";
 
 interface LoveStoryFormProps {
@@ -31,6 +31,7 @@ interface MomentCardProps {
 
 const MomentCard = ({ moment, index, hue, canRemove, onChange, onRemove }: MomentCardProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const handleFile = (file: File | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -41,42 +42,56 @@ const MomentCard = ({ moment, index, hue, canRemove, onChange, onRemove }: Momen
 
   return (
     <div
-      className="rounded-lg border p-4 space-y-3 relative bg-white"
-      style={{ borderColor: `${hue}33` }}
+      className="group/card rounded-xl border border-slate-200 p-4 space-y-4 relative bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-sm"
     >
       <div className="flex items-center justify-between">
         <span
-          className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
-          style={{ backgroundColor: `${hue}1a`, color: hue }}
+          className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
+          style={{ backgroundColor: `${hue}14`, color: hue }}
         >
-          Розділ {index + 1}
+          <span
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
+            style={{ backgroundColor: hue, color: "#fff" }}
+          >
+            {index + 1}
+          </span>
+          Розділ
         </span>
         {canRemove && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+            className="h-8 w-8 p-0 text-slate-400 hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
             onClick={onRemove}
             type="button"
+            aria-label="Видалити розділ"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </Button>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`moment-title-${moment.id}`}>Заголовок</Label>
+      <div className="space-y-1.5">
+        <Label
+          htmlFor={`moment-title-${moment.id}`}
+          className="text-xs font-medium text-slate-600"
+        >
+          Заголовок
+        </Label>
         <Input
           id={`moment-title-${moment.id}`}
           value={moment.title}
           onChange={(e) => onChange({ title: e.target.value })}
           placeholder="Як ми зустрілися"
-          className="h-10 accent-focus-ring-textarea"
+          className="h-10 accent-focus-ring-textarea bg-white border-slate-200/80 focus:border-slate-300 transition-colors"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Фото</Label>
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-slate-600 flex items-center gap-1.5">
+          <ImageIcon className="w-3 h-3" strokeWidth={2.5} />
+          Фото
+        </Label>
         <input
           ref={fileRef}
           type="file"
@@ -86,34 +101,50 @@ const MomentCard = ({ moment, index, hue, canRemove, onChange, onRemove }: Momen
           id={`image-upload-${moment.id}`}
         />
         {moment.image ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div
-              className="relative group flex justify-center bg-muted/30 rounded-lg border-2 p-2 overflow-hidden"
-              style={{ borderColor: `${hue}40` }}
+              className="relative group/img flex justify-center bg-slate-50 rounded-xl border border-slate-200 p-2 overflow-hidden"
             >
               <img
                 src={moment.image}
                 alt={moment.title || `Момент ${index + 1}`}
-                className="max-w-full max-h-48 w-auto h-auto object-cover rounded-lg"
+                className="max-w-full max-h-52 w-auto h-auto object-cover rounded-lg shadow-sm"
                 style={{ objectPosition: `${moment.imagePosition.x}% ${moment.imagePosition.y}%` }}
               />
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => {
-                  onChange({ image: "" });
-                  if (fileRef.current) fileRef.current.value = "";
-                }}
-              >
-                <X className="w-4 h-4" />
-              </Button>
+              <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover/img:opacity-100 transition-opacity">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 px-3 shadow-md"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <Upload className="w-3.5 h-3.5 mr-1.5" />
+                  Замінити
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="h-8 w-8 p-0 shadow-md"
+                  onClick={() => {
+                    onChange({ image: "" });
+                    if (fileRef.current) fileRef.current.value = "";
+                  }}
+                  aria-label="Видалити фото"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
-            <div className="space-y-2 px-1">
-              <p className="text-xs text-muted-foreground font-medium">Центрування фото</p>
-              <div className="flex items-center gap-2">
-                <MoveHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+            <div
+              className="space-y-2.5 px-3 py-3 rounded-lg bg-slate-50/80 border border-slate-200/80"
+            >
+              <p className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">
+                Центрування фото
+              </p>
+              <div className="flex items-center gap-2.5">
+                <MoveHorizontal className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                 <input
                   type="range"
                   min={0}
@@ -125,10 +156,12 @@ const MomentCard = ({ moment, index, hue, canRemove, onChange, onRemove }: Momen
                   className="w-full h-1.5 cursor-pointer"
                   style={{ accentColor: hue }}
                 />
-                <span className="text-xs text-muted-foreground w-8 text-right">{moment.imagePosition.x}%</span>
+                <span className="text-xs text-slate-500 w-10 text-right tabular-nums">
+                  {moment.imagePosition.x}%
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <MoveVertical className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+              <div className="flex items-center gap-2.5">
+                <MoveVertical className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                 <input
                   type="range"
                   min={0}
@@ -140,32 +173,62 @@ const MomentCard = ({ moment, index, hue, canRemove, onChange, onRemove }: Momen
                   className="w-full h-1.5 cursor-pointer"
                   style={{ accentColor: hue }}
                 />
-                <span className="text-xs text-muted-foreground w-8 text-right">{moment.imagePosition.y}%</span>
+                <span className="text-xs text-slate-500 w-10 text-right tabular-nums">
+                  {moment.imagePosition.y}%
+                </span>
               </div>
             </div>
           </div>
         ) : (
           <label htmlFor={`image-upload-${moment.id}`}>
             <div
-              className="w-full h-28 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-accent/5"
-              style={{ borderColor: `${hue}55` }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragOver(true);
+              }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragOver(false);
+                handleFile(e.dataTransfer.files?.[0]);
+              }}
+              className="w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-200 group/upload"
+              style={{
+                borderColor: isDragOver ? hue : `${hue}40`,
+                backgroundColor: isDragOver ? `${hue}10` : `${hue}05`,
+              }}
             >
-              <Upload className="w-5 h-5 mb-1.5" style={{ color: hue }} />
-              <span className="text-sm text-muted-foreground">Завантажити фото</span>
+              <div
+                className="flex items-center justify-center w-10 h-10 rounded-full mb-2 transition-transform duration-200 group-hover/upload:scale-110"
+                style={{ backgroundColor: `${hue}1a`, color: hue }}
+              >
+                <Upload className="w-4 h-4" />
+              </div>
+              <span className="text-sm font-medium text-slate-700">
+                {isDragOver ? "Відпустіть фото" : "Завантажити фото"}
+              </span>
+              <span className="text-[11px] text-slate-500 mt-0.5">
+                або перетягніть сюди
+              </span>
             </div>
           </label>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`moment-desc-${moment.id}`}>Опис</Label>
+      <div className="space-y-1.5">
+        <Label
+          htmlFor={`moment-desc-${moment.id}`}
+          className="text-xs font-medium text-slate-600"
+        >
+          Опис
+        </Label>
         <Textarea
           id={`moment-desc-${moment.id}`}
           value={moment.description}
           onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Розкажіть про цей момент…"
           rows={5}
-          className="resize-y accent-focus-ring-textarea"
+          className="resize-y accent-focus-ring-textarea bg-white border-slate-200/80 focus:border-slate-300 transition-colors"
         />
       </div>
     </div>
@@ -218,7 +281,12 @@ export const LoveStoryForm = ({ data, setData }: LoveStoryFormProps) => {
   };
 
   return (
-    <BuilderSection title="Історія кохання" icon={Heart} hue={hue}>
+    <BuilderSection
+      title="Історія кохання"
+      description="Розкажіть про ваші особливі моменти"
+      icon={Heart}
+      hue={hue}
+    >
       <div className="space-y-4">
         {moments.map((moment, index) => (
           <MomentCard
@@ -231,7 +299,12 @@ export const LoveStoryForm = ({ data, setData }: LoveStoryFormProps) => {
             onRemove={() => removeMoment(moment.id)}
           />
         ))}
-        <Button variant="outline" onClick={addMoment} className="w-full" type="button">
+        <Button
+          variant="outline"
+          onClick={addMoment}
+          className="w-full h-11 border-dashed border-slate-300 text-slate-600 hover:text-slate-900 hover:border-slate-400 hover:bg-slate-50 transition-colors"
+          type="button"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Додати момент
         </Button>
