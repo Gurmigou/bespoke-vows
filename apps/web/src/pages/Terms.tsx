@@ -17,7 +17,7 @@ const Terms = () => {
               <p>
                 Цей документ («Умови використання») є юридично обов'язковою угодою між фізичною або юридичною особою
                 («Користувач», «ви») та Beloved («Сервіс», «ми», «нас»), що регулює доступ до платформи Beloved,
-                розташованої за адресою <strong>bespoke-vows.com</strong> та будь-яких пов'язаних субдоменів
+                розташованої за адресою <strong>beloved.com</strong> та будь-яких пов'язаних субдоменів
                 (далі — «Платформа»).
               </p>
               <p className="mt-3">
@@ -217,8 +217,8 @@ const Terms = () => {
               <h2 className="text-xl font-semibold font-geologica text-foreground mb-3">13. Контактна інформація</h2>
               <p>
                 З питань, що стосуються цих Умов, звертайтеся до нас електронною поштою:{" "}
-                <a href="mailto:support@bespoke-vows.com" className="text-primary underline underline-offset-4">
-                  support@bespoke-vows.com
+                <a href="mailto:support@beloved.com" className="text-primary underline underline-offset-4">
+                  support@beloved.com
                 </a>
               </p>
             </section>

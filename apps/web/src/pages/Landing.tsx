@@ -56,17 +56,24 @@ const Landing = () => {
                 на весілля
                 <br />
                 <span
-                  className="bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 bg-clip-text text-transparent italic"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400 }}
+                  className="text-5xl md:text-[76px] text-pink-500 italic"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700 }}
                 >
                   Твій ідеальний дизайн
                 </span>
               </h1>
 
               <p className="text-lg md:text-xl text-foreground/65 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Без складних програми та зайвих витрат на розробку. Оберіть стиль,
+                Без складних програм та зайвих витрат на розробку. Оберіть стиль,
                 додайте деталі — і надішліть запрошення своїм гостям.
               </p>
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-pink-50 px-4 py-1.5 w-fit mx-auto lg:mx-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-pink-500 animate-pulse" />
+                <span className="text-sm font-medium text-pink-600">
+                  Запрошення, яке готове за 10 хв
+                </span>
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">
                 <Link to="/templates">
@@ -105,17 +112,9 @@ const Landing = () => {
               <div className="absolute inset-0 -z-10 mx-auto h-[600px] w-[400px] translate-y-8 rounded-[3rem] bg-gradient-to-br from-pink-300/40 via-rose-200/40 to-amber-200/40 blur-2xl" />
 
               {/* Decorative rotating ring */}
-              <div className="absolute -top-6 -left-6 h-24 w-24 rounded-full border border-pink-300/40 bg-white/40 backdrop-blur-md flex items-center justify-center shadow-sm">
+              <div className="absolute -top-6 -left-32 h-24 w-24 rounded-full border border-pink-300/40 bg-white/40 backdrop-blur-md flex items-center justify-center shadow-sm">
                 <Heart className="h-8 w-8 text-pink-500" fill="currentColor" />
               </div>
-              <div className="absolute -bottom-4 -right-2 rotate-6 rounded-2xl bg-white/80 backdrop-blur-md border border-foreground/5 px-4 py-3 shadow-elegant">
-                <div className="flex items-center gap-2 text-sm">
-                  <Sparkles className="h-4 w-4 text-amber-500" />
-                  <span className="font-semibold text-foreground">3 шаблони</span>
-                </div>
-                <p className="text-xs text-foreground/60 mt-0.5">Класичний · Сучасний · Квітковий</p>
-              </div>
-
               <div className="relative mx-auto w-full max-w-md transition-transform duration-700 hover:-translate-y-2 hover:rotate-0 -rotate-3">
                 <img
                   src={section1Iphone}
@@ -142,8 +141,8 @@ const Landing = () => {
             <h2 className="text-4xl md:text-6xl font-bold text-foreground font-geologica leading-tight tracking-tight">
               Всього{" "}
               <span
-                className="italic bg-gradient-to-r from-pink-500 to-amber-500 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+                className="text-5xl md:text-[76px] italic text-pink-500"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
               >
                 3 кроки
               </span>{" "}
@@ -213,8 +212,8 @@ const Landing = () => {
             <h2 className="text-4xl md:text-6xl font-semibold text-foreground font-geologica leading-tight tracking-tight">
               Запрошення, яке ваші гості{" "}
               <span
-                className="italic bg-gradient-to-r from-pink-500 to-rose-400 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+                className="text-5xl md:text-[76px] italic text-pink-500"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
               >
                 запам'ятають
               </span>
@@ -286,8 +285,8 @@ const Landing = () => {
             <h2 className="text-4xl md:text-6xl font-bold text-foreground font-geologica leading-tight tracking-tight">
               Адаптивний дизайн{" "}
               <span
-                className="italic bg-gradient-to-r from-pink-500 to-amber-500 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+                className="text-5xl md:text-[76px] italic text-pink-500"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
               >
                 для всіх пристроїв
               </span>
@@ -334,8 +333,8 @@ const Landing = () => {
             <h2 className="text-4xl md:text-6xl font-bold font-geologica leading-tight tracking-tight">
               Все, що потрібно для створення{" "}
               <span
-                className="italic bg-gradient-to-r from-pink-500 to-rose-400 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+                className="text-5xl md:text-[76px] italic text-pink-500"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
               >
                 магії
               </span>
@@ -390,8 +389,8 @@ const Landing = () => {
             Ваше весілля заслуговує
             <br />
             <span
-              className="italic bg-gradient-to-r from-pink-500 via-rose-400 to-amber-500 bg-clip-text text-transparent"
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+              className="text-5xl md:text-[76px] italic text-pink-500"
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
             >
               на красиве запрошення
             </span>
@@ -430,7 +429,7 @@ const Landing = () => {
             <div className="col-span-2 md:col-span-1 space-y-4">
               <h3
                 className="text-3xl font-bold text-white"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 400 }}
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700 }}
               >
                 Beloved
               </h3>
@@ -446,11 +445,6 @@ const Landing = () => {
                 <li>
                   <Link to="/about" className="text-sm text-gray-400 hover:text-pink-400 transition-colors">
                     Про нас
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/invites" className="text-sm text-gray-400 hover:text-pink-400 transition-colors">
-                    Про запрошення
                   </Link>
                 </li>
                 <li>
@@ -513,7 +507,7 @@ const Landing = () => {
           <div className="border-t border-white/5 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-500">Rights reserved © {new Date().getFullYear()}</p>
             <p className="text-xs text-gray-500 flex items-center gap-1.5">
-              Зроблено з <Heart className="h-3 w-3 text-pink-400" fill="currentColor" /> для українських пар
+              Зроблено для пар з <Heart className="h-3 w-3 text-pink-400" fill="currentColor" /> любов'ю
             </p>
           </div>
         </div>

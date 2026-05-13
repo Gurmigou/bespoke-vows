@@ -1,74 +1,71 @@
 import { Hono } from 'hono';
-import { eq, and, or, isNull, isNotNull, lt, count } from 'drizzle-orm';
-import { del } from '@vercel/blob';
+import type { Context } from 'hono';
+import { eq, and, isNull } from 'drizzle-orm';
 import { db } from '../db/index.js';
-import { invitations } from '../db/schema.js';
+import { invitations, templates, payments } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
-import { deriveStatus } from '../lib/status.js';
-import { verifyPlataSignature } from '../lib/payment.js';
+import { canPublish, derivedStatus } from '../lib/status.js';
+import { signPreviewToken } from '../lib/jwt.js';
+import { toInvitationDto } from '../lib/serialize.js';
 import type { JwtPayload } from '../lib/jwt.js';
+import type { InvitationData } from '@bespoke-vows/shared';
+import { buildDefaultInvitationData } from '@bespoke-vows/shared';
 
 type Variables = { user: JwtPayload };
 
-const FREE_INVITATION_LIMIT = 3;
-const FREE_DAYS_LIMIT = 7;
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-// Templates are defined on the frontend (`apps/web/src/components/invitation/templates/definitions/`).
-// The API only validates that a templateId is a sane slug — adding a new template doesn't require
-// a backend change. Unknown IDs simply fall back to the default template at render time.
-const TEMPLATE_ID_PATTERN = /^[a-z][a-z0-9-]{0,31}$/;
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function formatInvitation(row: typeof invitations.$inferSelect) {
-  return {
-    ...row,
-    derivedStatus: deriveStatus(row),
-    publishedAt: row.publishedAt?.toISOString() ?? null,
-    lastPublishedAt: row.lastPublishedAt?.toISOString() ?? null,
-    paidUntil: row.paidUntil?.toISOString() ?? null,
-    deletedAt: row.deletedAt?.toISOString() ?? null,
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
-  };
+async function resolveTemplate(idOrSlug: string) {
+  const isUuid = UUID_RE.test(idOrSlug);
+  const [template] = await db
+    .select()
+    .from(templates)
+    .where(and(isUuid ? eq(templates.id, idOrSlug) : eq(templates.slug, idOrSlug), isNull(templates.deletedAt)));
+  return template ?? null;
 }
 
-async function deleteBlobs(cfg: unknown) {
-  const c = cfg as { loveStory?: { image1Url?: string; image2Url?: string } };
-  const urls = [c.loveStory?.image1Url, c.loveStory?.image2Url].filter((u): u is string => Boolean(u));
-  if (urls.length > 0) await del(urls).catch(() => {});
+async function loadOwnedInvitation(
+  id: string,
+  userId: string,
+): Promise<typeof invitations.$inferSelect | null | 'deleted'> {
+  const [row] = await db.select().from(invitations).where(eq(invitations.id, id));
+  if (!row || row.userId !== userId) return null;
+  if (row.deletedAt !== null) return 'deleted';
+  return row;
+}
+
+async function dtoFor(row: typeof invitations.$inferSelect) {
+  const [template] = await db.select().from(templates).where(eq(templates.id, row.templateId));
+  return toInvitationDto(row, template?.slug ?? '');
 }
 
 export const invitationRoutes = new Hono<{ Variables: Variables }>();
 
 invitationRoutes.post('/', requireAuth, async (c) => {
   const user = c.get('user');
-  const body = await c.req.json<{ templateId?: string; config?: unknown }>();
+  const body = await c.req
+    .json<{ templateId?: string; config?: Partial<InvitationData> }>()
+    .catch(() => ({} as { templateId?: string; config?: Partial<InvitationData> }));
 
-  if (!body.templateId || !TEMPLATE_ID_PATTERN.test(body.templateId)) {
-    return c.json({ error: 'templateId is required and must be a slug (lowercase, alphanumeric, dashes)' }, 400);
+  if (!body.templateId) {
+    return c.json({ error: 'templateId_required' }, 400);
   }
 
-  const now = new Date();
-  const [{ value: unpaidCount }] = await db
-    .select({ value: count() })
-    .from(invitations)
-    .where(
-      and(
-        eq(invitations.userId, user.sub),
-        isNull(invitations.deletedAt),
-        or(isNull(invitations.paidUntil), lt(invitations.paidUntil, now))
-      )
-    );
-
-  if (Number(unpaidCount) >= FREE_INVITATION_LIMIT) {
-    return c.json({ error: 'Maximum 3 free invitations allowed. Pay for one to create more free slots.' }, 403);
+  const template = await resolveTemplate(body.templateId);
+  if (!template) {
+    return c.json({ error: 'template_not_found' }, 400);
   }
+
+  const config = { ...(template.defaultData as InvitationData), ...(body.config ?? {}) };
 
   const [invitation] = await db
     .insert(invitations)
-    .values({ userId: user.sub, templateId: body.templateId, config: body.config ?? {} })
+    .values({ userId: user.sub, templateId: template.id, config })
     .returning();
 
-  return c.json(formatInvitation(invitation), 201);
+  return c.json(toInvitationDto(invitation, template.slug), 201);
 });
 
 invitationRoutes.get('/', requireAuth, async (c) => {
@@ -79,199 +76,201 @@ invitationRoutes.get('/', requireAuth, async (c) => {
     .where(and(eq(invitations.userId, user.sub), isNull(invitations.deletedAt)))
     .orderBy(invitations.createdAt);
 
-  return c.json(rows.map(formatInvitation));
-});
+  const allTemplates = await db.select().from(templates);
+  const slugById = new Map(allTemplates.map((t) => [t.id, t.slug]));
 
-invitationRoutes.get('/trash', requireAuth, async (c) => {
-  const user = c.get('user');
-  const rows = await db
-    .select()
-    .from(invitations)
-    .where(and(eq(invitations.userId, user.sub), isNotNull(invitations.deletedAt)))
-    .orderBy(invitations.deletedAt);
-
-  return c.json(rows.map(formatInvitation));
+  return c.json(rows.map((r) => toInvitationDto(r, slugById.get(r.templateId) ?? '')));
 });
 
 invitationRoutes.get('/:id', requireAuth, async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
-  const [row] = await db.select().from(invitations).where(eq(invitations.id, id));
-
-  if (!row) return c.json({ error: 'Not found' }, 404);
-  if (row.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
-
-  return c.json(formatInvitation(row));
+  const row = await loadOwnedInvitation(id, user.sub);
+  if (row === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (row === null) return c.json({ error: 'not_found' }, 404);
+  return c.json(await dtoFor(row));
 });
 
-invitationRoutes.patch('/:id', requireAuth, async (c) => {
+async function patchConfig(c: Context<{ Variables: Variables }>) {
   const user = c.get('user');
-  const { id } = c.req.param();
-  const body = await c.req.json<{ config?: unknown }>();
+  const id = c.req.param('id');
+  const body = await c.req
+    .json<{ config?: Partial<InvitationData> }>()
+    .catch(() => ({} as { config?: Partial<InvitationData> }));
 
   if (!body.config || typeof body.config !== 'object') {
-    return c.json({ error: 'config is required' }, 400);
+    return c.json({ error: 'config_required' }, 400);
   }
 
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
+
+  const merged = { ...(existing.config as InvitationData), ...body.config };
 
   const [updated] = await db
     .update(invitations)
-    .set({ config: body.config, updatedAt: new Date() })
+    .set({ config: merged, updatedAt: new Date() })
     .where(eq(invitations.id, id))
     .returning();
 
-  return c.json(formatInvitation(updated));
+  return c.json(await dtoFor(updated));
+}
+
+invitationRoutes.post('/:id/sync', requireAuth, patchConfig);
+invitationRoutes.patch('/:id', requireAuth, patchConfig);
+
+invitationRoutes.post('/:id/reset', requireAuth, async (c) => {
+  const user = c.get('user');
+  const { id } = c.req.param();
+
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
+
+  const [template] = await db.select().from(templates).where(eq(templates.id, existing.templateId));
+  if (!template) return c.json({ error: 'template_not_found' }, 404);
+
+  const defaultConfig = buildDefaultInvitationData(
+    (template.definition as { defaultColors: InvitationData['templateColors'] }).defaultColors,
+  );
+  const [updated] = await db
+    .update(invitations)
+    .set({ config: defaultConfig, updatedAt: new Date() })
+    .where(eq(invitations.id, id))
+    .returning();
+
+  return c.json(toInvitationDto(updated, template.slug));
 });
 
 invitationRoutes.delete('/:id', requireAuth, async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
 
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
-  if (existing.deletedAt) return c.json({ error: 'Already in trash' }, 409);
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
 
-  const status = deriveStatus(existing);
-  const isPaid = status === 'active_paid' || (existing.paidUntil !== null);
-
-  if (isPaid) {
-    const [updated] = await db
-      .update(invitations)
-      .set({ deletedAt: new Date(), updatedAt: new Date() })
-      .where(eq(invitations.id, id))
-      .returning();
-    return c.json({ moved_to_trash: true, invitation: formatInvitation(updated) });
-  }
-
-  await deleteBlobs(existing.config);
-  await db.delete(invitations).where(eq(invitations.id, id));
-  return c.json({ ok: true });
-});
-
-invitationRoutes.delete('/:id/permanent', requireAuth, async (c) => {
-  const user = c.get('user');
-  const { id } = c.req.param();
-
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
-  if (!existing.deletedAt) return c.json({ error: 'Not in trash' }, 409);
-
-  await deleteBlobs(existing.config);
-  await db.delete(invitations).where(eq(invitations.id, id));
-  return c.json({ ok: true });
-});
-
-invitationRoutes.post('/:id/restore', requireAuth, async (c) => {
-  const user = c.get('user');
-  const { id } = c.req.param();
-
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
-  if (!existing.deletedAt) return c.json({ error: 'Not in trash' }, 409);
-
-  const [updated] = await db
+  const now = new Date();
+  await db
     .update(invitations)
-    .set({ deletedAt: null, updatedAt: new Date() })
-    .where(eq(invitations.id, id))
-    .returning();
+    .set({ deletedAt: now, updatedAt: now })
+    .where(eq(invitations.id, id));
 
-  return c.json(formatInvitation(updated));
+  return c.json({ ok: true });
 });
 
 invitationRoutes.post('/:id/hide', requireAuth, async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
+  const body = await c.req
+    .json<{ visible?: boolean }>()
+    .catch(() => ({} as { visible?: boolean }));
 
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
+  if (typeof body.visible !== 'boolean') {
+    return c.json({ error: 'visible_required' }, 400);
+  }
 
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
+
+  if (derivedStatus(existing) !== 'active') {
+    return c.json({ error: 'not_active' }, 409);
+  }
+
+  const now = new Date();
   const [updated] = await db
     .update(invitations)
-    .set({ hidden: !existing.hidden, updatedAt: new Date() })
+    .set({ visible: body.visible, visibleStatusChangedAt: now, updatedAt: now })
     .where(eq(invitations.id, id))
     .returning();
 
-  return c.json(formatInvitation(updated));
+  return c.json(await dtoFor(updated));
 });
 
 invitationRoutes.post('/:id/publish', requireAuth, async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
 
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
-  if (existing.userId !== user.sub) return c.json({ error: 'Forbidden' }, 403);
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
 
-  const currentStatus = deriveStatus(existing);
-
-  if (currentStatus === 'active_free') {
-    return c.json({ error: 'Invitation is already active. Wait for it to expire before republishing.' }, 409);
-  }
-
-  const isPaidActive = currentStatus === 'active_paid';
-  if (!isPaidActive && existing.freeActiveDaysUsed >= FREE_DAYS_LIMIT) {
-    return c.json({ error: 'Free period exhausted. Pay to republish.' }, 403);
+  const decision = canPublish(existing);
+  if (decision.ok === false) {
+    if (decision.reason === 'already_active') return c.json({ error: 'already_active' }, 409);
+    return c.json({ error: 'payment_required' }, 402);
   }
 
   const now = new Date();
   const [updated] = await db
     .update(invitations)
     .set({
-      lastPublishedAt: now,
-      publishedAt: existing.publishedAt ?? now,
-      freeActiveDaysUsed: isPaidActive ? existing.freeActiveDaysUsed : existing.freeActiveDaysUsed + 1,
+      status: 'active',
+      paymentStatus: 'free',
+      activeUntil: new Date(now.getTime() + THREE_DAYS_MS),
+      freeTrialUsedAt: now,
+      visible: true,
       updatedAt: now,
     })
     .where(eq(invitations.id, id))
     .returning();
 
-  return c.json(formatInvitation(updated));
+  return c.json(await dtoFor(updated));
 });
 
-invitationRoutes.post('/:id/pay', async (c) => {
+invitationRoutes.post('/:id/pay', requireAuth, async (c) => {
+  const user = c.get('user');
   const { id } = c.req.param();
-  const rawBody = await c.req.text();
-  const signature = c.req.header('x-sign') ?? '';
+  const body = await c.req
+    .json<{ amount?: number; currency?: string }>()
+    .catch(() => ({} as { amount?: number; currency?: string }));
 
-  if (!verifyPlataSignature(rawBody, signature)) {
-    return c.json({ error: 'Invalid signature' }, 401);
-  }
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
 
-  const [existing] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!existing) return c.json({ error: 'Not found' }, 404);
+  const amount = body.amount ?? 999;
+  const currency = body.currency ?? 'USD';
+  const now = new Date();
 
-  const paidUntil = new Date(Date.now() + ONE_YEAR_MS);
+  const [payment] = await db
+    .insert(payments)
+    .values({
+      userId: user.sub,
+      invitationId: id,
+      amount,
+      currency,
+      provider: 'plata_mock',
+      status: 'succeeded',
+    })
+    .returning();
+
   const [updated] = await db
     .update(invitations)
-    .set({ paidUntil, updatedAt: new Date() })
+    .set({
+      status: 'active',
+      paymentStatus: 'paid',
+      activeUntil: new Date(now.getTime() + ONE_YEAR_MS),
+      paymentId: payment.id,
+      visible: true,
+      updatedAt: now,
+    })
     .where(eq(invitations.id, id))
     .returning();
 
-  return c.json(formatInvitation(updated));
+  return c.json(await dtoFor(updated));
 });
 
-export const publicInvitationRoutes = new Hono();
-
-publicInvitationRoutes.get('/:id', async (c) => {
+invitationRoutes.post('/:id/preview-token', requireAuth, async (c) => {
+  const user = c.get('user');
   const { id } = c.req.param();
-  const [row] = await db.select().from(invitations).where(eq(invitations.id, id));
-  if (!row) return c.json({ error: 'Not found' }, 404);
 
-  if (row.deletedAt || row.hidden) {
-    return c.json({ error: 'This invitation is no longer active', status: 'hidden' }, 410);
-  }
+  const existing = await loadOwnedInvitation(id, user.sub);
+  if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
+  if (existing === null) return c.json({ error: 'not_found' }, 404);
 
-  const status = deriveStatus(row);
-  if (status === 'locked' || status === 'expired' || status === 'draft') {
-    return c.json({ error: 'This invitation is no longer active', status }, 410);
-  }
-
-  return c.json(formatInvitation(row));
+  const token = await signPreviewToken({ invitationId: id, ownerId: user.sub });
+  return c.json({ token });
 });

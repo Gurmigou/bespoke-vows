@@ -1,36 +1,43 @@
 import { Link } from "react-router-dom";
-import { HeartCrack, ArrowLeft, Mail } from "lucide-react";
+import { Heart, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const InvitationInactive = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-primary/5 px-4 font-geologica">
-      <div className="text-center space-y-6 max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(32,20%,96%)] px-4 font-geologica">
+      <div className="text-center max-w-md space-y-7">
         <div className="flex justify-center">
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-            <HeartCrack className="w-10 h-10 text-primary" strokeWidth={1.5} />
+          <div className="w-16 h-16 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center">
+            <Heart className="w-7 h-7 text-stone-400" strokeWidth={1.5} />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <p className="text-primary font-medium tracking-widest uppercase text-sm">Запрошення</p>
-          <h1 className="text-3xl font-semibold text-foreground">Запрошення неактивне</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            Це запрошення більше не активне або посилання некоректне.
-            Якщо ви вважаєте, що це помилка — зв'яжіться з нами.
+        <div className="space-y-3">
+          <p className="text-stone-400 font-medium tracking-widest uppercase text-xs">
+            Beloved
+          </p>
+          <h1 className="text-3xl font-semibold text-stone-800 leading-snug tracking-tight">
+            Запрошення недоступне
+          </h1>
+          <p className="text-stone-500 text-sm leading-relaxed max-w-xs mx-auto">
+            Це запрошення більше не активне або посилання некоректне. Якщо ви вважаєте, що це помилка — зв'яжіться з нами.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button asChild className="gap-2">
-            <Link to="/">
-              <ArrowLeft className="w-4 h-4" />
-              На головну
-            </Link>
+        <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-1">
+          <Button
+            asChild
+            className="h-11 rounded-full px-6 text-sm font-medium bg-stone-800 hover:bg-stone-900 text-white shadow-none"
+          >
+            <Link to="/">На головну</Link>
           </Button>
-          <Button asChild variant="outline" className="gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 rounded-full px-6 text-sm gap-2 border-stone-200 bg-white hover:bg-stone-50 text-stone-600"
+          >
             <Link to="/contact">
-              <Mail className="w-4 h-4" />
+              <Mail className="w-3.5 h-3.5" />
               Зв'язатися з нами
             </Link>
           </Button>

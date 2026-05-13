@@ -1,74 +1,91 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { users, invitations } from './schema.js';
-import { eq } from 'drizzle-orm';
+import { scrypt, randomBytes } from 'node:crypto';
+import { promisify } from 'node:util';
+import { users, templates, invitations, payments } from './schema.js';
+import { classicTemplate } from '../../../web/src/components/invitation/templates/definitions/classic.js';
+import { modernTemplate } from '../../../web/src/components/invitation/templates/definitions/modern.js';
+import { floralTemplate } from '../../../web/src/components/invitation/templates/definitions/floral.js';
+import type { InvitationData, TemplateDefinition } from '@bespoke-vows/shared';
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16).toString('hex');
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString('hex')}.${salt}`;
+}
 
 const client = postgres(process.env.DATABASE_URL!, { max: 1 });
 const db = drizzle(client);
 
 const DEV_EMAIL = 'dev@test.com';
-const DEV_GOOGLE_ID = `dev:${DEV_EMAIL}`;
+const DEV_PASSWORD = 'devdevdev';
 
-const [user] = await db
-  .insert(users)
-  .values({ googleId: DEV_GOOGLE_ID, email: DEV_EMAIL, name: 'Dev User', avatarUrl: null })
-  .onConflictDoUpdate({ target: users.googleId, set: { name: 'Dev User' } })
-  .returning();
+const blankConfig = (defaults: TemplateDefinition['defaultColors']): InvitationData => ({
+  hisName: '',
+  herName: '',
+  weddingDate: '',
+  weddingPlace: '',
+  venue: { label: '', mapsUrl: '' },
+  loveStory: { moments: [] },
+  events: [],
+  weddingColors: [],
+  templateColors: { ...defaults },
+});
 
-console.log(`User: ${user.email} (${user.id})`);
+async function main() {
+  console.log('Wiping & seeding...');
+  await db.delete(payments);
+  await db.delete(invitations);
+  await db.delete(templates);
+  await db.delete(users);
 
-const existing = await db.select().from(invitations).where(eq(invitations.userId, user.id));
-if (existing.length > 0) {
-  console.log(`Skipping invitations — ${existing.length} already exist for this user`);
+  const defs: TemplateDefinition[] = [classicTemplate, modernTemplate, floralTemplate];
+
+  for (const def of defs) {
+    await db.insert(templates).values({
+      slug: def.id,
+      name: def.name,
+      description: def.description,
+      definition: def,
+      defaultData: blankConfig(def.defaultColors),
+    });
+  }
+
+  const allTemplates = await db.select().from(templates);
+  console.log(`Templates seeded: ${allTemplates.map((t) => t.slug).join(', ')}`);
+
+  const passwordHash = await hashPassword(DEV_PASSWORD);
+  const [user] = await db
+    .insert(users)
+    .values({ email: DEV_EMAIL, passwordHash })
+    .returning();
+  console.log(`User: ${user.email} / ${DEV_PASSWORD}`);
+
+  const classic = allTemplates.find((t) => t.slug === 'classic')!;
+  const [draft] = await db
+    .insert(invitations)
+    .values({
+      userId: user.id,
+      templateId: classic.id,
+      config: {
+        ...(classic.defaultData as InvitationData),
+        hisName: 'Іван',
+        herName: 'Марія',
+        weddingDate: '15 червня 2026',
+        weddingPlace: 'Київ',
+      },
+    })
+    .returning();
+  console.log(`Draft invitation: ${draft.id} (classic)`);
+
   await client.end();
-  process.exit(0);
 }
 
-const [draft] = await db
-  .insert(invitations)
-  .values({
-    userId: user.id,
-    templateId: 'classic',
-    config: {
-      hisName: 'Іван',
-      herName: 'Марія',
-      weddingDate: '15 червня 2026',
-      weddingPlace: 'Київ',
-      loveStory: { moment1: '', moment2: '', image1Url: '', image2Url: '' },
-      events: [],
-      weddingColors: [],
-      templateColors: { primary: '#f5e6d3', text: '#2c2c2c', accent: '#b8860b' },
-    },
-  })
-  .returning();
-
-const now = new Date();
-const [published] = await db
-  .insert(invitations)
-  .values({
-    userId: user.id,
-    templateId: 'modern',
-    publishedAt: now,
-    lastPublishedAt: now,
-    freeActiveDaysUsed: 1,
-    config: {
-      hisName: 'Олексій',
-      herName: 'Наталія',
-      weddingDate: '20 вересня 2026',
-      weddingPlace: 'Львів',
-      loveStory: { moment1: 'Ми познайомились у 2020', moment2: 'Він запропонував у 2025', image1Url: '', image2Url: '' },
-      events: [{ id: '1', title: 'Церемонія', time: '14:00', location: 'Собор Св. Юра', description: '' }],
-      weddingColors: ['#e8d5c4', '#8b7355'],
-      templateColors: { primary: '#1a1a2e', text: '#eaeaea', accent: '#e94560' },
-    },
-  })
-  .returning();
-
-console.log(`Draft invitation:     ${draft.id} (classic)`);
-console.log(`Published invitation: ${published.id} (modern, active_free)`);
-console.log('\nDone. Log in via:');
-console.log(`  POST http://localhost:3001/auth/dev-login`);
-console.log(`  Body: { "email": "${DEV_EMAIL}", "name": "Dev User" }`);
-
-await client.end();
+main().catch(async (err) => {
+  console.error(err);
+  await client.end();
+  process.exit(1);
+});

@@ -1,4 +1,4 @@
-import { useId, useMemo } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 import type {
   InvitationData,
   SectionBg,
@@ -12,13 +12,17 @@ import type { ResolvedTheme } from "./sections/types";
 interface TemplateRendererProps {
   template: TemplateDefinition;
   data: InvitationData;
+  /** Optional content rendered inside the scroll container before the sections. */
+  prepend?: (theme: ResolvedTheme) => ReactNode;
+  /** Id assigned to the first section wrapper so prepend content can scroll to it. */
+  contentAnchorId?: string;
 }
 
-const resolveBg = (bg: SectionBg | undefined, theme: TemplateTheme): string => {
-  if (!bg || bg === "background") return theme.background;
+const resolveBg = (bg: SectionBg | undefined, theme: TemplateTheme, primaryColor: string): string => {
+  if (!bg || bg === "background") return primaryColor;
   if (bg === "surface") return theme.surface;
   if (typeof bg === "object" && "color" in bg) return bg.color;
-  return theme.background;
+  return primaryColor;
 };
 
 const buildScopedFontStyles = (theme: TemplateTheme, scope: string, displayClass: string, bodyClass: string) => {
@@ -39,7 +43,7 @@ const buildScopedFontStyles = (theme: TemplateTheme, scope: string, displayClass
   `;
 };
 
-export const TemplateRenderer = ({ template, data }: TemplateRendererProps) => {
+export const TemplateRenderer = ({ template, data, prepend, contentAnchorId }: TemplateRendererProps) => {
   const reactId = useId();
   const scope = `tpl-${reactId.replace(/[^a-zA-Z0-9]/g, "")}`;
   const displayClass = `${scope}-display`;
@@ -60,12 +64,13 @@ export const TemplateRenderer = ({ template, data }: TemplateRendererProps) => {
       <style>{styles}</style>
       <div
         className={`${scope} ${bodyClass} h-screen overflow-y-auto`}
-        style={{ backgroundColor: template.theme.background, color: data.templateColors.text }}
+        style={{ backgroundColor: data.templateColors.primary, color: data.templateColors.text }}
       >
+        {prepend?.(theme)}
         {template.sections.map((section, idx) => {
           const Component = getSectionComponent(section);
           if (!Component) return null;
-          const background = resolveBg(section.bg, template.theme);
+          const background = resolveBg(section.bg, template.theme, data.templateColors.primary);
           const sectionData =
             section.textColor || section.accentColor
               ? {
@@ -78,13 +83,14 @@ export const TemplateRenderer = ({ template, data }: TemplateRendererProps) => {
                 }
               : data;
           return (
-            <Component
-              key={`${section.type}-${idx}`}
-              config={section as SectionConfig}
-              data={sectionData}
-              theme={theme}
-              background={background}
-            />
+            <div key={`${section.type}-${idx}`} id={idx === 0 ? contentAnchorId : undefined}>
+              <Component
+                config={section as SectionConfig}
+                data={sectionData}
+                theme={theme}
+                background={background}
+              />
+            </div>
           );
         })}
       </div>

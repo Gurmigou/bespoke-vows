@@ -2,7 +2,10 @@ import 'dotenv/config';
 import { Hono } from 'hono';
 import { corsMiddleware } from './middleware/cors.js';
 import { authRoutes } from './routes/auth.js';
-import { invitationRoutes, publicInvitationRoutes } from './routes/invitations.js';
+import { invitationRoutes } from './routes/invitations.js';
+import { templateRoutes } from './routes/templates.js';
+import { paymentRoutes } from './routes/payments.js';
+import { publicRoutes } from './routes/public.js';
 import { uploadRoutes } from './routes/upload.js';
 
 const app = new Hono();
@@ -13,7 +16,9 @@ app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISO
 
 app.route('/auth', authRoutes);
 app.route('/invitations', invitationRoutes);
-app.route('/i', publicInvitationRoutes);
+app.route('/templates', templateRoutes);
+app.route('/payments', paymentRoutes);
 app.route('/upload', uploadRoutes);
+app.route('/', publicRoutes);
 
 export default app;

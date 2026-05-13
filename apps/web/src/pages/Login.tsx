@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import weddingPhoto from "@/img/story-photo-1.jpg";
+import { useAuth } from "@/contexts/AuthContext";
+import { ApiError } from "@/lib/api";
 
 const schema = z.object({
   email: z.string().email("Введіть коректний email"),
@@ -15,8 +17,6 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -41,6 +41,7 @@ const GoogleIcon = () => (
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,117 +56,200 @@ export default function Login() {
     setServerError(null);
     setLoading(true);
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(values),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setServerError(data.error ?? "Щось пішло не так");
-        return;
+      const { claimedInvitationId } = await login(values.email, values.password);
+      const intent = localStorage.getItem("bv:postLoginIntent");
+      if (intent === "pay" && claimedInvitationId) {
+        localStorage.removeItem("bv:postLoginIntent");
+        navigate(`/account?pay=${claimedInvitationId}`);
+      } else if (claimedInvitationId) {
+        navigate(`/builder?id=${claimedInvitationId}`);
+      } else {
+        navigate("/account");
       }
-      navigate("/builder");
-    } catch {
-      setServerError("Помилка з'єднання");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        setServerError("Неправильний email або пароль");
+      } else {
+        setServerError("Помилка з'єднання");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogle = () => {
-    window.location.href = `${API_URL}/auth/google`;
+    setServerError("Google-авторизація тимчасово недоступна");
   };
 
   return (
-    <div className="flex min-h-screen font-geologica">
+    <div className="flex min-h-screen font-geologica bg-background">
       {/* Left — wedding photo */}
-      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <img
           src={weddingPhoto}
           alt="Wedding"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-foreground/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-foreground/10 via-foreground/30 to-foreground/70" />
+
+        <Link
+          to="/"
+          className="absolute top-8 left-8 inline-flex items-center gap-2 text-white/90 hover:text-white text-sm font-medium transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          На головну
+        </Link>
+
+        <div className="relative z-10 mt-auto p-12 text-white max-w-lg">
+          <p
+            className="text-4xl xl:text-5xl leading-tight italic"
+            style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}
+          >
+            «Кохання — це найкрасивіша історія, яку варто розповісти красиво.»
+          </p>
+          <p className="mt-5 text-sm text-white/70 tracking-[0.2em] uppercase">
+            Beloved
+          </p>
+        </div>
       </div>
 
       {/* Right — form */}
-      <div className="flex flex-1 items-center justify-center px-6 py-12 bg-background">
-        <div className="w-full max-w-sm space-y-8">
-          {/* Logo */}
-          <div>
-            <Link to="/" className="text-2xl font-bold text-foreground hover:text-primary transition-colors">
+      <div className="relative flex flex-1 items-center justify-center px-6 py-12 lg:py-16 overflow-hidden">
+        {/* Decorative blobs */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-pink-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-amber-100/50 blur-3xl" />
+
+        <div className="relative w-full max-w-md space-y-8">
+          {/* Mobile back link */}
+          <Link
+            to="/"
+            className="lg:hidden inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            На головну
+          </Link>
+
+          <div className="space-y-3">
+            <Link
+              to="/"
+              className="inline-block text-2xl font-bold tracking-tight text-foreground hover:text-pink-500 transition-colors"
+            >
               Beloved
             </Link>
-            <h2 className="mt-6 text-3xl font-bold text-foreground">Вхід</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight tracking-tight text-foreground">
+              З поверненням,{" "}
+              <span
+                className="text-pink-500 italic"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
+              >
+                закохані
+              </span>
+            </h1>
+            <p className="text-foreground/60">
               Немає акаунту?{" "}
-              <Link to="/register" className="text-primary hover:underline font-medium">
+              <Link to="/register" className="text-pink-500 hover:text-pink-600 font-medium underline-offset-4 hover:underline">
                 Зареєструватися
               </Link>
             </p>
           </div>
 
-          {/* Google */}
           <Button
             type="button"
             variant="outline"
-            className="w-full flex items-center gap-3"
             onClick={handleGoogle}
+            className="w-full h-12 rounded-full border-foreground/15 bg-white/70 backdrop-blur hover:bg-white text-foreground font-medium gap-3 shadow-sm"
           >
             <GoogleIcon />
             Продовжити з Google
           </Button>
 
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">або</span>
-            <div className="flex-1 h-px bg-border" />
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-foreground/10" />
+            <span className="text-[11px] tracking-[0.2em] uppercase text-foreground/40">
+              або email
+            </span>
+            <div className="flex-1 h-px bg-foreground/10" />
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-            <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-semibold tracking-wide uppercase text-foreground/60">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autoComplete="email"
+                {...register("email")}
+                className="h-12 rounded-xl border-foreground/15 bg-white/70 backdrop-blur focus-visible:ring-pink-300 focus-visible:border-pink-300"
+              />
               {errors.email && (
-                <p className="text-xs text-destructive">{errors.email.message}</p>
+                <p className="text-xs text-destructive pt-0.5">{errors.email.message}</p>
               )}
             </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="password">Пароль</Label>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-xs font-semibold tracking-wide uppercase text-foreground/60">
+                  Пароль
+                </Label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-foreground/50 hover:text-pink-500 transition-colors"
+                >
+                  Забули?
+                </Link>
+              </div>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Ваш пароль"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
                   {...register("password")}
-                  className="pr-10"
+                  className="h-12 pr-11 rounded-xl border-foreground/15 bg-white/70 backdrop-blur focus-visible:ring-pink-300 focus-visible:border-pink-300"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password.message}</p>
+                <p className="text-xs text-destructive pt-0.5">{errors.password.message}</p>
               )}
             </div>
 
             {serverError && (
-              <p className="text-sm text-destructive">{serverError}</p>
+              <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {serverError}
+              </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-sm disabled:opacity-70"
+            >
               {loading ? "Вхід…" : "Увійти"}
             </Button>
           </form>
+
+          <p className="text-center text-xs text-foreground/40 leading-relaxed">
+            Продовжуючи, ви погоджуєтесь з{" "}
+            <Link to="/terms" className="hover:text-foreground underline-offset-4 hover:underline">
+              умовами використання
+            </Link>{" "}
+            та{" "}
+            <Link to="/terms" className="hover:text-foreground underline-offset-4 hover:underline">
+              політикою конфіденційності
+            </Link>
+            .
+          </p>
         </div>
       </div>
     </div>

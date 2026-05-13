@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { featureFlags } from "@/lib/featureFlags";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Locale = "uk" | "en";
 
@@ -20,6 +21,7 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   // Determine locale from URL
   const getLocaleFromPath = (path: string): Locale => {
     if (path.startsWith("/en/") || path === "/en") return "en";
@@ -112,8 +114,8 @@ const Header = () => {
           </div>
         )}
 
-        {/* Right: Account + Menu Button (mobile) + Language Switcher */}
-        <div className="flex items-center gap-2 md:gap-4">
+        {/* Right: Auth actions + Mobile menu + Language Switcher */}
+        <div className="flex items-center gap-2 md:gap-3">
           {isMobile && (
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>
@@ -152,18 +154,62 @@ const Header = () => {
                         </Link>
                       </li>
                     ))}
+                    {user && (
+                      <li>
+                        <Link
+                          to="/invitations"
+                          onClick={() => setIsSheetOpen(false)}
+                          className={cn(
+                            "block text-lg font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm px-2 py-2",
+                            location.pathname === "/invitations"
+                              ? "text-primary font-semibold"
+                              : "text-foreground"
+                          )}
+                          aria-current={location.pathname === "/invitations" ? "page" : undefined}
+                        >
+                          {locale === "en" ? "My Invitations" : "Мої запрошення"}
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </nav>
               </SheetContent>
             </Sheet>
           )}
-          
+
+          {user && !isMobile && (
+            <Link
+              to="/invitations"
+              aria-label="Мої запрошення"
+              className={cn(
+                "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                location.pathname === "/invitations"
+                  ? "bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white shadow-md shadow-rose-500/25"
+                  : "bg-foreground/[0.05] text-foreground hover:bg-gradient-to-r hover:from-pink-500 hover:via-rose-500 hover:to-amber-500 hover:text-white hover:shadow-md hover:shadow-rose-500/20"
+              )}
+            >
+              {locale === "en" ? "My Invitations" : "Мої запрошення"}
+            </Link>
+          )}
+
           <Link
             to="/account"
-            className="flex items-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm p-1"
-            aria-label="Account"
+            aria-label="Акаунт"
+            className={cn(
+              "flex items-center justify-center rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              user
+                ? "h-8 w-8 bg-gradient-to-br from-pink-500 to-rose-400 shadow-sm shadow-pink-500/20 hover:shadow-md hover:shadow-pink-500/30 hover:-translate-y-px"
+                : "h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-foreground/[0.05]",
+              location.pathname === "/account" && "ring-2 ring-pink-400 ring-offset-1"
+            )}
           >
-            <CircleUser className="h-5 w-5" />
+            {user ? (
+              <span className="text-xs font-bold text-white leading-none">
+                {user.email[0].toUpperCase()}
+              </span>
+            ) : (
+              <CircleUser className="h-5 w-5" />
+            )}
           </Link>
 
           {featureFlags.languageSwitcher && (

@@ -16,19 +16,27 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Contact from "./pages/Contact";
 import Account from "./pages/Account";
+import MyInvitations from "./pages/MyInvitations";
+import Checkout from "./pages/Checkout";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
 import InvitationInactive from "./pages/InvitationInactive";
+import InvitationDeleted from "./pages/InvitationDeleted";
+import PublicInvitation from "./pages/PublicInvitation";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
   const location = useLocation();
   const hideHeader =
-    location.pathname === "/preview" ||
+    location.pathname.startsWith("/preview") ||
+    location.pathname.startsWith("/i/") ||
     location.pathname === "/register" ||
     location.pathname === "/login" ||
-    location.pathname === "/invitation-inactive";
+    location.pathname === "/invitation-inactive" ||
+    location.pathname === "/invitation-deleted" ||
+    location.pathname.startsWith("/checkout");
   return (
     <>
       {!hideHeader && <Header />}
@@ -41,12 +49,12 @@ const AppRoutes = () => {
           <Route path="/en/templates" element={<Templates />} />
           <Route path="/builder" element={<Builder />} />
           <Route path="/preview" element={<PreviewPage />} />
+          <Route path="/preview/:token" element={<PreviewPage />} />
+          <Route path="/i/:id" element={<PublicInvitation />} />
           <Route path="/about" element={<About />} />
           <Route path="/uk/about" element={<About />} />
           <Route path="/en/about" element={<About />} />
-          <Route path="/invites" element={<About />} />
-          <Route path="/uk/invites" element={<About />} />
-          <Route path="/en/invites" element={<About />} />
+          <Route path="/invitations" element={<MyInvitations />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/uk/pricing" element={<Pricing />} />
           <Route path="/en/pricing" element={<Pricing />} />
@@ -59,9 +67,11 @@ const AppRoutes = () => {
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/checkout/:id" element={<Checkout />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/invitation-inactive" element={<InvitationInactive />} />
+          <Route path="/invitation-deleted" element={<InvitationDeleted />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -75,7 +85,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AppRoutes />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

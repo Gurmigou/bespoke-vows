@@ -1,23 +1,22 @@
 import type { DerivedStatus } from '@bespoke-vows/shared';
 import type { InvitationRow } from '../db/schema.js';
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const FREE_DAYS_LIMIT = 7;
+export function derivedStatus(inv: Pick<InvitationRow, 'status' | 'activeUntil'>, now: Date = new Date()): DerivedStatus {
+  if (inv.status === 'draft') return 'draft';
+  if (inv.activeUntil && inv.activeUntil > now) return 'active';
+  return 'expired';
+}
 
-export function deriveStatus(inv: InvitationRow): DerivedStatus {
-  const now = new Date();
+export function canFreeTrial(inv: Pick<InvitationRow, 'freeTrialUsedAt'>): boolean {
+  return inv.freeTrialUsedAt == null;
+}
 
-  if (inv.paidUntil && inv.paidUntil > now) return 'active_paid';
-  if (inv.freeActiveDaysUsed >= FREE_DAYS_LIMIT) return 'locked';
+export type CanPublishResult =
+  | { ok: true; mode: 'free' }
+  | { ok: false; reason: 'already_active' | 'payment_required' };
 
-  if (inv.lastPublishedAt) {
-    const lastPublishWasPaid = inv.paidUntil && inv.paidUntil > inv.lastPublishedAt;
-    if (!lastPublishWasPaid) {
-      const expiresAt = new Date(inv.lastPublishedAt.getTime() + ONE_DAY_MS);
-      if (expiresAt > now) return 'active_free';
-    }
-    return 'expired';
-  }
-
-  return 'draft';
+export function canPublish(inv: Pick<InvitationRow, 'status' | 'activeUntil' | 'freeTrialUsedAt'>, now: Date = new Date()): CanPublishResult {
+  if (derivedStatus(inv, now) === 'active') return { ok: false, reason: 'already_active' };
+  if (canFreeTrial(inv)) return { ok: true, mode: 'free' };
+  return { ok: false, reason: 'payment_required' };
 }

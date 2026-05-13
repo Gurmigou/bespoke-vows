@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
@@ -6,16 +6,17 @@ import type {
   LoveStoryMoment,
   WeddingEvent,
 } from "@bespoke-vows/shared";
+import { buildDefaultInvitationData as buildDefaultData } from "@bespoke-vows/shared";
 import { BuilderPanel } from "@/components/builder/BuilderPanel";
 import { InvitationPreview } from "@/components/invitation/InvitationPreview";
 import { getTemplateDefinition, getTemplateId } from "@/components/invitation/templates/registry";
+import { invitations as invApi, ApiError } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useInvitationDraft } from "@/hooks/useInvitationDraft";
+import { writeAnonDraft, readAnonDraft } from "@/contexts/AuthContext";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
-
-// Re-export shared types so existing builder forms keep importing from this module.
 export type { InvitationData, LoveStoryMoment, WeddingEvent };
 
-// Normalize legacy loveStory shape ({ moment1, moment2, image1, image2, ... }) to moments[]
 const normalizeLoveStory = (raw: unknown): { moments: LoveStoryMoment[] } => {
   if (!raw || typeof raw !== "object") return { moments: [] };
   const ls = raw as Record<string, unknown>;
@@ -30,139 +31,192 @@ const normalizeLoveStory = (raw: unknown): { moments: LoveStoryMoment[] } => {
       })),
     };
   }
-  // Legacy shape
-  const moments: LoveStoryMoment[] = [];
-  for (let i = 1; i <= 2; i++) {
-    const text = (ls[`moment${i}`] as string) ?? "";
-    const image = (ls[`image${i}`] as string) ?? "";
-    const pos = (ls[`image${i}Position`] as { x: number; y: number }) ?? { x: 50, y: 50 };
-    if (text || image) {
-      moments.push({
-        id: `legacy-${i}`,
-        title: i === 1 ? "Як ми зустрілися" : "Пропозиція",
-        description: text,
-        image,
-        imagePosition: pos,
-      });
-    }
-  }
-  return { moments };
+  return { moments: [] };
 };
+
+function buildDefaultInvitationData(
+  tpl: ReturnType<typeof getTemplateDefinition>
+): InvitationData {
+  return buildDefaultData(tpl.defaultColors);
+}
 
 const Builder = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const invitationId = searchParams.get("id");
-  const templateId = useMemo(
-    () => getTemplateId(searchParams.get("template")),
-    [searchParams]
-  );
+  const { user, loading: authLoading } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlInvitationId = searchParams.get("id");
+  const requestedTemplate = searchParams.get("template");
 
+  const [invitationId, setInvitationId] = useState<string | null>(urlInvitationId);
+  const [serverUpdatedAt, setServerUpdatedAt] = useState<string | null>(null);
+  const [serverConfig, setServerConfig] = useState<InvitationData | null>(null);
+  const [isActiveInvitation, setIsActiveInvitation] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const templateId = useMemo(
+    () => getTemplateId(requestedTemplate),
+    [requestedTemplate]
+  );
   const template = useMemo(() => getTemplateDefinition(templateId), [templateId]);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isActiveInvitation, setIsActiveInvitation] = useState(false);
+  const initial = useMemo<InvitationData>(() => {
+    if (serverConfig) {
+      return { ...serverConfig, loveStory: normalizeLoveStory(serverConfig.loveStory) };
+    }
+    return buildDefaultInvitationData(template);
+  }, [serverConfig, template]);
 
-  const buildDefaultInvitationData = (
-    tpl: ReturnType<typeof getTemplateDefinition>
-  ): InvitationData => ({
-    hisName: "Михайло",
-    herName: "Софія",
-    weddingDate: "15 червня 2025",
-    weddingPlace: "Ресторан Маяк, Київ, Україна",
-    venue: {
-      label: "Ресторан Маяк, вул. Набережна 1, Київ",
-      mapsUrl: "",
-    },
-    loveStory: {
-      moments: [
-        {
-          id: "m-1",
-          title: "Як ми зустрілися",
-          description:
-            "Ми зустрілися ранньої осені 2020 року на студентській вечірці у Львові. Те, що розпочалося як випадкова розмова про улюблені книги, непомітно перетворилося на кілька годин сміху і відвертих одкровень — і ми обидва відчули, що щось особливе щойно народилося.",
-          image: "",
-          imagePosition: { x: 50, y: 50 },
-        },
-        {
-          id: "m-2",
-          title: "Пропозиція",
-          description:
-            "Через три роки, у тому ж затишному кафе на Ринковій площі, де ми провели наше перше побачення, Михайло опустився на коліно. Навколо зупинився час, і серед теплого осіннього світла Софія сказала «так».",
-          image: "",
-          imagePosition: { x: 50, y: 50 },
-        },
-      ],
-    },
-    events: [
-      { id: "1", time: "16:00", eventName: "Церемонія" },
-      { id: "2", time: "17:00", eventName: "Коктейль" },
-      { id: "3", time: "18:30", eventName: "Прийом" },
-      { id: "4", time: "19:00", eventName: "Вечеря" },
-      { id: "5", time: "21:00", eventName: "Танці" },
-    ],
-    weddingColors: ["#2E4D3A", "#6B8F71", "#A7BFA3", "#E8DCC4"],
-    templateColors: { ...tpl.defaultColors },
+  const { data, setData, flush, clearDraft } = useInvitationDraft({
+    invitationId,
+    templateId,
+    initial,
+    serverUpdatedAt,
   });
 
-  const [invitationData, setInvitationData] = useState<InvitationData>(() =>
-    buildDefaultInvitationData(template)
-  );
-
-  const handleResetToDefault = () => {
-    setInvitationData(buildDefaultInvitationData(template));
-  };
-
-  // When template changes (via URL), reset template-driven defaults (only for new invitations)
+  // Load invitation when ?id= is present and user is authenticated
+  const loadedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!invitationId) {
-      setInvitationData((prev) => ({
-        ...prev,
-        templateColors: { ...template.defaultColors },
-      }));
-    }
-  }, [template, invitationId]);
-
-  // Load existing invitation when ?id= is present
-  useEffect(() => {
-    if (!invitationId) return;
-    fetch(`${API_URL}/invitations/${invitationId}`, { credentials: "include" })
-      .then((r) => r.ok ? r.json() : null)
+    if (!urlInvitationId) return;
+    if (loadedRef.current === urlInvitationId) return;
+    loadedRef.current = urlInvitationId;
+    invApi
+      .get(urlInvitationId)
       .then((inv) => {
-        if (!inv) return;
-        if (inv.config) {
-          const cfg = inv.config as InvitationData;
-          setInvitationData({
-            ...cfg,
-            loveStory: normalizeLoveStory(cfg.loveStory),
-          });
-        }
-        setIsEditing(true);
-        setIsActiveInvitation(inv.derivedStatus === "active_free" || inv.derivedStatus === "active_paid");
+        setInvitationId(inv.id);
+        setServerUpdatedAt(inv.updatedAt);
+        setServerConfig(inv.config);
+        setIsActiveInvitation(inv.derivedStatus === "active");
       })
-      .catch(() => {});
-  }, [invitationId]);
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) {
+          navigate("/login");
+        } else if (err instanceof ApiError && err.code === 'invitation_deleted') {
+          navigate("/invitation-deleted");
+        } else {
+          setLoadError("Не вдалося завантажити запрошення");
+        }
+      });
+  }, [urlInvitationId, navigate]);
+
+  // Mirror anon draft into localStorage with templateId so login can claim it
+  useEffect(() => {
+    if (invitationId) return;
+    if (authLoading) return;
+    if (user) return;
+    writeAnonDraft({
+      templateId,
+      config: data,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [data, templateId, invitationId, user, authLoading]);
+
+  // When template changes (via URL), refresh template-driven default colors for new invitations
+  useEffect(() => {
+    if (invitationId) return;
+    setData((prev) => ({
+      ...prev,
+      templateColors: { ...template.defaultColors },
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template.id, invitationId]);
 
   // Dynamic accent color for resize divider
   useEffect(() => {
-    const styleId = 'accent-color-divider-style';
+    const styleId = "accent-color-divider-style";
     let styleElement = document.getElementById(styleId);
-
     if (!styleElement) {
-      styleElement = document.createElement('style');
+      styleElement = document.createElement("style");
       styleElement.id = styleId;
       document.head.appendChild(styleElement);
     }
-
     styleElement.textContent = `
       .accent-divider {
-        background-color: ${invitationData.templateColors.accent}20 !important;
+        background-color: ${data.templateColors.accent}20 !important;
       }
       .accent-divider:hover {
-        background-color: ${invitationData.templateColors.accent} !important;
+        background-color: ${data.templateColors.accent} !important;
       }
     `;
-  }, [invitationData.templateColors.accent]);
+  }, [data.templateColors.accent]);
+
+  const handleResetToDefault = async () => {
+    if (invitationId) {
+      try {
+        const inv = await invApi.reset(invitationId);
+        setServerUpdatedAt(inv.updatedAt);
+        setServerConfig(inv.config);
+        setData({ ...inv.config, loveStory: normalizeLoveStory(inv.config.loveStory) });
+        clearDraft();
+      } catch (err) {
+        if (err instanceof ApiError && err.code === 'invitation_deleted') {
+          navigate("/invitation-deleted");
+        } else {
+          setLoadError("Не вдалося скинути");
+        }
+      }
+    } else {
+      setData(buildDefaultInvitationData(template));
+      clearDraft();
+    }
+  };
+
+  const handlePreview = async () => {
+    setActionBusy(true);
+    try {
+      await flush();
+      let id = invitationId;
+      if (!id) {
+        if (!user) {
+          // Anonymous preview: render directly from local state, no token / no auth.
+          const existing = readAnonDraft();
+          if (!existing) {
+            writeAnonDraft({
+              templateId,
+              config: data,
+              updatedAt: new Date().toISOString(),
+            });
+          }
+          navigate("/preview", { state: { data, templateId } });
+          return;
+        }
+        const created = await invApi.create({ templateId, config: data });
+        id = created.id;
+        setInvitationId(id);
+        setServerUpdatedAt(created.updatedAt);
+        setServerConfig(created.config);
+        const next = new URLSearchParams(searchParams);
+        next.set("id", id);
+        setSearchParams(next, { replace: true });
+      }
+      const { token } = await invApi.previewToken(id);
+      navigate(`/preview/${token}`);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        navigate("/login");
+      } else if (err instanceof ApiError && err.code === 'invitation_deleted') {
+        navigate("/invitation-deleted");
+      } else {
+        setLoadError("Не вдалося відкрити перегляд");
+      }
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setActionBusy(true);
+    try {
+      await flush();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch {
+      setLoadError("Не вдалося зберегти зміни");
+    } finally {
+      setActionBusy(false);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -171,52 +225,58 @@ const Builder = () => {
           viewBox="0 0 120 120"
           className="w-32 h-32"
           fill="none"
-          stroke={invitationData.templateColors.accent}
+          stroke={data.templateColors.accent}
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <rect
-            x="46"
-            y="20"
-            width="28"
-            height="50"
-            rx="4"
-            transform="rotate(-35 60 45)"
-          />
+          <rect x="46" y="20" width="28" height="50" rx="4" transform="rotate(-35 60 45)" />
           <line x1="56" y1="26" x2="60" y2="29" transform="rotate(-35 60 45)" />
           <path d="M 25 80 A 35 35 0 0 1 95 80" />
           <polyline points="20,72 25,80 33,75" />
           <polyline points="100,72 95,80 87,75" />
         </svg>
         <div>
-          <h2 className="text-xl font-semibold mb-2">
-            Поверніть телефон
-          </h2>
+          <h2 className="text-xl font-semibold mb-2">Поверніть телефон</h2>
           <p className="text-muted-foreground text-sm max-w-xs">
             Для зручного редагування запрошення оберніть телефон у горизонтальне положення.
           </p>
         </div>
       </div>
+
+      {loadError && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-xl border border-destructive/20 bg-white shadow-lg px-4 py-3 text-sm text-destructive">
+          {loadError}
+        </div>
+      )}
+
       <PanelGroup direction="horizontal">
         <Panel defaultSize={40} minSize={30} maxSize={60}>
           <BuilderPanel
-            data={invitationData}
-            setData={setInvitationData}
+            data={data}
+            setData={setData as React.Dispatch<React.SetStateAction<InvitationData>>}
             templateId={templateId}
-            isEditing={isEditing}
+            isEditing={Boolean(invitationId)}
             isActiveInvitation={isActiveInvitation}
-            onPublish={() => navigate("/preview", { state: { data: invitationData, templateId } })}
+            onPublish={handlePreview}
+            onSave={handleSave}
             onReset={handleResetToDefault}
+            saveSuccess={saveSuccess}
           />
         </Panel>
 
         <PanelResizeHandle className="w-1 transition-colors cursor-col-resize accent-divider" />
 
         <Panel>
-          <InvitationPreview data={invitationData} templateId={templateId} />
+          <InvitationPreview data={data} templateId={templateId} />
         </Panel>
       </PanelGroup>
+
+      {actionBusy && (
+        <div className="fixed bottom-4 right-4 z-50 rounded-full bg-foreground text-background text-xs px-3 py-2 shadow-lg">
+          Зберігаємо…
+        </div>
+      )}
     </div>
   );
 };

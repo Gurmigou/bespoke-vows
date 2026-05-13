@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RotateCcw, Send, Sparkles } from "lucide-react";
+import { CheckCircle2, Info, RotateCcw, Save, Send, Sparkles } from "lucide-react";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { LoveStoryForm } from "./LoveStoryForm";
 import { EventsForm } from "./EventsForm";
@@ -26,18 +26,22 @@ interface BuilderPanelProps {
   setData: React.Dispatch<React.SetStateAction<InvitationData>>;
   templateId: string;
   onPublish: () => void;
+  onSave: () => void;
   onReset: () => void;
   isEditing?: boolean;
   isActiveInvitation?: boolean;
+  saveSuccess?: boolean;
 }
 
 export const BuilderPanel = ({
   data,
   setData,
   onPublish,
+  onSave,
   onReset,
   isEditing,
   isActiveInvitation,
+  saveSuccess,
 }: BuilderPanelProps) => {
   const accent = data.templateColors.accent;
   const primary = data.templateColors.primary;
@@ -117,24 +121,51 @@ export const BuilderPanel = ({
               </AlertDialog>
             </TooltipProvider>
 
-            <Button
-              onClick={onPublish}
-              className="h-10 rounded-full px-5 font-semibold text-white shadow-md hover:shadow-lg hover:brightness-105 transition-all duration-300 gap-2"
-              style={{
-                backgroundColor: accent,
-                boxShadow: `0 8px 20px -8px ${accent}80`,
-              }}
-            >
-              <Send className="w-4 h-4" />
-              {isUpdate ? "Оновити" : "Опублікувати"}
-            </Button>
+            {isUpdate ? (
+              <Button
+                onClick={onSave}
+                className="h-10 rounded-full px-5 font-semibold text-white shadow-md hover:shadow-lg hover:brightness-105 transition-all duration-300 gap-2"
+                style={{
+                  backgroundColor: accent,
+                  boxShadow: `0 8px 20px -8px ${accent}80`,
+                }}
+              >
+                {saveSuccess ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                {saveSuccess ? "Збережено" : "Зберегти зміни"}
+              </Button>
+            ) : (
+              <Button
+                onClick={onPublish}
+                className="h-10 rounded-full px-5 font-semibold text-white shadow-md hover:shadow-lg hover:brightness-105 transition-all duration-300 gap-2"
+                style={{
+                  backgroundColor: accent,
+                  boxShadow: `0 8px 20px -8px ${accent}80`,
+                }}
+              >
+                <Send className="w-4 h-4" />
+                Переглянути
+              </Button>
+            )}
           </div>
         </div>
 
         {isUpdate && (
-          <p className="mt-2 text-[11px] text-slate-500 text-right">
-            посилання залишиться тим самим
-          </p>
+          <div
+            className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2.5 text-[12px] leading-snug text-slate-700"
+            style={{
+              backgroundColor: `${accent}12`,
+              border: `1px solid ${accent}28`,
+            }}
+          >
+            <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
+            <span>
+              Після збереження змін посилання для ваших гостей залишиться тим самим.
+            </span>
+          </div>
         )}
       </header>
 

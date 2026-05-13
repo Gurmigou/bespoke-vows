@@ -1,27 +1,116 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import type { InvitationData } from "@bespoke-vows/shared";
+import { useEffect, useState } from "react";
+import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
+import type { InvitationData, Template } from "@bespoke-vows/shared";
 import { TemplateRenderer } from "@/components/invitation/TemplateRenderer";
 import { getTemplateDefinition } from "@/components/invitation/templates/registry";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Heart, Mail } from "lucide-react";
+import { publicApi, ApiError } from "@/lib/api";
+import { writeAnonDraft } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PreviewPage = () => {
+  const { token } = useParams<{ token?: string }>();
   const location = useLocation();
   const navigate = useNavigate();
-  const state = location.state as { data: InvitationData; templateId: string } | null;
+  const { user } = useAuth();
+  const localState = location.state as { data: InvitationData; templateId: string } | null;
 
-  if (!state?.data) {
+  const [data, setData] = useState<InvitationData | null>(localState?.data ?? null);
+  const [template, setTemplate] = useState<Template["definition"] | null>(
+    localState?.templateId ? getTemplateDefinition(localState.templateId) : null
+  );
+  const [invitationId, setInvitationId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    publicApi
+      .preview(token)
+      .then((view) => {
+        setData(view.invitation.config);
+        setTemplate(view.template.definition);
+        setInvitationId(view.invitation.id);
+      })
+      .catch((err) => {
+        if (err instanceof ApiError) {
+          setError(err.status === 401 ? "Посилання застаріло" : "Запрошення недоступне");
+        } else {
+          setError("Помилка завантаження");
+        }
+      });
+  }, [token]);
+
+  if (token && error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Запрошення не знайдено.</p>
-        <Button variant="outline" onClick={() => navigate("/builder")}>
-          Повернутися до редактора
-        </Button>
+      <div className="min-h-screen flex items-center justify-center bg-[hsl(32,20%,96%)] px-4 font-geologica">
+        <div className="text-center max-w-md space-y-7">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center">
+              <Heart className="w-7 h-7 text-stone-400" strokeWidth={1.5} />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-stone-400 font-medium tracking-widest uppercase text-xs">Beloved</p>
+            <h1 className="text-3xl font-semibold text-stone-800 leading-snug tracking-tight">
+              {error === "Посилання застаріло" ? "Посилання застаріло" : "Запрошення недоступне"}
+            </h1>
+            <p className="text-stone-500 text-sm leading-relaxed max-w-xs mx-auto">
+              {error === "Посилання застаріло"
+                ? "Це посилання для перегляду більше не дійсне. Спробуйте отримати нове — або якщо вважаєте, що відбулась помилка, зверніться до нас."
+                : "Це запрошення більше не активне або посилання некоректне. Якщо ви вважаєте, що це помилка — зв'яжіться з нами."}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-1">
+            <Button
+              asChild
+              className="h-11 rounded-full px-6 text-sm font-medium bg-stone-800 hover:bg-stone-900 text-white shadow-none"
+            >
+              <Link to="/">На головну</Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 rounded-full px-6 text-sm gap-2 border-stone-200 bg-white hover:bg-stone-50 text-stone-600"
+            >
+              <Link to="/contact">
+                <Mail className="w-3.5 h-3.5" />
+                Зв'язатися з нами
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  const template = getTemplateDefinition(state.templateId);
+  if (!data || !template) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Завантаження...</p>
+      </div>
+    );
+  }
+
+  const handlePublish = () => {
+    if (token && invitationId) {
+      navigate(`/account?publish=${invitationId}`);
+      return;
+    }
+    if (localState) {
+      writeAnonDraft({
+        templateId: localState.templateId,
+        config: localState.data,
+        updatedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("bv:postLoginIntent", "pay");
+      navigate(user ? "/account?postLoginPay=1" : "/register");
+    }
+  };
+
+  const showPublish = Boolean((token && invitationId) || localState);
 
   return (
     <div className="relative">
@@ -29,34 +118,27 @@ const PreviewPage = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="group inline-flex items-center gap-2 h-11 pl-1.5 pr-4 rounded-full bg-white/85 backdrop-blur-xl border border-slate-200/80 text-slate-700 shadow-sm transition-[background-color,box-shadow,color,border-color] duration-200 hover:bg-white hover:shadow-md hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+          className="group inline-flex items-center gap-2 h-11 pl-1.5 pr-4 rounded-full bg-white/85 backdrop-blur-xl border border-slate-200/80 text-slate-700 shadow-sm hover:bg-white hover:shadow-md"
         >
-          <span className="inline-grid place-items-center w-8 h-8 rounded-full bg-slate-100 text-slate-700 transition-colors group-hover:bg-slate-900 group-hover:text-white shrink-0">
-            <ArrowLeft className="w-4 h-4 block" strokeWidth={2.25} />
+          <span className="inline-grid place-items-center w-8 h-8 rounded-full bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white">
+            <ArrowLeft className="w-4 h-4" strokeWidth={2.25} />
           </span>
-          <span className="text-sm font-medium leading-none">Назад до редактора</span>
+          <span className="text-sm font-medium leading-none">Назад</span>
         </button>
       </div>
-
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          type="button"
-          onClick={() => navigate("/pricing")}
-          className="group relative inline-flex items-center gap-2.5 h-11 pl-4 pr-1.5 rounded-full text-white font-semibold text-sm bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 shadow-[0_8px_24px_-8px_rgba(244,63,94,0.55)] transition-[box-shadow,filter] duration-300 hover:shadow-[0_12px_32px_-10px_rgba(244,63,94,0.7)] hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 overflow-hidden"
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-700 group-hover:translate-x-full"
-          />
-          <Sparkles className="w-4 h-4 block shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]" strokeWidth={2.25} />
-          <span className="leading-none">Зробити видимим для гостей</span>
-          <span className="inline-grid place-items-center w-8 h-8 rounded-full bg-white/20 transition-colors group-hover:bg-white/30 shrink-0">
-            <Share2 className="w-4 h-4 block" strokeWidth={2.25} />
-          </span>
-        </button>
-      </div>
-
-      <TemplateRenderer template={template} data={state.data} />
+      {showPublish && (
+        <div className="fixed top-4 right-4 z-50">
+          <Button
+            type="button"
+            onClick={handlePublish}
+            className="h-11 rounded-full px-5 gap-2 bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-md"
+          >
+            <Sparkles className="h-4 w-4" />
+            Опублікувати
+          </Button>
+        </div>
+      )}
+      <TemplateRenderer template={template} data={data} />
     </div>
   );
 };

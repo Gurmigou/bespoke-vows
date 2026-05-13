@@ -5,7 +5,7 @@ export const classicTemplate: TemplateDefinition = {
   name: "Класичний",
   description: "Витончений редакторський дизайн з рукописним шрифтом",
   defaultColors: {
-    primary: "#2C2416",
+    primary: "#FBF7EE",
     text: "#2C2416",
     accent: "#D4A574",
   },

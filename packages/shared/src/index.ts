@@ -1,4 +1,15 @@
-export type DerivedStatus = 'draft' | 'active_free' | 'active_paid' | 'expired' | 'locked';
+// ============================================================================
+// Domain enums
+// ============================================================================
+
+export type DerivedStatus = 'draft' | 'active' | 'expired';
+export type InvitationStatus = 'draft' | 'active';
+export type PaymentStatus = 'free' | 'paid';
+export type PaymentRecordStatus = 'succeeded' | 'pending' | 'failed';
+
+// ============================================================================
+// Invitation user-filled data (stored in invitations.config jsonb)
+// ============================================================================
 
 export interface LoveStoryMoment {
   id: string;
@@ -42,9 +53,9 @@ export interface InvitationData {
   templateColors: TemplateColors;
 }
 
-// ----------------------------------------------------------------------------
-// Template definition (JSON-serialisable; consumed by the renderer)
-// ----------------------------------------------------------------------------
+// ============================================================================
+// Template definition (stored in templates.definition jsonb)
+// ============================================================================
 
 export interface TemplateThumbnail {
   bg: string;
@@ -59,111 +70,66 @@ export interface TemplateThumbnail {
 }
 
 export interface TemplateTheme {
-  /** Google Fonts import URL or full @import block. */
   fontImports: string;
-  /** Page-wide background colour. */
   background: string;
-  /** Secondary/alternating section background. */
   surface: string;
-  /** Display font family (used for headings). */
   displayFont: string;
-  /** Optional weight/style suffix appended to the display font CSS. */
   displayFontStyle?: string;
-  /** Body/sans font family. */
   bodyFont: string;
-  /** Additional letter-spacing/style applied to body font. */
   bodyFontStyle?: string;
-  /** Optional decorative motif rendered between sections. */
   ornament?: 'none' | 'hairline' | 'flourish' | 'frame';
 }
 
-/** Where a section pulls its background from. */
 export type SectionBg = 'background' | 'surface' | { color: string } | { image: string };
 
 export interface SectionBase {
   bg?: SectionBg;
-  /** Decorative motif to render at the top of the section. Falls back to theme.ornament. */
   ornament?: TemplateTheme['ornament'];
-  /** Override the resolved text color for this section (e.g. light text on a dark bg). */
   textColor?: string;
-  /** Override the resolved accent color for this section. */
   accentColor?: string;
 }
 
-// ---- Hero ------------------------------------------------------------------
 export interface HeroSection extends SectionBase {
   type: 'hero';
-  /** centered: stacked text. split: text + decorative panel. framed: bordered box. botanical: minimal botanical line-art with corner brackets. */
   variant: 'centered' | 'split' | 'framed' | 'botanical';
   copy: {
-    /** "Save the date" / "Просимо честі вашої присутності" */
     eyebrow?: string;
-    /** Optional connector glyph between names (e.g. "&", "та"). Defaults to "та". */
     connector?: string;
-    /** Closing tagline shown beneath the date. */
     closing?: string;
   };
 }
 
-// ---- Countdown -------------------------------------------------------------
 export interface CountdownSection extends SectionBase {
   type: 'countdown';
-  /** minimal: bare numbers. boxed: numbers in cells. ornament: framed by motif. */
   variant: 'minimal' | 'boxed' | 'ornamented';
-  copy: {
-    title: string;
-    eyebrow?: string;
-  };
-  /** Pad single-digit numbers with a leading zero. */
+  copy: { title: string; eyebrow?: string };
   padDigits?: boolean;
 }
 
-// ---- Love Story ------------------------------------------------------------
 export interface StorySection extends SectionBase {
   type: 'story';
-  /** alternating: photos flip sides. stacked: photo on left, text on right. framed: bordered photos. */
   variant: 'alternating' | 'stacked' | 'framed';
-  copy: {
-    title: string;
-    eyebrow?: string;
-  };
-  /** CSS filter applied to story photos (e.g. 'grayscale(1)'). */
+  copy: { title: string; eyebrow?: string };
   imageFilter?: string;
-  /** Photo aspect ratio (e.g. '3/4', '4/5'). */
   imageAspect?: string;
 }
 
-// ---- Colours ---------------------------------------------------------------
 export interface ColorsSection extends SectionBase {
   type: 'colors';
-  /** circles: round swatches. squares: rectangles. labelled: circles with index labels. */
   variant: 'circles' | 'squares' | 'labelled';
-  copy: {
-    title: string;
-    eyebrow?: string;
-  };
+  copy: { title: string; eyebrow?: string };
 }
 
-// ---- Events ----------------------------------------------------------------
 export interface EventsSection extends SectionBase {
   type: 'events';
-  /** dashed: time + name on a single line. numbered: indexed list. dotted-line: time-line-name. */
   variant: 'dashed' | 'numbered' | 'dotted-line';
-  copy: {
-    title: string;
-    eyebrow?: string;
-  };
+  copy: { title: string; eyebrow?: string };
 }
 
-// ---- Venue -----------------------------------------------------------------
 export interface VenueSection extends SectionBase {
   type: 'venue';
   variant: 'centered' | 'ornamented';
-  copy: {
-    title: string;
-    eyebrow?: string;
-    closing?: string;
-  };
+  copy: { title: string; eyebrow?: string; closing?: string };
 }
 
 export type SectionConfig =
@@ -186,32 +152,68 @@ export interface TemplateDefinition {
   sections: SectionConfig[];
 }
 
-// ----------------------------------------------------------------------------
-// API contracts
-// ----------------------------------------------------------------------------
+// ============================================================================
+// API DTOs (what the frontend receives — server strips internal columns)
+// ============================================================================
 
 export interface User {
   id: string;
   email: string;
-  name: string;
-  avatarUrl: string | null;
   createdAt: string;
+}
+
+export interface Template {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  definition: TemplateDefinition;
+  defaultData: InvitationData;
 }
 
 export interface Invitation {
   id: string;
   userId: string;
   templateId: string;
+  templateSlug: string;
+  status: InvitationStatus;
+  paymentStatus: PaymentStatus;
   derivedStatus: DerivedStatus;
-  publishedAt: string | null;
-  lastPublishedAt: string | null;
-  freeActiveDaysUsed: number;
-  paidUntil: string | null;
+  activeUntil: string | null;
+  visible: boolean;
+  visibleStatusChangedAt: string | null;
+  paymentId: string | null;
+  freeTrialUsedAt: string | null;
   config: InvitationData;
-  hidden: boolean;
-  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Payment {
+  id: string;
+  invitationId: string;
+  amount: number;
+  currency: string;
+  status: PaymentRecordStatus;
+  createdAt: string;
+  // Joined fields (read-only, computed by server)
+  couple: string;
+  templateSlug: string;
+  activeUntil: string | null;
+}
+
+// ============================================================================
+// API request bodies
+// ============================================================================
+
+export interface RegisterBody {
+  email: string;
+  password: string;
+}
+
+export interface LoginBody {
+  email: string;
+  password: string;
 }
 
 export interface CreateInvitationBody {
@@ -221,4 +223,63 @@ export interface CreateInvitationBody {
 
 export interface UpdateInvitationBody {
   config: Partial<InvitationData>;
+}
+
+export interface HideInvitationBody {
+  visible: boolean;
+}
+
+export interface PreviewTokenResponse {
+  token: string;
+}
+
+export interface PublicInvitationView {
+  template: Template;
+  invitation: Pick<Invitation, 'id' | 'config' | 'activeUntil'>;
+}
+
+// ============================================================================
+// Default invitation data (used for reset and new invitation previews)
+// ============================================================================
+
+export function buildDefaultInvitationData(templateColors: TemplateColors): InvitationData {
+  return {
+    hisName: 'Михайло',
+    herName: 'Софія',
+    weddingDate: '15 червня 2025',
+    weddingPlace: 'Ресторан Маяк, Київ, Україна',
+    venue: {
+      label: 'Ресторан Маяк, вул. Набережна 1, Київ',
+      mapsUrl: '',
+    },
+    loveStory: {
+      moments: [
+        {
+          id: 'm-1',
+          title: 'Як ми зустрілися',
+          description:
+            'Ми зустрілися ранньої осені 2020 року на студентській вечірці у Львові. Те, що розпочалося як випадкова розмова про улюблені книги, непомітно перетворилося на кілька годин сміху і відвертих одкровень — і ми обидва відчули, що щось особливе щойно народилося.',
+          image: '',
+          imagePosition: { x: 50, y: 50 },
+        },
+        {
+          id: 'm-2',
+          title: 'Пропозиція',
+          description:
+            'Через три роки, у тому ж затишному кафе на Ринковій площі, де ми провели наше перше побачення, Михайло опустився на коліно. Навколо зупинився час, і серед теплого осіннього світла Софія сказала «так».',
+          image: '',
+          imagePosition: { x: 50, y: 50 },
+        },
+      ],
+    },
+    events: [
+      { id: '1', time: '16:00', eventName: 'Церемонія' },
+      { id: '2', time: '17:00', eventName: 'Коктейль' },
+      { id: '3', time: '18:30', eventName: 'Прийом' },
+      { id: '4', time: '19:00', eventName: 'Вечеря' },
+      { id: '5', time: '21:00', eventName: 'Танці' },
+    ],
+    weddingColors: ['#2E4D3A', '#6B8F71', '#A7BFA3', '#E8DCC4'],
+    templateColors: { ...templateColors },
+  };
 }

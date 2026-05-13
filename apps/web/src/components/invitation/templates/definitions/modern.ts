@@ -5,7 +5,7 @@ export const modernTemplate: TemplateDefinition = {
   name: "Модерн мінімал",
   description: "Чистий мінімалізм у зелених відтінках",
   defaultColors: {
-    primary: "#1F3A2E",
+    primary: "#F4F7F1",
     text: "#1F3A2E",
     accent: "#4F7B5F",
   },
