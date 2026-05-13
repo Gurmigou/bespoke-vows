@@ -1,73 +1,65 @@
-# Welcome to your Lovable project
+# Bespoke Vows
 
-## Project info
+Online wedding invitation builder for Ukrainian-speaking couples. Form-based editor with live preview; share via public URL.
 
-**URL**: https://lovable.dev/projects/da67d851-dc3a-4b7b-aad3-d969fb0f5575
+- Web (`apps/web`) — React 18 + Vite + Tailwind + shadcn/ui
+- API (`apps/api`) — Hono + Drizzle + PostgreSQL
+- Monorepo: npm workspaces + Turborepo
 
-## How can I edit this code?
+See [`CLAUDE.md`](./CLAUDE.md) for architecture, [`DEPLOY.md`](./DEPLOY.md) for Vercel + Neon deployment.
 
-There are several ways of editing your application.
+## Prerequisites
 
-**Use Lovable**
+- Node.js 20+, npm 10+
+- Docker Desktop (local PostgreSQL)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/da67d851-dc3a-4b7b-aad3-d969fb0f5575) and start prompting.
+## Run locally
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+npm install
 
-**Use your preferred IDE**
+# one-time: create API env
+cp apps/api/.env.example apps/api/.env
+# generate a JWT secret and paste it into apps/api/.env
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# start Postgres + run migrations
+npm run db:setup --workspace=apps/api
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# (optional) seed dev@test.com with sample invitations
+npm run db:seed --workspace=apps/api
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# start web + API
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+- Web → <http://localhost:8080>
+- API → <http://localhost:3001>
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Individually: `npm run dev:web`, `npm run dev:api`.
 
-**Use GitHub Codespaces**
+### Dev login (no Google OAuth)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+curl -c cookies.txt -X POST http://localhost:3001/auth/dev-login \
+  -H 'Content-Type: application/json' \
+  -d '{"email": "dev@test.com", "name": "Dev User"}'
+```
 
-## What technologies are used for this project?
+Only enabled when `NODE_ENV=development`.
 
-This project is built with:
+## Commands
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start web + API |
+| `npm run build` | Build all workspaces |
+| `npm run db:setup --workspace=apps/api` | Start Docker Postgres + migrate |
+| `npm run db:migrate --workspace=apps/api` | Apply pending migrations |
+| `npm run db:generate --workspace=apps/api` | Generate migration from schema changes |
+| `npm run db:studio --workspace=apps/api` | Open Drizzle Studio |
+| `docker compose down -v` | Stop Postgres and wipe data |
 
-## How can I deploy this project?
+## Secrets
 
-Simply open [Lovable](https://lovable.dev/projects/da67d851-dc3a-4b7b-aad3-d969fb0f5575) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+`.env` files are gitignored — never commit them. Production secrets live in Vercel env vars (see [`DEPLOY.md`](./DEPLOY.md)).
