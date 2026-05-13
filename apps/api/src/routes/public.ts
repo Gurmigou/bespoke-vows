@@ -53,7 +53,7 @@ publicRoutes.get('/preview/:token', async (c) => {
       expiresAt: new Date(payload.exp * 1000),
     })
     .onConflictDoNothing({ target: consumedPreviewTokens.jti })
-    .returning({ jti: consumedPreviewTokens.jti });
+    .returning();
 
   if (claimed.length === 0) {
     return c.json({ error: 'not_found' }, 404);
