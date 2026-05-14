@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { put } from '@vercel/blob';
 import { requireAuth } from '../middleware/auth.js';
+import { storage, isLocalStorage } from '../lib/storage.js';
 import type { JwtPayload } from '../lib/jwt.js';
 
 type Variables = { user: JwtPayload };
@@ -18,6 +18,22 @@ uploadRoutes.post('/', requireAuth, async (c) => {
   if (!ALLOWED_TYPES.has(file.type)) return c.json({ error: 'Only JPEG, PNG, WebP allowed' }, 415);
   if (file.size > MAX_SIZE_BYTES) return c.json({ error: 'File exceeds 3MB limit' }, 413);
 
-  const blob = await put(file.name, file, { access: 'public' });
-  return c.json({ url: blob.url }, 201);
+  const { url } = await storage.put(file);
+  return c.json({ url }, 201);
 });
+
+export const uploadsServeRoutes = new Hono();
+
+if (isLocalStorage) {
+  uploadsServeRoutes.get('/:key', async (c) => {
+    if (!storage.serve) return c.notFound();
+    const result = await storage.serve(c.req.param('key'));
+    if (!result) return c.notFound();
+    return new Response(new Uint8Array(result.body), {
+      headers: {
+        'Content-Type': result.contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    });
+  });
+}

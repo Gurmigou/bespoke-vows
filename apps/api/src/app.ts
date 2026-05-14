@@ -6,7 +6,7 @@ import { invitationRoutes } from './routes/invitations.js';
 import { templateRoutes } from './routes/templates.js';
 import { paymentRoutes } from './routes/payments.js';
 import { publicRoutes } from './routes/public.js';
-import { uploadRoutes } from './routes/upload.js';
+import { uploadRoutes, uploadsServeRoutes } from './routes/upload.js';
 
 const app = new Hono();
 
@@ -19,6 +19,7 @@ app.route('/invitations', invitationRoutes);
 app.route('/templates', templateRoutes);
 app.route('/payments', paymentRoutes);
 app.route('/upload', uploadRoutes);
+app.route('/uploads', uploadsServeRoutes);
 app.route('/', publicRoutes);
 
 export default app;
