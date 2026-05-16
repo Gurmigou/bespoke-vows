@@ -16,7 +16,7 @@ interface ColorPreset {
   accent: string;
 }
 
-const PRESETS: ColorPreset[] = [
+export const PRESETS: ColorPreset[] = [
   { name: "Класик",    primary: "#FBF7EE", text: "#2C2416", accent: "#D4A574" },
   { name: "Ботанічний", primary: "#F4EFE6", text: "#1A1A1A", accent: "#8C7355" },
   { name: "Мʼята",     primary: "#EFF5F0", text: "#1F3A2E", accent: "#4F7B5F" },

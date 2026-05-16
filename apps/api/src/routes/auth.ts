@@ -14,12 +14,13 @@ export const authRoutes = new Hono();
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 function setSession(c: Context, token: string) {
+  const isProd = process.env.NODE_ENV !== 'development';
   setCookie(c, 'session', token, {
     httpOnly: true,
-    sameSite: 'Lax',
+    sameSite: isProd ? 'None' : 'Lax',
     path: '/',
     maxAge: SESSION_MAX_AGE,
-    secure: process.env.NODE_ENV !== 'development',
+    secure: isProd,
   });
 }
 

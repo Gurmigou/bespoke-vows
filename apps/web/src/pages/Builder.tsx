@@ -10,6 +10,7 @@ import { buildDefaultInvitationData as buildDefaultData } from "@bespoke-vows/sh
 import { BuilderPanel } from "@/components/builder/BuilderPanel";
 import { InvitationPreview } from "@/components/invitation/InvitationPreview";
 import { getTemplateDefinition, getTemplateId } from "@/components/invitation/templates/registry";
+import { PRESETS } from "@/components/builder/TemplateColorPicker";
 import { invitations as invApi, ApiError } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInvitationDraft } from "@/hooks/useInvitationDraft";
@@ -34,10 +35,8 @@ const normalizeLoveStory = (raw: unknown): { moments: LoveStoryMoment[] } => {
   return { moments: [] };
 };
 
-function buildDefaultInvitationData(
-  tpl: ReturnType<typeof getTemplateDefinition>
-): InvitationData {
-  return buildDefaultData(tpl.defaultColors);
+function buildDefaultInvitationData(): InvitationData {
+  return buildDefaultData(PRESETS[0]);
 }
 
 const Builder = () => {
@@ -65,8 +64,8 @@ const Builder = () => {
     if (serverConfig) {
       return { ...serverConfig, loveStory: normalizeLoveStory(serverConfig.loveStory) };
     }
-    return buildDefaultInvitationData(template);
-  }, [serverConfig, template]);
+    return buildDefaultInvitationData();
+  }, [serverConfig]);
 
   const { data, setData, flush, clearDraft } = useInvitationDraft({
     invitationId,
@@ -112,12 +111,12 @@ const Builder = () => {
     });
   }, [data, templateId, invitationId, user, authLoading]);
 
-  // When template changes (via URL), refresh template-driven default colors for new invitations
+  // When template changes (via URL), reset to first preset for new invitations
   useEffect(() => {
     if (invitationId) return;
     setData((prev) => ({
       ...prev,
-      templateColors: { ...template.defaultColors },
+      templateColors: { ...PRESETS[0] },
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [template.id, invitationId]);
@@ -157,7 +156,7 @@ const Builder = () => {
         }
       }
     } else {
-      setData(buildDefaultInvitationData(template));
+      setData(buildDefaultInvitationData());
       clearDraft();
     }
   };
