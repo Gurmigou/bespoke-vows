@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd ../.. && npm run build --workspace=packages/shared && cd apps/api && npx tsc",
+  "buildCommand": "cd ../.. && npm run build --workspace=packages/shared && cd apps/api && npx tsx src/db/migrate.ts && npx tsc",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api" }
   ]
