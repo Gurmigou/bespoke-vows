@@ -24,6 +24,13 @@ const PreviewPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    sessionStorage.setItem(
+      "bv:loginReturnTo",
+      location.pathname + location.search,
+    );
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
     if (!token) return;
     publicApi
       .preview(token)

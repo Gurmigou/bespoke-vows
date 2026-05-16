@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +41,8 @@ const GoogleIcon = () => (
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromState = (location.state as { from?: string } | null)?.from ?? null;
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -61,11 +63,24 @@ export default function Login() {
       if (intent === "pay" && claimedInvitationId) {
         localStorage.removeItem("bv:postLoginIntent");
         navigate(`/account?pay=${claimedInvitationId}`);
-      } else if (claimedInvitationId) {
-        navigate(`/builder?id=${claimedInvitationId}`);
-      } else {
-        navigate("/account");
+        return;
       }
+      if (claimedInvitationId) {
+        navigate(`/builder?id=${claimedInvitationId}`);
+        return;
+      }
+      const returnTo = sessionStorage.getItem("bv:loginReturnTo");
+      if (returnTo && returnTo.startsWith("/preview")) {
+        sessionStorage.removeItem("bv:loginReturnTo");
+        navigate(returnTo, { replace: true });
+        return;
+      }
+      if (fromState && fromState.startsWith("/preview")) {
+        navigate(fromState, { replace: true });
+        return;
+      }
+      sessionStorage.removeItem("bv:loginReturnTo");
+      navigate("/templates");
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setServerError("Неправильний email або пароль");

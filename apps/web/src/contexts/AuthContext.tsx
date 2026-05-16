@@ -31,6 +31,8 @@ export function clearAnonDraft() {
 async function claimAnonDraft(): Promise<string | null> {
   const draft = readAnonDraft();
   if (!draft) return null;
+  const intent = localStorage.getItem('bv:postLoginIntent');
+  if (!intent) return null;
   try {
     const inv = await invitations.create({ templateId: draft.templateId, config: draft.config });
     clearAnonDraft();
