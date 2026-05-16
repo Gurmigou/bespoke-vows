@@ -43,6 +43,13 @@
       "when": 1777260000000,
       "tag": "0005_preview_token_expiry",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1747396800000,
+      "tag": "0006_seed_templates",
+      "breakpoints": true
     }
   ]
 }
