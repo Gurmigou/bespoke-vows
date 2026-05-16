@@ -10,6 +10,19 @@ import { uploadRoutes, uploadsServeRoutes } from './routes/upload.js';
 
 const app = new Hono();
 
+app.use('*', async (c, next) => {
+  console.log(`[${new Date().toISOString()}] ${c.req.method} ${c.req.url}`);
+  await next();
+  if (c.res.status >= 400) {
+    console.error(`[ERROR] ${c.req.method} ${c.req.url} → ${c.res.status}`);
+  }
+});
+
+app.onError((err, c) => {
+  console.error(`[UNHANDLED] ${c.req.method} ${c.req.url}`, err);
+  return c.json({ error: 'Internal server error', message: err.message }, 500);
+});
+
 app.use('*', corsMiddleware);
 
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
