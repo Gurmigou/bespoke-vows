@@ -68,11 +68,20 @@ export default function Register() {
       if (intent === "pay" && claimedInvitationId) {
         localStorage.removeItem("bv:postLoginIntent");
         navigate(`/account?pay=${claimedInvitationId}`);
-      } else if (claimedInvitationId) {
-        navigate(`/builder?id=${claimedInvitationId}`);
-      } else {
-        navigate("/builder");
+        return;
       }
+      if (claimedInvitationId) {
+        navigate(`/builder?id=${claimedInvitationId}`);
+        return;
+      }
+      const returnTo = sessionStorage.getItem("bv:loginReturnTo");
+      if (returnTo && returnTo.startsWith("/preview")) {
+        sessionStorage.removeItem("bv:loginReturnTo");
+        navigate(returnTo, { replace: true });
+        return;
+      }
+      sessionStorage.removeItem("bv:loginReturnTo");
+      navigate("/templates");
     } catch (err) {
       if (err instanceof ApiError) {
         setServerError(
