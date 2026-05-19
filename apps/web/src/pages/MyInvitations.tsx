@@ -10,7 +10,7 @@ import { invitations as invApi, ApiError } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import QRCodeStyling from "qr-code-styling";
 
-function buildHeartLogo(primary: string, accent: string) {
+function buildHeartLogoSvgDataUrl(primary: string, accent: string) {
   return (
     "data:image/svg+xml;utf8," +
     encodeURIComponent(
@@ -28,12 +28,30 @@ function buildHeartLogo(primary: string, accent: string) {
   );
 }
 
+async function buildHeartLogoPngDataUrl(primary: string, accent: string, size = 256): Promise<string> {
+  const svgUrl = buildHeartLogoSvgDataUrl(primary, accent);
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const el = new Image();
+    el.onload = () => resolve(el);
+    el.onerror = reject;
+    el.src = svgUrl;
+  });
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas ctx unavailable");
+  ctx.drawImage(img, 0, 0, size, size);
+  return canvas.toDataURL("image/png");
+}
+
 async function downloadInvitationQr(
   url: string,
   fileName: string,
   colors: { primary: string; accent: string; text: string },
 ) {
   const qrSize = 1024;
+  const heartPng = await buildHeartLogoPngDataUrl(colors.primary, colors.accent, 256);
   const qr = new QRCodeStyling({
     width: qrSize,
     height: qrSize,
@@ -41,9 +59,8 @@ async function downloadInvitationQr(
     data: url,
     margin: 16,
     qrOptions: { errorCorrectionLevel: "H" },
-    image: buildHeartLogo(colors.primary, colors.accent),
+    image: heartPng,
     imageOptions: {
-      crossOrigin: "anonymous",
       margin: 4,
       imageSize: 0.22,
       hideBackgroundDots: true,
@@ -253,7 +270,7 @@ function InvitationCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
-      className="group relative bg-white rounded-2xl border border-foreground/5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
+      className="group relative overflow-hidden bg-white rounded-2xl border border-foreground/5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
     >
       <div className={`absolute inset-x-0 top-0 h-20 bg-gradient-to-b ${accentColor} pointer-events-none`} />
 
