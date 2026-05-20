@@ -265,7 +265,7 @@ export default function Account() {
                         onClick={() => navigate("/invitations")}
                         className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors mt-0.5"
                       >
-                        Переглянути запрошення →
+                        Переглянути мої запрошення →
                       </button>
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export default function Account() {
                     <div>
                       <p className="text-sm font-semibold text-destructive">Небезпечна зона</p>
                       <p className="text-xs text-foreground/50 mt-1 leading-relaxed">
-                        Видалення акаунту незворотне — всі запрошення та дані будуть втрачені назавжди.
+                        Видалення акаунта є незворотним — усі запрошення та дані будуть втрачені назавжди.
                       </p>
                     </div>
                     <button
@@ -332,7 +332,18 @@ export default function Account() {
                       <tbody>
                         {paymentsList.map((p) => (
                           <tr key={p.id} className="border-b border-foreground/5 last:border-0 hover:bg-foreground/[0.02] transition-colors">
-                            <td className="px-5 py-4 font-medium">{p.couple || "—"}</td>
+                            <td className="px-5 py-4 font-medium">
+                              {p.invitationId ? (
+                                <button
+                                  onClick={() => navigate(`/i/${p.invitationId}`)}
+                                  className="text-pink-600 hover:text-pink-700 hover:underline transition-colors"
+                                >
+                                  {p.couple || "—"}
+                                </button>
+                              ) : (
+                                p.couple || "—"
+                              )}
+                            </td>
                             <td className="px-5 py-4 text-foreground/55">{TEMPLATE_LABELS[p.templateSlug] ?? p.templateSlug}</td>
                             <td className="px-5 py-4 text-emerald-600 font-semibold">
                               {(p.amount / 100).toFixed(2)} {p.currency}

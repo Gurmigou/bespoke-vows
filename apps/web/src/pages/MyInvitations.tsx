@@ -398,7 +398,7 @@ function InvitationCard({
               onClick={(e) => { e.stopPropagation(); onPay(); }}
             >
               <Crown className="h-4 w-4" />
-              Оплатити $9.99 (1 рік)
+              Опублікувати на 1 рік $15.99
             </Button>
           </div>
         )}

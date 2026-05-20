@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const stats = [
   { value: "10 хв", label: "до готового запрошення" },
-  { value: "$9.99", label: "одна ціна на рік" },
+  { value: "$15.99", label: "одна ціна на рік" },
   { value: "∞", label: "редагувань без доплат" },
   { value: "0", label: "папір, принтерів і черг" },
 ];
@@ -68,7 +68,7 @@ const Invites = () => {
               </thead>
               <tbody>
                 {[
-                  ["Вартість на 100 гостей", "₴5 000–15 000", "₴400 (~$9.99)"],
+                  ["Вартість на 100 гостей", "₴5 000–15 000", "₴400 (~$15.99)"],
                   ["Час до готовності", "2–4 тижні", "10 хвилин"],
                   ["Зміна деталей", "Передрук = нові витрати", "Безкоштовно, миттєво"],
                   ["Доставка гостям", "Пошта або руки", "Одне посилання в чат"],
@@ -108,7 +108,7 @@ const Invites = () => {
         <div className="container mx-auto max-w-2xl space-y-4">
           <p className="text-muted-foreground text-lg">Кава на двох коштує більше.</p>
           <h2 className="text-3xl md:text-4xl font-bold leading-tight font-geologica text-foreground">
-            Ваше запрошення — лише $9.99
+            Ваше запрошення — лише $15.99
           </h2>
           <p className="text-muted-foreground">Одна оплата. Активне цілий рік. Без підписок.</p>
           <Link to="/templates">

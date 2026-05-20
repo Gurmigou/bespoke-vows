@@ -40,10 +40,6 @@ const Blog = () => {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-foreground/65 max-w-2xl mx-auto leading-relaxed">
-            Невеликі статті про те, як зробити день, запрошення та підготовку справді
-            своїми.
-          </p>
         </div>
 
         {/* Bottom soft fade */}
@@ -108,21 +104,6 @@ const Blog = () => {
         <div className="pointer-events-none absolute bottom-0 left-0 h-[28rem] w-[28rem] rounded-full bg-amber-200/30 blur-3xl" />
 
         <div className="container mx-auto max-w-6xl relative">
-          <div className="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-            <span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-pink-500 mb-4">
-              Усі статті
-            </span>
-            <h2 className="text-4xl md:text-6xl font-bold text-foreground font-geologica leading-tight tracking-tight">
-              Більше історій та{" "}
-              <span
-                className="text-5xl md:text-[76px] italic bg-gradient-to-r from-pink-500 to-amber-500 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
-              >
-                порад
-              </span>
-            </h2>
-          </div>
-
           {rest.length === 0 ? (
             <p className="text-center text-foreground/55">Скоро тут з'являться нові статті.</p>
           ) : (

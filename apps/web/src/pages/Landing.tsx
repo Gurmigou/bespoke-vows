@@ -41,15 +41,6 @@ const Landing = () => {
           <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-8 items-center">
             {/* Left — copy */}
             <div className="space-y-7 text-center lg:text-left animate-in fade-in slide-in-from-bottom-4 duration-1000">
-              {/* Eyebrow badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-white/70 backdrop-blur px-4 py-1.5 text-xs md:text-sm font-medium text-foreground/70 shadow-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-pink-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-pink-500" />
-                </span>
-                Створено з любов'ю в Україні
-              </div>
-
               <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold text-foreground leading-[1.05] tracking-tight font-geologica">
                 Цифрове запрошення
                 <br />
@@ -64,8 +55,7 @@ const Landing = () => {
               </h1>
 
               <p className="text-lg md:text-xl text-foreground/65 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Без складних програм та зайвих витрат на розробку. Оберіть стиль,
-                додайте деталі — і надішліть запрошення своїм гостям.
+                Оберіть вишуканий весільний шаблон, налаштуйте його під себе — додайте всі деталі вашого весілля: кольори, фото та описи. Отримайте одне елегантне посилання та надішліть його вашим гостям.
               </p>
 
               <div className="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-pink-50 px-4 py-1.5 w-fit mx-auto lg:mx-0">
@@ -95,13 +85,22 @@ const Landing = () => {
               {/* Trust row */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 pt-4 text-sm text-foreground/55">
                 <span className="flex items-center gap-1.5">
-                  <Check className="h-4 w-4 text-pink-500" /> Без застосунків
+                  <Check className="h-4 w-4 text-pink-500" /> Без очікування розробки
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <Check className="h-4 w-4 text-pink-500" /> Готово за 10 хвилин
+                  <Check className="h-4 w-4 text-pink-500" /> Без знань програмування
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Check className="h-4 w-4 text-pink-500" /> Одне посилання для гостей
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Check className="h-4 w-4 text-pink-500" /> Редагування після публікації
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Check className="h-4 w-4 text-pink-500" /> QR-code посилання
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Check className="h-4 w-4 text-pink-500" /> Безкоштовний попередній перегляд · Без карти
                 </span>
               </div>
             </div>
@@ -331,13 +330,7 @@ const Landing = () => {
               Можливості
             </span>
             <h2 className="text-4xl md:text-6xl font-bold font-geologica leading-tight tracking-tight">
-              Все, що потрібно для створення{" "}
-              <span
-                className="text-5xl md:text-[76px] italic text-pink-500"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
-              >
-                магії
-              </span>
+              Змінна палітра кольорів дизайну, основна інформація про весілля, місце проведення, історія кохання, програма подій, кольори дрескоду, посилання та QR-код запрошення.
             </h2>
           </div>
 
@@ -392,13 +385,9 @@ const Landing = () => {
               className="text-5xl md:text-[76px] italic text-pink-500"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
             >
-              на красиве запрошення
+              на вишукане запрошення
             </span>
           </h2>
-
-          <p className="text-base md:text-lg text-foreground/65 max-w-xl mx-auto">
-            Сотні пар вже створили своє запрошення та поділились ним з гостями
-          </p>
 
           <div className="flex flex-col items-center gap-5">
             <Link to="/templates" className="inline-block">

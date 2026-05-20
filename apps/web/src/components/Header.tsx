@@ -81,7 +81,7 @@ const Header = () => {
     <header className="relative z-50 w-full border-b bg-background">
       <nav className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         {/* Left: Brand */}
-        <div className="flex items-center">
+        <div className="flex flex-1 items-center">
           <Link
             to={locale === "uk" ? "/" : "/en"}
             className="text-xl font-bold text-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm px-2 py-1"
@@ -115,7 +115,7 @@ const Header = () => {
         )}
 
         {/* Right: Auth actions + Mobile menu + Language Switcher */}
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex flex-1 items-center justify-end gap-2 md:gap-3">
           {isMobile && (
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild>

@@ -4,19 +4,16 @@ import { Link } from "react-router-dom";
 import { PRICE_INVITATION_1Y_USD, PRICE_LIFETIME_USD } from "@bespoke-vows/shared";
 
 const FREE_PERKS = [
-  "Створення та редагування без обмежень",
-  "Усі 3 шаблони доступні для прев'ю",
   "Активне посилання 3 дні після публікації",
-  "Без вводу карти",
+  "Без даних картки",
 ];
 
 const INVITATION_PERKS = [
   "1 обраний шаблон",
   "Активне посилання 1 рік від дати оплати",
   "Необмежені перегляди гостями",
-  "Редагування контенту будь-коли",
-  "Унікальне посилання · мобільна адаптація",
-  "Підтримка email",
+  "Редагування запрошення будь-коли, посилання завжди те саме",
+  "Підтримка у разі проблем",
 ];
 
 const LIFETIME_PERKS = [
@@ -62,7 +59,7 @@ const Pricing = () => {
           </h1>
 
           <p className="text-lg md:text-xl text-foreground/65 max-w-xl mx-auto leading-relaxed">
-            Спробуйте безкоштовно, а потім оберіть план, який підходить саме вам.
+            Прозора ціна — без підписок. Разовий платіж.
           </p>
         </div>
       </section>
@@ -112,7 +109,7 @@ const Pricing = () => {
               <div className="px-7 pt-8 pb-6 border-b border-foreground/5">
                 <div className="flex items-center gap-2 mb-4">
                   <Heart className="w-3.5 h-3.5 text-pink-500" fill="currentColor" />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-pink-500">Одне запрошення</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-pink-500">Один шаблон</p>
                 </div>
                 <div className="flex items-end gap-1">
                   <span className="text-6xl font-bold text-foreground leading-none">
@@ -148,10 +145,6 @@ const Pricing = () => {
               <div className="absolute -inset-2 bg-gradient-to-br from-pink-400/40 via-rose-300/30 to-amber-300/30 rounded-[2rem] blur-2xl opacity-70 pointer-events-none" />
 
               <div className="relative bg-gradient-to-br from-white via-white to-pink-50/60 backdrop-blur-sm border border-pink-200/50 rounded-3xl shadow-elegant overflow-hidden flex flex-col h-full hover:-translate-y-1 transition-transform duration-500">
-                <div className="bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 text-white text-[11px] font-semibold uppercase tracking-[0.2em] text-center py-2.5 flex items-center justify-center gap-1.5">
-                  <Sparkles className="h-3 w-3" /> Рекомендовано
-                </div>
-
                 <div className="px-7 pt-8 pb-6 border-b border-pink-100/60">
                   <div className="flex items-center gap-2 mb-4">
                     <InfinityIcon className="w-3.5 h-3.5 text-rose-500" />
@@ -191,7 +184,7 @@ const Pricing = () => {
           <div className="pt-16 text-center">
             <p className="text-foreground/55 text-sm flex items-center justify-center gap-2">
               <Heart className="h-3.5 w-3.5 text-pink-500" fill="currentColor" />
-              Вже <span className="font-semibold text-foreground">сотні пар</span> поділилися своїм запрошенням через Beloved
+              Приєднуйся до <span className="font-semibold text-foreground">щасливих пар</span>, які поділилися своїм запрошенням через Beloved
             </p>
           </div>
         </div>
