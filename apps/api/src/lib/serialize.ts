@@ -6,6 +6,8 @@ export function toUserDto(user: UserRow): User {
   return {
     id: user.id,
     email: user.email,
+    subscriptionStatus: user.subscriptionStatus as User['subscriptionStatus'],
+    subscriptionEndDate: user.subscriptionEndDate ? user.subscriptionEndDate.toISOString() : null,
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -55,6 +57,7 @@ export function toPaymentDto(p: PaymentRow, join: PaymentDtoJoin): Payment {
     amount: p.amount,
     currency: p.currency,
     status: p.status as Payment['status'],
+    kind: p.kind as Payment['kind'],
     createdAt: p.createdAt.toISOString(),
     couple: `${join.hisName} & ${join.herName}`.trim(),
     templateSlug: join.templateSlug,

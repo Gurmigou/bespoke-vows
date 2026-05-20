@@ -6,10 +6,43 @@ import { requireAuth } from '../middleware/auth.js';
 import { toPaymentDto } from '../lib/serialize.js';
 import type { JwtPayload } from '../lib/jwt.js';
 import type { InvitationData } from '@bespoke-vows/shared';
+import { PRICE_LIFETIME_CENTS, PRICING_CURRENCY } from '../lib/pricing.js';
+import { grantLifetime, userHasLifetime } from '../lib/entitlements.js';
 
 type Variables = { user: JwtPayload };
 
 export const paymentRoutes = new Hono<{ Variables: Variables }>();
+
+paymentRoutes.post('/lifetime', requireAuth, async (c) => {
+  const user = c.get('user');
+  const body = await c.req
+    .json<{ amount?: number; currency?: string }>()
+    .catch(() => ({} as { amount?: number; currency?: string }));
+
+  if (await userHasLifetime(user.sub)) {
+    return c.json({ error: 'already_lifetime' }, 409);
+  }
+
+  const amount = body.amount ?? PRICE_LIFETIME_CENTS;
+  const currency = body.currency ?? PRICING_CURRENCY;
+
+  const [payment] = await db
+    .insert(payments)
+    .values({
+      userId: user.sub,
+      invitationId: null,
+      amount,
+      currency,
+      provider: 'plata_mock',
+      status: 'succeeded',
+      kind: 'lifetime',
+    })
+    .returning();
+
+  await grantLifetime(user.sub);
+
+  return c.json({ ok: true, paymentId: payment.id }, 201);
+});
 
 paymentRoutes.get('/', requireAuth, async (c) => {
   const user = c.get('user');
@@ -21,7 +54,7 @@ paymentRoutes.get('/', requireAuth, async (c) => {
 
   if (rows.length === 0) return c.json([]);
 
-  const invIds = Array.from(new Set(rows.map((r) => r.invitationId)));
+  const invIds = Array.from(new Set(rows.map((r) => r.invitationId).filter((id): id is string => id !== null)));
   const invs = await db.select().from(invitations).where(eq(invitations.userId, user.sub));
   const byId = new Map(invs.filter((i) => invIds.includes(i.id)).map((i) => [i.id, i]));
 
@@ -30,7 +63,7 @@ paymentRoutes.get('/', requireAuth, async (c) => {
 
   return c.json(
     rows.map((p) => {
-      const inv = byId.get(p.invitationId);
+      const inv = p.invitationId ? byId.get(p.invitationId) : undefined;
       const tpl = inv ? templateById.get(inv.templateId) : undefined;
       const cfg = (inv?.config ?? {}) as Partial<InvitationData>;
       return toPaymentDto(p, {

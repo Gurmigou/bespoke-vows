@@ -4,7 +4,9 @@ import { eq, and, isNull } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { invitations, templates, payments } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
-import { canPublish, derivedStatus } from '../lib/status.js';
+import { canPublish, derivedStatus, LIFETIME_ACTIVE_UNTIL } from '../lib/status.js';
+import { userHasLifetime, getProEntitlement } from '../lib/entitlements.js';
+import { PRICE_INVITATION_1Y_CENTS, PRICING_CURRENCY } from '../lib/pricing.js';
 import { signPreviewToken } from '../lib/jwt.js';
 import { toInvitationDto } from '../lib/serialize.js';
 import type { JwtPayload } from '../lib/jwt.js';
@@ -197,20 +199,22 @@ invitationRoutes.post('/:id/publish', requireAuth, async (c) => {
   if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
   if (existing === null) return c.json({ error: 'not_found' }, 404);
 
-  const decision = canPublish(existing);
+  const hasLifetime = await userHasLifetime(user.sub);
+  const decision = canPublish(existing, hasLifetime);
   if (decision.ok === false) {
     if (decision.reason === 'already_active') return c.json({ error: 'already_active' }, 409);
     return c.json({ error: 'payment_required' }, 402);
   }
 
   const now = new Date();
+  const isLifetime = decision.mode === 'lifetime';
   const [updated] = await db
     .update(invitations)
     .set({
       status: 'active',
-      paymentStatus: 'free',
-      activeUntil: new Date(now.getTime() + THREE_DAYS_MS),
-      freeTrialUsedAt: now,
+      paymentStatus: isLifetime ? 'paid' : 'free',
+      activeUntil: isLifetime ? LIFETIME_ACTIVE_UNTIL : new Date(now.getTime() + THREE_DAYS_MS),
+      freeTrialUsedAt: isLifetime ? existing.freeTrialUsedAt : now,
       visible: true,
       updatedAt: now,
     })
@@ -231,19 +235,25 @@ invitationRoutes.post('/:id/pay', requireAuth, async (c) => {
   if (existing === 'deleted') return c.json({ error: 'invitation_deleted' }, 410);
   if (existing === null) return c.json({ error: 'not_found' }, 404);
 
-  const amount = body.amount ?? 999;
-  const currency = body.currency ?? 'USD';
   const now = new Date();
+  const pro = await getProEntitlement(user.sub, now);
+  const amount = body.amount ?? PRICE_INVITATION_1Y_CENTS;
+  const currency = body.currency ?? PRICING_CURRENCY;
+
+  const oneYearFromNow = new Date(now.getTime() + ONE_YEAR_MS);
+  const proActiveUntil =
+    pro.endDate && pro.endDate.getTime() < oneYearFromNow.getTime() ? pro.endDate : oneYearFromNow;
 
   const [payment] = await db
     .insert(payments)
     .values({
       userId: user.sub,
       invitationId: id,
-      amount,
+      amount: pro.active ? 0 : amount,
       currency,
-      provider: 'plata_mock',
+      provider: pro.active ? 'pro_subscription' : 'plata_mock',
       status: 'succeeded',
+      kind: pro.active ? 'lifetime' : 'invitation_1y',
     })
     .returning();
 
@@ -252,7 +262,7 @@ invitationRoutes.post('/:id/pay', requireAuth, async (c) => {
     .set({
       status: 'active',
       paymentStatus: 'paid',
-      activeUntil: new Date(now.getTime() + ONE_YEAR_MS),
+      activeUntil: pro.active ? proActiveUntil : oneYearFromNow,
       paymentId: payment.id,
       visible: true,
       updatedAt: now,

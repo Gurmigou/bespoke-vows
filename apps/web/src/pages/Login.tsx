@@ -62,7 +62,7 @@ export default function Login() {
       const intent = localStorage.getItem("bv:postLoginIntent");
       if (intent === "pay" && claimedInvitationId) {
         localStorage.removeItem("bv:postLoginIntent");
-        navigate(`/account?pay=${claimedInvitationId}`);
+        navigate(`/checkout/${claimedInvitationId}`);
         return;
       }
       if (claimedInvitationId) {
@@ -80,7 +80,7 @@ export default function Login() {
         return;
       }
       sessionStorage.removeItem("bv:loginReturnTo");
-      navigate("/templates");
+      navigate("/");
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         setServerError("Неправильний email або пароль");

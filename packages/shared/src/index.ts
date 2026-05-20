@@ -6,6 +6,17 @@ export type DerivedStatus = 'draft' | 'active' | 'expired';
 export type InvitationStatus = 'draft' | 'active';
 export type PaymentStatus = 'free' | 'paid';
 export type PaymentRecordStatus = 'succeeded' | 'pending' | 'failed';
+export type PaymentKind = 'invitation_1y' | 'lifetime';
+
+// ============================================================================
+// Pricing
+// ============================================================================
+
+export const PRICE_INVITATION_1Y_CENTS = 1599;
+export const PRICE_LIFETIME_CENTS = 3999;
+export const PRICE_INVITATION_1Y_USD = 15.99;
+export const PRICE_LIFETIME_USD = 39.99;
+export const PRICING_CURRENCY = 'USD';
 
 // ============================================================================
 // Invitation user-filled data (stored in invitations.config jsonb)
@@ -156,9 +167,13 @@ export interface TemplateDefinition {
 // API DTOs (what the frontend receives — server strips internal columns)
 // ============================================================================
 
+export type SubscriptionStatus = 'none' | 'pro';
+
 export interface User {
   id: string;
   email: string;
+  subscriptionStatus: SubscriptionStatus;
+  subscriptionEndDate: string | null;
   createdAt: string;
 }
 
@@ -191,10 +206,11 @@ export interface Invitation {
 
 export interface Payment {
   id: string;
-  invitationId: string;
+  invitationId: string | null;
   amount: number;
   currency: string;
   status: PaymentRecordStatus;
+  kind: PaymentKind;
   createdAt: string;
   // Joined fields (read-only, computed by server)
   couple: string;
@@ -213,6 +229,15 @@ export interface RegisterBody {
 
 export interface LoginBody {
   email: string;
+  password: string;
+}
+
+export interface ForgotPasswordBody {
+  email: string;
+}
+
+export interface ResetPasswordBody {
+  token: string;
   password: string;
 }
 

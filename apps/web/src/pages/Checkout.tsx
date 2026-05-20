@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Check, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Infinity as InfinityIcon } from "lucide-react";
 import type { Invitation } from "@bespoke-vows/shared";
-import { invitations as invApi, ApiError } from "@/lib/api";
+import { PRICE_INVITATION_1Y_USD, PRICE_LIFETIME_USD } from "@bespoke-vows/shared";
+import { invitations as invApi, payments as paymentsApi, ApiError } from "@/lib/api";
 import { getTemplateDefinition } from "@/components/invitation/templates/registry";
 import { useAuth } from "@/contexts/AuthContext";
+
+interface CheckoutProps {
+  mode?: "invitation" | "lifetime";
+}
 
 function coupleName(inv: Invitation) {
   const d = inv.config;
@@ -55,25 +60,35 @@ function MiniPreview({ inv }: { inv: Invitation }) {
   );
 }
 
-const PERKS = [
-  "Активне посилання на 365 днів",
-  "Необмежена кількість переглядів",
-  "Редагування в будь-який час",
-  "QR-код для друкованих запрошень",
+const PERKS_INVITATION = [
+  "1 обраний шаблон",
+  "Активне посилання 1 рік",
+  "Необмежені перегляди гостями",
+  "Редагування контенту будь-коли",
 ];
 
-export default function Checkout() {
+const PERKS_LIFETIME = [
+  "Усі шаблони — зараз 3, нові безкоштовно",
+  "Безлімітна кількість запрошень",
+  "Без терміну дії — назавжди",
+  "Зміна шаблону в будь-який момент",
+  "Пріоритетна підтримка",
+];
+
+export default function Checkout({ mode = "invitation" }: CheckoutProps) {
+  const isLifetime = mode === "lifetime";
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [inv, setInv] = useState<Invitation | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isLifetime);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate("/login"); return; }
+    if (isLifetime) return;
     if (!id) { navigate("/invitations"); return; }
     invApi.get(id)
       .then(setInv)
@@ -85,18 +100,27 @@ export default function Checkout() {
         }
       })
       .finally(() => setLoading(false));
-  }, [id, navigate, user, authLoading]);
+  }, [id, navigate, user, authLoading, isLifetime]);
 
   const handlePay = async () => {
-    if (!id) return;
     setPaying(true);
     setError(null);
     try {
+      if (isLifetime) {
+        await paymentsApi.payLifetime();
+        navigate("/invitations");
+        return;
+      }
+      if (!id) return;
       await invApi.pay(id);
       navigate("/invitations");
     } catch (err) {
       if (err instanceof ApiError && err.code === 'invitation_deleted') {
         navigate("/invitation-deleted");
+        return;
+      }
+      if (err instanceof ApiError && err.code === 'already_lifetime') {
+        navigate("/invitations");
         return;
       }
       setError(err instanceof ApiError ? err.message : "Помилка оплати. Спробуйте ще раз.");
@@ -112,11 +136,9 @@ export default function Checkout() {
     );
   }
 
-  if (!inv) return null;
+  if (!isLifetime && !inv) return null;
 
-  const template = getTemplateDefinition(inv.templateSlug);
-
-  if (inv.paymentStatus === "paid") {
+  if (!isLifetime && inv && inv.paymentStatus === "paid") {
     return (
       <div className="min-h-screen font-geologica bg-white flex flex-col">
         <div className="flex-1 flex items-center justify-center px-4">
@@ -142,13 +164,17 @@ export default function Checkout() {
     );
   }
 
+  const template = inv ? getTemplateDefinition(inv.templateSlug) : null;
+  const priceUsd = isLifetime ? PRICE_LIFETIME_USD : PRICE_INVITATION_1Y_USD;
+  const priceLabel = isLifetime ? "одноразово · назавжди" : "одноразово · 1 рік";
+  const perks = isLifetime ? PERKS_LIFETIME : PERKS_INVITATION;
+
   return (
     <div className="min-h-screen font-geologica bg-white flex flex-col">
 
-      {/* Minimal top bar */}
       <div className="border-b border-foreground/6 px-6 py-4">
         <Link
-          to="/invitations"
+          to={isLifetime ? "/pricing" : "/invitations"}
           className="inline-flex items-center gap-1.5 text-sm text-foreground/40 hover:text-foreground/60 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -156,26 +182,42 @@ export default function Checkout() {
         </Link>
       </div>
 
-      {/* Content */}
       <div className="flex-1 flex items-start justify-center px-4 py-12">
         <div className="w-full max-w-sm flex flex-col gap-6">
 
-          {/* Invitation row */}
-          <div className="flex items-center gap-4">
-            <MiniPreview inv={inv} />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-foreground text-base leading-tight truncate">
-                {coupleName(inv)}
-              </p>
-              <p className="text-xs text-foreground/40 mt-0.5">{template.name}</p>
+          {isLifetime ? (
+            <div className="flex items-center gap-4">
+              <div
+                className="rounded-2xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-amber-100 via-rose-100 to-pink-100"
+                style={{ width: 120, height: 160 }}
+              >
+                <InfinityIcon className="h-10 w-10 text-rose-500" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground text-base leading-tight">
+                  Усі шаблони назавжди
+                </p>
+                <p className="text-xs text-foreground/40 mt-0.5">
+                  Безлімітні запрошення · без терміну дії
+                </p>
+              </div>
             </div>
-          </div>
+          ) : inv && template && (
+            <div className="flex items-center gap-4">
+              <MiniPreview inv={inv} />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground text-base leading-tight truncate">
+                  {coupleName(inv)}
+                </p>
+                <p className="text-xs text-foreground/40 mt-0.5">{template.name}</p>
+              </div>
+            </div>
+          )}
 
           <div className="h-px bg-foreground/6" />
 
-          {/* Perks */}
           <div className="flex flex-col gap-2.5">
-            {PERKS.map((perk) => (
+            {perks.map((perk) => (
               <div key={perk} className="flex items-center gap-2.5">
                 <Check className="h-3.5 w-3.5 text-foreground/30 flex-shrink-0" />
                 <span className="text-sm text-foreground/60">{perk}</span>
@@ -185,32 +227,25 @@ export default function Checkout() {
 
           <div className="h-px bg-foreground/6" />
 
-          {/* Price row */}
           <div className="flex items-baseline justify-between">
             <span className="text-sm text-foreground/50">Разом</span>
             <div className="text-right">
-              <span className="text-2xl font-bold text-foreground">$9.99</span>
-              <p className="text-[11px] text-foreground/30">одноразово</p>
+              <span className="text-2xl font-bold text-foreground">${priceUsd.toFixed(2)}</span>
+              <p className="text-[11px] text-foreground/30">{priceLabel}</p>
             </div>
           </div>
 
-          {/* Error */}
           {error && (
             <p className="text-sm text-destructive bg-destructive/5 rounded-xl px-3.5 py-3">
               {error}
             </p>
           )}
 
-          {/* Pay button */}
           <button
             onClick={handlePay}
             disabled={paying}
             className="w-full h-13 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2.5 transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            style={{
-              height: 52,
-              backgroundColor: "#000",
-              color: "#fff",
-            }}
+            style={{ height: 52, backgroundColor: "#000", color: "#fff" }}
           >
             {paying ? (
               <>
@@ -227,7 +262,6 @@ export default function Checkout() {
             )}
           </button>
 
-          {/* Security note */}
           <p className="text-center text-[11px] text-foreground/30 leading-relaxed">
             Оплата обробляється monobank.{" "}
             Ми не зберігаємо дані картки.

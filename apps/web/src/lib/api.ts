@@ -5,6 +5,8 @@ import type {
   Payment,
   RegisterBody,
   LoginBody,
+  ForgotPasswordBody,
+  ResetPasswordBody,
   CreateInvitationBody,
   UpdateInvitationBody,
   HideInvitationBody,
@@ -47,6 +49,8 @@ export const auth = {
   register: (body: RegisterBody) => request<User>('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: (body: LoginBody) => request<User>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
   logout: () => request<{ ok: true }>('/auth/logout', { method: 'POST' }),
+  forgotPassword: (body: ForgotPasswordBody) => request<{ ok: true }>('/auth/forgot-password', { method: 'POST', body: JSON.stringify(body) }),
+  resetPassword: (body: ResetPasswordBody) => request<{ ok: true }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(body) }),
   me: () => request<User>('/auth/me'),
   deleteAccount: () => request<{ ok: true }>('/auth/account', { method: 'DELETE' }),
 };
@@ -71,6 +75,8 @@ export const invitations = {
 
 export const payments = {
   list: () => request<Payment[]>('/payments'),
+  payLifetime: (body: { amount?: number; currency?: string } = {}) =>
+    request<{ ok: true; paymentId: string }>('/payments/lifetime', { method: 'POST', body: JSON.stringify(body) }),
 };
 
 export const publicApi = {

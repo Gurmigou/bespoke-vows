@@ -5,7 +5,7 @@ import { TemplateRenderer } from "@/components/invitation/TemplateRenderer";
 import { getTemplateDefinition } from "@/components/invitation/templates/registry";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Sparkles, Heart, Mail } from "lucide-react";
-import { publicApi, ApiError } from "@/lib/api";
+import { publicApi, invitations as invApi, ApiError } from "@/lib/api";
 import { writeAnonDraft } from "@/contexts/AuthContext";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -101,20 +101,44 @@ const PreviewPage = () => {
     );
   }
 
-  const handlePublish = () => {
-    if (token && invitationId) {
-      navigate(`/account?publish=${invitationId}`);
+  const goPayOrCheckout = async (id: string) => {
+    if (user?.subscriptionStatus === "pro") {
+      try {
+        await invApi.pay(id);
+        navigate("/invitations");
+      } catch {
+        setError("Не вдалося опублікувати запрошення");
+      }
       return;
     }
-    if (localState) {
-      writeAnonDraft({
-        templateId: localState.templateId,
-        config: localState.data,
-        updatedAt: new Date().toISOString(),
-      });
-      localStorage.setItem("bv:postLoginIntent", "pay");
-      navigate(user ? "/account?postLoginPay=1" : "/register");
+    navigate(`/checkout/${id}`);
+  };
+
+  const handlePublish = async () => {
+    if (token && invitationId) {
+      await goPayOrCheckout(invitationId);
+      return;
     }
+    if (!localState) return;
+    if (user) {
+      try {
+        const created = await invApi.create({
+          templateId: localState.templateId,
+          config: localState.data,
+        });
+        await goPayOrCheckout(created.id);
+      } catch {
+        setError("Не вдалося створити запрошення");
+      }
+      return;
+    }
+    writeAnonDraft({
+      templateId: localState.templateId,
+      config: localState.data,
+      updatedAt: new Date().toISOString(),
+    });
+    localStorage.setItem("bv:postLoginIntent", "pay");
+    navigate("/register");
   };
 
   const showPublish = Boolean((token && invitationId) || localState);
