@@ -1,5 +1,0 @@
-ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT NOT NULL DEFAULT 'none';
-ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMP;
-
-ALTER TABLE payments ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'invitation_1y';
-ALTER TABLE payments ALTER COLUMN invitation_id DROP NOT NULL;
