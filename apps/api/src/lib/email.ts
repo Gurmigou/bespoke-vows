@@ -48,8 +48,8 @@ export async function sendWelcomeEmail(to: string): Promise<void> {
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a;">
         <h2 style="margin-top: 0;">Вітаємо у Beloved!</h2>
-        <p>Ваш акаунт створено. Тепер ви можете побудувати красиве цифрове запрошення на ваше весілля.</p>
-        <a href="${webOrigin}/builder" style="display: inline-block; margin: 16px 0; padding: 12px 24px; background: #c8a97e; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+        <p>Ваш акаунт створено. Тепер Ви можете побудувати неймовірне запрошення на Ваше весілля.</p>
+        <a href="https://beloved-invitation.com/templates" style="display: inline-block; margin: 16px 0; padding: 12px 24px; background: #c8a97e; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
           Створити запрошення
         </a>
         <p style="font-size: 13px; color: #666;">З любов'ю, команда Beloved 💌</p>

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { eq, and, isNull, desc } from 'drizzle-orm';
 import { db } from '../db/index.js';
-import { payments, invitations, templates } from '../db/schema.js';
+import { payments, invitations, templates, users } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
 import { toPaymentDto } from '../lib/serialize.js';
 import type { JwtPayload } from '../lib/jwt.js';
@@ -43,7 +43,9 @@ paymentRoutes.post('/lifetime', requireAuth, async (c) => {
   await grantLifetime(user.sub);
 
   try {
-    await sendPurchaseConfirmationEmail(user.email);
+    const [dbUser] = await db.select().from(users).where(eq(users.id, user.sub));
+    const emailTo = dbUser?.email ?? user.email;
+    await sendPurchaseConfirmationEmail(emailTo);
   } catch (err) {
     console.error('[email] purchase confirmation failed:', err);
   }
