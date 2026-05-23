@@ -132,8 +132,7 @@ const Pricing = () => {
               <div className="px-7 pb-7">
                 <Link to="/builder" className="block">
                   <Button
-                    variant="outline"
-                    className="w-full h-12 rounded-full border-pink-300/60 bg-pink-50/40 text-pink-700 text-sm font-medium hover:bg-pink-50"
+                    className="w-full h-12 rounded-full text-sm font-semibold shadow-elegant hover:shadow-soft transition-all"
                   >
                     Створити запрошення
                   </Button>
@@ -179,9 +178,9 @@ const Pricing = () => {
                     </Button>
                   ) : (
                     <Link to="/checkout/lifetime" className="block">
-                      <Button className="group w-full h-12 text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-md shadow-pink-500/20 hover:shadow-lg transition-all">
+                      <Button className="group w-full h-12 text-sm font-semibold rounded-full shadow-elegant hover:shadow-soft transition-all hover:-translate-y-0.5">
                         Отримати назавжди
-                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </Button>
                     </Link>
                   )}
@@ -191,8 +190,8 @@ const Pricing = () => {
           </div>
 
           <div className="pt-16 text-center">
-            <p className="text-foreground/55 text-sm flex items-center justify-center gap-2">
-              <Heart className="h-3.5 w-3.5 text-pink-500" fill="currentColor" />
+            <p className="text-foreground/55 text-sm max-w-md mx-auto px-4 leading-relaxed">
+              <Heart className="inline-block h-3.5 w-3.5 text-pink-500 mr-1.5 -mt-0.5 align-middle" fill="currentColor" />
               Приєднуйся до <span className="font-semibold text-foreground">щасливих пар</span>, які поділилися своїм запрошенням через Beloved
             </p>
           </div>

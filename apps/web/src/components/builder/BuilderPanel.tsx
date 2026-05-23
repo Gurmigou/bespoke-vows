@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CheckCircle2, Info, RotateCcw, Save, Send, Sparkles } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { BasicInfoForm } from "./BasicInfoForm";
 import { LoveStoryForm } from "./LoveStoryForm";
 import { EventsForm } from "./EventsForm";
@@ -48,6 +49,8 @@ export const BuilderPanel = ({
   const accent = data.templateColors.accent;
   const primary = data.templateColors.primary;
   const isUpdate = isEditing && isActiveInvitation;
+  const { user } = useAuth();
+  const showDraftNotice = !isUpdate && !user;
 
   const resetDialog = (
     <AlertDialogContent>
@@ -76,8 +79,8 @@ export const BuilderPanel = ({
         className={`${embedded ? "px-4 py-3" : "px-6 py-4"} border-b sticky top-0 z-10 backdrop-blur-xl bg-white/70 transition-colors duration-500`}
         style={{ borderColor: `${primary}26` }}
       >
-        <div className="flex items-center justify-between gap-2">
-          <div className={`flex items-center ${embedded ? "gap-2" : "gap-3"} min-w-0`}>
+        <div className="flex items-center justify-between gap-4">
+          <div className={`flex items-center ${embedded ? "gap-2" : "gap-3"} min-w-0 flex-1`}>
             {!embedded && (
               <span
                 className="flex items-center justify-center w-10 h-10 rounded-2xl shrink-0 transition-colors duration-500 ring-1 ring-inset"
@@ -106,33 +109,7 @@ export const BuilderPanel = ({
             </div>
           </div>
 
-          <div className={`flex items-center ${embedded ? "gap-1.5" : "gap-2"} shrink-0`}>
-            {!embedded && (
-              <TooltipProvider delayDuration={200}>
-                <AlertDialog>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <AlertDialogTrigger asChild>
-                        <button
-                          type="button"
-                          aria-label="Скинути до початкового"
-                          className="group relative inline-flex items-center justify-center h-10 w-10 rounded-full border bg-white text-slate-600 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 hover:text-slate-900 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                          style={{
-                            borderColor: `${accent}40`,
-                            ['--tw-ring-color' as string]: accent,
-                          }}
-                        >
-                          <RotateCcw className="w-[17px] h-[17px] transition-transform duration-300 group-hover:-rotate-[60deg]" />
-                        </button>
-                      </AlertDialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">Скинути до початкового</TooltipContent>
-                  </Tooltip>
-                  {resetDialog}
-                </AlertDialog>
-              </TooltipProvider>
-            )}
-
+          <div className="flex items-center shrink-0">
             {isUpdate ? (
               <Button
                 onClick={onSave}
@@ -152,18 +129,44 @@ export const BuilderPanel = ({
             ) : (
               <Button
                 onClick={onPublish}
-                className={`${embedded ? "h-11 px-6 text-[14px]" : "h-10 px-5"} rounded-full font-semibold text-white shadow-md hover:shadow-lg hover:brightness-105 transition-all duration-300 gap-2`}
+                className={`${embedded ? "h-12 px-7 text-[15px]" : "h-12 px-7 text-[15px]"} rounded-full font-semibold text-white shadow-lg hover:shadow-xl hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 gap-2 ring-1 ring-white/20`}
                 style={{
+                  backgroundImage: `linear-gradient(135deg, ${accent} 0%, ${accent} 60%, color-mix(in srgb, ${accent} 80%, #ffffff) 100%)`,
                   backgroundColor: accent,
-                  boxShadow: `0 8px 20px -8px ${accent}80`,
+                  boxShadow: `0 12px 28px -8px ${accent}cc, 0 2px 6px -2px ${accent}80`,
                 }}
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-[18px] h-[18px]" />
                 Далі
               </Button>
             )}
           </div>
         </div>
+
+        {!embedded && (
+          <div className="mt-3 flex items-center">
+            <TooltipProvider delayDuration={200}>
+              <AlertDialog>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Скинути до початкового"
+                        className="group inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[12px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100/80 transition-colors"
+                      >
+                        <RotateCcw className="w-[13px] h-[13px] transition-transform duration-300 group-hover:-rotate-[60deg]" />
+                        Скинути
+                      </button>
+                    </AlertDialogTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Скинути до початкового</TooltipContent>
+                </Tooltip>
+                {resetDialog}
+              </AlertDialog>
+            </TooltipProvider>
+          </div>
+        )}
 
         {isUpdate && !embedded && (
           <div
@@ -176,6 +179,21 @@ export const BuilderPanel = ({
             <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
             <span>
               Після збереження змін посилання для ваших гостей залишиться тим самим.
+            </span>
+          </div>
+        )}
+
+        {showDraftNotice && !embedded && (
+          <div
+            className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2.5 text-[12px] leading-snug text-slate-700"
+            style={{
+              backgroundColor: `${accent}12`,
+              border: `1px solid ${accent}28`,
+            }}
+          >
+            <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
+            <span>
+              Дані шаблону збережені у Вашому браузері. Увійдіть в акаунт та опублікуйте запрошення, щоб їх не втратити.
             </span>
           </div>
         )}
@@ -194,6 +212,20 @@ export const BuilderPanel = ({
               <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
               <span>
                 Після збереження змін посилання для ваших гостей залишиться тим самим.
+              </span>
+            </div>
+          )}
+          {showDraftNotice && embedded && (
+            <div
+              className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-[12px] leading-snug text-slate-700"
+              style={{
+                backgroundColor: `${accent}12`,
+                border: `1px solid ${accent}28`,
+              }}
+            >
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
+              <span>
+                Дані шаблону збережені у Вашому браузері. Увійдіть в акаунт та опублікуйте запрошення, щоб їх не втратити.
               </span>
             </div>
           )}

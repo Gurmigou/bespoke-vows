@@ -27,14 +27,14 @@ const InvitationDeleted = () => {
         <div className="flex flex-col sm:flex-row gap-2.5 justify-center pt-1">
           <Button
             asChild
-            className="h-11 rounded-full px-6 text-sm font-medium bg-stone-800 hover:bg-stone-900 text-white shadow-none"
+            className="h-11 rounded-full px-6 text-sm font-medium shadow-elegant hover:shadow-soft transition-all hover:-translate-y-0.5"
           >
             <Link to="/invitations">Мої запрошення</Link>
           </Button>
           <Button
             asChild
             variant="outline"
-            className="h-11 rounded-full px-6 text-sm gap-2 border-stone-200 bg-white hover:bg-stone-50 text-stone-600"
+            className="h-11 rounded-full px-6 text-sm gap-2"
           >
             <Link to="/contact">
               <Mail className="w-3.5 h-3.5" />
