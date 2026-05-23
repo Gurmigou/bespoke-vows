@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Check, Heart, Infinity as InfinityIcon, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { PRICE_INVITATION_1Y_UAH, PRICE_LIFETIME_UAH } from "@bespoke-vows/shared";
 
 const FREE_PERKS = [
@@ -26,6 +27,9 @@ const LIFETIME_PERKS = [
 ];
 
 const Pricing = () => {
+  const { user } = useAuth();
+  const hasLifetime = user?.subscriptionStatus === "pro";
+
   return (
     <div className="min-h-screen flex flex-col font-geologica overflow-x-hidden bg-[hsl(32,30%,97%)]">
       <section className="relative isolate overflow-hidden bg-[hsl(32,30%,97%)] pt-20 pb-20 md:pt-28 md:pb-24 px-4">
@@ -168,12 +172,19 @@ const Pricing = () => {
                 </div>
 
                 <div className="px-7 pb-7">
-                  <Link to="/checkout/lifetime" className="block">
-                    <Button className="group w-full h-12 text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-md shadow-pink-500/20 hover:shadow-lg transition-all">
-                      Отримати назавжди
-                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  {hasLifetime ? (
+                    <Button disabled className="w-full h-12 text-sm font-semibold rounded-full" variant="outline">
+                      <InfinityIcon className="mr-2 h-4 w-4" />
+                      Підписка вже активна
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link to="/checkout/lifetime" className="block">
+                      <Button className="group w-full h-12 text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-md shadow-pink-500/20 hover:shadow-lg transition-all">
+                        Отримати назавжди
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

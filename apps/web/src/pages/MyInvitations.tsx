@@ -277,7 +277,7 @@ function InvitationCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
-      className="group relative overflow-hidden bg-white rounded-2xl border border-foreground/8 shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
+      className="group relative bg-white rounded-2xl border border-foreground/8 shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
     >
       {/* Thumbnail */}
       <div
@@ -306,54 +306,55 @@ function InvitationCard({
           </span>
         </div>
 
-        <div ref={menuRef} className="absolute top-2 right-2" onClick={stop}>
-          <button
-            onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
-            className="h-8 w-8 flex items-center justify-center rounded-full bg-white/70 backdrop-blur-sm text-foreground/60 hover:text-foreground hover:bg-white/90 transition-colors shadow-sm"
-            aria-label="Меню"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-foreground/5 w-52 py-1.5 z-20">
+      </div>
+
+      <div ref={menuRef} className="absolute top-2 right-2 z-30" onClick={stop}>
+        <button
+          onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
+          className="h-8 w-8 flex items-center justify-center rounded-full bg-white/70 backdrop-blur-sm text-foreground/60 hover:text-foreground hover:bg-white/90 transition-colors shadow-sm"
+          aria-label="Меню"
+        >
+          <MoreVertical className="h-4 w-4" />
+        </button>
+        {menuOpen && (
+          <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-foreground/5 w-52 py-1.5 z-30">
+            <button
+              onClick={() => { onEdit(); setMenuOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
+            >
+              <Edit2 className="h-3.5 w-3.5 opacity-60" />
+              Редагувати
+            </button>
+            {isDraft && (
               <button
-                onClick={() => { onEdit(); setMenuOpen(false); }}
+                onClick={() => { onPreview(); setMenuOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
               >
-                <Edit2 className="h-3.5 w-3.5 opacity-60" />
-                Редагувати
+                <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+                Попередній перегляд
               </button>
-              {isDraft && (
-                <button
-                  onClick={() => { onPreview(); setMenuOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                  Попередній перегляд
-                </button>
-              )}
-              {canHide && (
-                <button
-                  onClick={() => { onHide(); setMenuOpen(false); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
-                >
-                  {!inv.visible
-                    ? <Eye className="h-3.5 w-3.5 opacity-60" />
-                    : <EyeOff className="h-3.5 w-3.5 opacity-60" />}
-                  {!inv.visible ? "Показати" : "Приховати"}
-                </button>
-              )}
-              <div className="border-t border-foreground/5 my-1" />
+            )}
+            {canHide && (
               <button
-                onClick={() => { onDelete(); setMenuOpen(false); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/8 transition-colors"
+                onClick={() => { onHide(); setMenuOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                Видалити
+                {!inv.visible
+                  ? <Eye className="h-3.5 w-3.5 opacity-60" />
+                  : <EyeOff className="h-3.5 w-3.5 opacity-60" />}
+                {!inv.visible ? "Показати" : "Приховати"}
               </button>
-            </div>
-          )}
-        </div>
+            )}
+            <div className="border-t border-foreground/5 my-1" />
+            <button
+              onClick={() => { onDelete(); setMenuOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/8 transition-colors"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Видалити
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="p-5 flex flex-col gap-4 flex-1">
@@ -596,13 +597,13 @@ export default function MyInvitations() {
       <div className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
 
         {user?.subscriptionStatus === "pro" && (
-          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-200/70 bg-amber-50/80 px-4 py-3">
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
-              <InfinityIcon className="h-3.5 w-3.5 text-amber-600" strokeWidth={2} />
+          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-foreground/10 bg-white px-4 py-3 shadow-sm">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-pink-50">
+              <InfinityIcon className="h-3.5 w-3.5 text-pink-500" strokeWidth={2} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-amber-800">Безстрокова підписка активна</p>
-              <p className="text-xs text-amber-700/70">Усі шаблони, безлімітні запрошення, без терміну дії.</p>
+              <p className="text-sm font-semibold text-foreground">Безстрокова підписка активна</p>
+              <p className="text-xs text-foreground/50">Усі шаблони, безлімітні запрошення, без терміну дії.</p>
             </div>
           </div>
         )}

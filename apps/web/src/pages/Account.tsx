@@ -344,7 +344,7 @@ export default function Account() {
                                 p.couple || "—"
                               )}
                             </td>
-                            <td className="px-5 py-4 text-foreground/55">{TEMPLATE_LABELS[p.templateSlug] ?? p.templateSlug}</td>
+                            <td className="px-5 py-4 text-foreground/55">{p.templateSlug ? (TEMPLATE_LABELS[p.templateSlug] ?? p.templateSlug) : "Усі шаблони назавжди"}</td>
                             <td className="px-5 py-4 text-emerald-600 font-semibold">
                               {(p.amount / 100).toFixed(2)} {p.currency}
                             </td>

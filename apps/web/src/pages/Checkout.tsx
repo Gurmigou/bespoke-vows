@@ -88,7 +88,10 @@ export default function Checkout({ mode = "invitation" }: CheckoutProps) {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate("/login"); return; }
-    if (isLifetime) return;
+    if (isLifetime) {
+      if (user.subscriptionStatus === "pro") { navigate("/invitations"); return; }
+      return;
+    }
     if (!id) { navigate("/invitations"); return; }
     invApi.get(id)
       .then(setInv)
