@@ -71,6 +71,13 @@
       "when": 1777620000000,
       "tag": "0009_payment_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1777710000000,
+      "tag": "0010_google_oauth",
+      "breakpoints": true
     }
   ]
 }
