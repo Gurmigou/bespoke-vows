@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Crown, Trash2, Eye, EyeOff, Edit2, Sparkles,
-  LayoutGrid, MoreVertical, Plus, ExternalLink, Link2, Check, Info, QrCode,
+  MoreVertical, Plus, ExternalLink, Link2, Check, Info, QrCode, Infinity as InfinityIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Invitation } from "@bespoke-vows/shared";
@@ -151,7 +151,9 @@ const TEMPLATE_LABELS: Record<string, string> = {
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("uk-UA", { day: "numeric", month: "long", year: "numeric" });
+  const d = new Date(iso);
+  if (d.getFullYear() >= 9999) return "необмежено";
+  return d.toLocaleDateString("uk-UA", { day: "numeric", month: "long", year: "numeric" });
 }
 
 function coupleName(inv: Invitation) {
@@ -258,11 +260,16 @@ function InvitationCard({
     return () => document.removeEventListener("mousedown", handle);
   }, [menuOpen]);
 
-  const accentColor =
-    isActive && inv.paymentStatus === "paid" ? "from-emerald-200/40 to-emerald-100/0"
-    : isActive && inv.paymentStatus === "free" ? "from-green-200/40 to-green-100/0"
-    : isExpired ? "from-amber-200/40 to-amber-100/0"
-    : "from-foreground/[0.04] to-transparent";
+  const primary = inv.config?.templateColors?.primary;
+  const accent = inv.config?.templateColors?.accent;
+  const iconColor = primary || "#e11d48";
+  const thumbBg = primary
+    ? `linear-gradient(135deg, ${primary}22 0%, ${accent || primary}38 100%)`
+    : `linear-gradient(135deg, #fef3f2 0%, #fde8f0 100%)`;
+
+  const his = inv.config?.hisName?.trim()[0]?.toUpperCase() ?? "";
+  const her = inv.config?.herName?.trim()[0]?.toUpperCase() ?? "";
+  const hasInitials = his || her;
 
   return (
     <div
@@ -270,71 +277,91 @@ function InvitationCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}
-      className="group relative overflow-hidden bg-white rounded-2xl border border-foreground/5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
+      className="group relative overflow-hidden bg-white rounded-2xl border border-foreground/8 shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex flex-col cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
     >
-      <div className={`absolute inset-x-0 top-0 h-20 bg-gradient-to-b ${accentColor} pointer-events-none`} />
+      {/* Thumbnail */}
+      <div
+        className="relative h-28 rounded-t-2xl overflow-hidden flex items-center justify-center flex-shrink-0"
+        style={{ background: thumbBg }}
+      >
+        <div
+          className="absolute -bottom-6 -right-6 h-20 w-20 rounded-full opacity-15"
+          style={{ background: iconColor }}
+        />
+        <div
+          className="absolute -top-5 -left-5 h-14 w-14 rounded-full opacity-10"
+          style={{ background: accent || iconColor }}
+        />
+        {hasInitials ? (
+          <p className="relative text-3xl font-bold tracking-[0.15em]" style={{ color: iconColor, opacity: 0.55 }}>
+            {his}{his && her ? " · " : ""}{her}
+          </p>
+        ) : (
+          <Sparkles className="relative h-9 w-9 opacity-20" style={{ color: iconColor }} />
+        )}
 
-      <div className="relative p-6 flex flex-col gap-5 flex-1">
-        <div className="flex items-start gap-2">
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground leading-tight text-lg md:text-xl truncate">{coupleName(inv)}</p>
-            <p className="text-sm text-foreground/55 mt-1.5">
-              {TEMPLATE_LABELS[inv.templateSlug] ?? inv.templateSlug}
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0" onClick={stop}>
-            <span className={`text-xs font-medium px-3 py-1.5 rounded-full whitespace-nowrap ${meta.className}`}>
-              {meta.label}
-            </span>
-            <div ref={menuRef} className="relative">
+        <div className="absolute top-3 left-3" onClick={stop}>
+          <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap backdrop-blur-sm ${meta.className}`}>
+            {meta.label}
+          </span>
+        </div>
+
+        <div ref={menuRef} className="absolute top-2 right-2" onClick={stop}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
+            className="h-8 w-8 flex items-center justify-center rounded-full bg-white/70 backdrop-blur-sm text-foreground/60 hover:text-foreground hover:bg-white/90 transition-colors shadow-sm"
+            aria-label="Меню"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-foreground/5 w-52 py-1.5 z-20">
               <button
-                onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
-                className="h-8 w-8 flex items-center justify-center rounded-full text-foreground/50 hover:text-foreground hover:bg-foreground/[0.06] transition-colors"
-                aria-label="Меню"
+                onClick={() => { onEdit(); setMenuOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
               >
-                <MoreVertical className="h-4 w-4" />
+                <Edit2 className="h-3.5 w-3.5 opacity-60" />
+                Редагувати
               </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-foreground/5 w-52 py-1.5 z-20">
-                  <button
-                    onClick={() => { onEdit(); setMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
-                  >
-                    <Edit2 className="h-3.5 w-3.5 opacity-60" />
-                    Редагувати
-                  </button>
-                  {isDraft && (
-                    <button
-                      onClick={() => { onPreview(); setMenuOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-                      Попередній перегляд
-                    </button>
-                  )}
-                  {canHide && (
-                    <button
-                      onClick={() => { onHide(); setMenuOpen(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
-                    >
-                      {!inv.visible
-                        ? <Eye className="h-3.5 w-3.5 opacity-60" />
-                        : <EyeOff className="h-3.5 w-3.5 opacity-60" />}
-                      {!inv.visible ? "Показати" : "Приховати"}
-                    </button>
-                  )}
-                  <div className="border-t border-foreground/5 my-1" />
-                  <button
-                    onClick={() => { onDelete(); setMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/8 transition-colors"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Видалити
-                  </button>
-                </div>
+              {isDraft && (
+                <button
+                  onClick={() => { onPreview(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5 opacity-60" />
+                  Попередній перегляд
+                </button>
               )}
+              {canHide && (
+                <button
+                  onClick={() => { onHide(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-foreground hover:bg-foreground/[0.04] transition-colors"
+                >
+                  {!inv.visible
+                    ? <Eye className="h-3.5 w-3.5 opacity-60" />
+                    : <EyeOff className="h-3.5 w-3.5 opacity-60" />}
+                  {!inv.visible ? "Показати" : "Приховати"}
+                </button>
+              )}
+              <div className="border-t border-foreground/5 my-1" />
+              <button
+                onClick={() => { onDelete(); setMenuOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/8 transition-colors"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Видалити
+              </button>
             </div>
-          </div>
+          )}
+        </div>
+      </div>
+
+      <div className="p-5 flex flex-col gap-4 flex-1">
+        <div>
+          <p className="font-semibold text-foreground leading-tight text-lg truncate">{coupleName(inv)}</p>
+          <p className="text-sm text-foreground/50 mt-0.5">
+            {TEMPLATE_LABELS[inv.templateSlug] ?? inv.templateSlug}
+          </p>
         </div>
 
         <div className="text-sm text-foreground/60 space-y-1.5 leading-relaxed">
@@ -568,9 +595,21 @@ export default function MyInvitations() {
     <div className="min-h-screen font-geologica bg-[hsl(32,30%,97%)]">
       <div className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
 
+        {user?.subscriptionStatus === "pro" && (
+          <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-200/70 bg-amber-50/80 px-4 py-3">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
+              <InfinityIcon className="h-3.5 w-3.5 text-amber-600" strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Безстрокова підписка активна</p>
+              <p className="text-xs text-amber-700/70">Усі шаблони, безлімітні запрошення, без терміну дії.</p>
+            </div>
+          </div>
+        )}
+
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-pink-500 mb-1.5">
+            <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-pink-400 mb-1.5">
               Колекція
             </p>
             <h1 className="text-2xl md:text-3xl font-bold text-foreground font-geologica">
@@ -579,10 +618,10 @@ export default function MyInvitations() {
           </div>
           <Button
             size="sm"
-            className="rounded-full gap-1.5 px-5 shadow-sm"
+            className="rounded-full gap-1.5 px-5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 shadow-sm shadow-pink-200/60 transition-all"
             onClick={() => navigate("/templates")}
           >
-            <Plus className="h-4 w-4" /> Нове
+            <Plus className="h-4 w-4" /> Нове запрошення
           </Button>
         </div>
 
@@ -595,11 +634,17 @@ export default function MyInvitations() {
 
         {items.length === 0 ? (
           <div className="bg-white rounded-2xl border border-dashed border-foreground/10 p-12 text-center">
-            <div className="h-12 w-12 mx-auto rounded-full bg-foreground/[0.04] flex items-center justify-center mb-3">
-              <LayoutGrid className="h-5 w-5 text-foreground/40" />
+            <div className="h-14 w-14 mx-auto rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-4">
+              <Sparkles className="h-6 w-6 text-pink-400" />
             </div>
-            <p className="text-base text-foreground/60">У вас ще немає запрошень.</p>
-            <Button className="mt-5 rounded-full" onClick={() => navigate("/templates")}>Створити перше</Button>
+            <p className="text-base font-medium text-foreground/70">Ще немає запрошень</p>
+            <p className="text-sm text-foreground/45 mt-1">Створіть перше запрошення за кілька хвилин</p>
+            <Button
+              className="mt-6 rounded-full gap-2 px-6 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white border-0 shadow-sm shadow-pink-200/60"
+              onClick={() => navigate("/templates")}
+            >
+              <Plus className="h-4 w-4" /> Створити перше
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

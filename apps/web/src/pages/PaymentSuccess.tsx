@@ -20,9 +20,9 @@ export default function PaymentSuccess() {
             Оплата успішна!
           </h1>
           <p className="text-sm text-foreground/50 leading-relaxed">
-            Дякуємо за покупку. Ваше запрошення активне —
+            Дякуємо за покупку. Переходьте до запрошень та
             <br />
-            діліться ним з гостями вже зараз.
+            діліться з Вашими гостями вже зараз.
           </p>
         </div>
 
