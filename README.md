@@ -1,4 +1,4 @@
-# Bespoke Vows
+# Beloved
 
 Online wedding invitation builder for Ukrainian-speaking couples. Form-based editor with live preview; share via public URL.
 
