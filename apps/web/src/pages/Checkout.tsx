@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Check, CheckCircle2, Infinity as InfinityIcon } from "lucide-react";
 import type { Invitation } from "@bespoke-vows/shared";
-import { PRICE_INVITATION_1Y_USD, PRICE_LIFETIME_USD } from "@bespoke-vows/shared";
+import { PRICE_INVITATION_1Y_UAH, PRICE_LIFETIME_UAH } from "@bespoke-vows/shared";
 import { invitations as invApi, payments as paymentsApi, ApiError } from "@/lib/api";
 import { getTemplateDefinition } from "@/components/invitation/templates/registry";
 import { useAuth } from "@/contexts/AuthContext";
@@ -108,12 +108,12 @@ export default function Checkout({ mode = "invitation" }: CheckoutProps) {
     try {
       if (isLifetime) {
         await paymentsApi.payLifetime();
-        navigate("/invitations");
+        navigate("/payment-success");
         return;
       }
       if (!id) return;
       await invApi.pay(id);
-      navigate("/invitations");
+      navigate("/payment-success");
     } catch (err) {
       if (err instanceof ApiError && err.code === 'invitation_deleted') {
         navigate("/invitation-deleted");
@@ -165,7 +165,7 @@ export default function Checkout({ mode = "invitation" }: CheckoutProps) {
   }
 
   const template = inv ? getTemplateDefinition(inv.templateSlug) : null;
-  const priceUsd = isLifetime ? PRICE_LIFETIME_USD : PRICE_INVITATION_1Y_USD;
+  const priceUah = isLifetime ? PRICE_LIFETIME_UAH : PRICE_INVITATION_1Y_UAH;
   const priceLabel = isLifetime ? "одноразово · назавжди" : "одноразово · 1 рік";
   const perks = isLifetime ? PERKS_LIFETIME : PERKS_INVITATION;
 
@@ -230,7 +230,7 @@ export default function Checkout({ mode = "invitation" }: CheckoutProps) {
           <div className="flex items-baseline justify-between">
             <span className="text-sm text-foreground/50">Разом</span>
             <div className="text-right">
-              <span className="text-2xl font-bold text-foreground">${priceUsd.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-foreground">{priceUah} ₴</span>
               <p className="text-[11px] text-foreground/30">{priceLabel}</p>
             </div>
           </div>

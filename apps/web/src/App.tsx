@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound";
 import InvitationInactive from "./pages/InvitationInactive";
 import InvitationDeleted from "./pages/InvitationDeleted";
 import PublicInvitation from "./pages/PublicInvitation";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -40,7 +41,8 @@ const AppRoutes = () => {
     location.pathname === "/reset-password" ||
     location.pathname === "/invitation-inactive" ||
     location.pathname === "/invitation-deleted" ||
-    location.pathname.startsWith("/checkout");
+    location.pathname.startsWith("/checkout") ||
+    location.pathname === "/payment-success";
   return (
     <>
       {!hideHeader && <Header />}
@@ -79,6 +81,7 @@ const AppRoutes = () => {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/invitation-inactive" element={<InvitationInactive />} />
           <Route path="/invitation-deleted" element={<InvitationDeleted />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

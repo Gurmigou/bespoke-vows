@@ -12,11 +12,11 @@ export type PaymentKind = 'invitation_1y' | 'lifetime';
 // Pricing
 // ============================================================================
 
-export const PRICE_INVITATION_1Y_CENTS = 1599;
-export const PRICE_LIFETIME_CENTS = 3999;
-export const PRICE_INVITATION_1Y_USD = 15.99;
-export const PRICE_LIFETIME_USD = 39.99;
-export const PRICING_CURRENCY = 'USD';
+export const PRICE_INVITATION_1Y_CENTS = 69900;
+export const PRICE_LIFETIME_CENTS = 159900;
+export const PRICE_INVITATION_1Y_UAH = 699;
+export const PRICE_LIFETIME_UAH = 1599;
+export const PRICING_CURRENCY = 'UAH';
 
 // ============================================================================
 // Invitation user-filled data (stored in invitations.config jsonb)

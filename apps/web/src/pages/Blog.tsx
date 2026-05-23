@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { blogPosts, formatPostDate } from "@/lib/blogPosts";
 
 const Blog = () => {
@@ -25,11 +25,6 @@ const Blog = () => {
         />
 
         <div className="container mx-auto max-w-4xl relative z-10 text-center space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <div className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-white/70 backdrop-blur px-4 py-1.5 text-xs md:text-sm font-medium text-foreground/70 shadow-sm">
-            <BookOpen className="h-3.5 w-3.5 text-pink-500" />
-            Блог
-          </div>
-
           <h1 className="text-4xl md:text-7xl font-bold leading-[1.05] tracking-tight font-geologica text-foreground">
             Історії, поради та{" "}
             <span

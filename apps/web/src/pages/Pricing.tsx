@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Check, Sparkles, Heart, Infinity as InfinityIcon, ArrowRight } from "lucide-react";
+import { Check, Heart, Infinity as InfinityIcon, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PRICE_INVITATION_1Y_USD, PRICE_LIFETIME_USD } from "@bespoke-vows/shared";
+import { PRICE_INVITATION_1Y_UAH, PRICE_LIFETIME_UAH } from "@bespoke-vows/shared";
 
 const FREE_PERKS = [
   "Активне посилання 3 дні після публікації",
@@ -17,12 +17,12 @@ const INVITATION_PERKS = [
 ];
 
 const LIFETIME_PERKS = [
-  "Доступ до всіх шаблонів (зараз 3, нові — безкоштовно)",
+  "Доступ до нових шаблонів і нових версій додатку безкоштовно",
   "Безлімітна кількість запрошень",
   "Без терміну дії — назавжди",
   "Зміна шаблону в будь-який момент",
   "Пріоритетна підтримка",
-  "Ідеально для річниць та родинних подій",
+
 ];
 
 const Pricing = () => {
@@ -43,11 +43,6 @@ const Pricing = () => {
         />
 
         <div className="container mx-auto max-w-4xl relative z-10 text-center space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <div className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-white/70 backdrop-blur px-4 py-1.5 text-xs md:text-sm font-medium text-foreground/70 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5 text-pink-500" />
-            Прозора ціна — без підписок
-          </div>
-
           <h1 className="text-4xl md:text-7xl font-bold leading-[1.05] tracking-tight font-geologica text-foreground">
             Зробіть ваше весілля{" "}
             <span
@@ -78,7 +73,8 @@ const Pricing = () => {
                   Безкоштовний trial
                 </p>
                 <div className="flex items-end gap-1">
-                  <span className="text-6xl font-bold text-foreground leading-none">$0</span>
+                  <span className="text-6xl font-bold text-foreground leading-none">0</span>
+                  <span className="text-2xl font-semibold text-foreground/60 mb-1.5">₴</span>
                 </div>
                 <p className="text-sm text-foreground/55 mt-3">3 дні після публікації</p>
               </div>
@@ -113,8 +109,9 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-end gap-1">
                   <span className="text-6xl font-bold text-foreground leading-none">
-                    ${PRICE_INVITATION_1Y_USD.toFixed(2)}
+                    {PRICE_INVITATION_1Y_UAH}
                   </span>
+                  <span className="text-2xl font-semibold text-foreground/60 mb-1.5">₴</span>
                 </div>
                 <p className="text-sm text-foreground/55 mt-3">одноразова оплата · 1 шаблон · 1 рік</p>
               </div>
@@ -141,7 +138,7 @@ const Pricing = () => {
             </div>
 
             {/* Усі шаблони назавжди — Рекомендовано */}
-            <div className="relative flex flex-col h-full md:-my-3">
+            <div className="relative flex flex-col h-full">
               <div className="absolute -inset-2 bg-gradient-to-br from-pink-400/40 via-rose-300/30 to-amber-300/30 rounded-[2rem] blur-2xl opacity-70 pointer-events-none" />
 
               <div className="relative bg-gradient-to-br from-white via-white to-pink-50/60 backdrop-blur-sm border border-pink-200/50 rounded-3xl shadow-elegant overflow-hidden flex flex-col h-full hover:-translate-y-1 transition-transform duration-500">
@@ -150,10 +147,11 @@ const Pricing = () => {
                     <InfinityIcon className="w-3.5 h-3.5 text-rose-500" />
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-500">Усі шаблони назавжди</p>
                   </div>
-                  <div className="flex items-end gap-2">
+                  <div className="flex items-end gap-1">
                     <span className="text-6xl font-bold text-foreground leading-none">
-                      ${PRICE_LIFETIME_USD.toFixed(2)}
+                      {PRICE_LIFETIME_UAH}
                     </span>
+                    <span className="text-2xl font-semibold text-foreground/60 mb-1.5">₴</span>
                   </div>
                   <p className="text-sm text-foreground/55 mt-3">одноразово · усі шаблони · без терміну</p>
                 </div>
