@@ -227,7 +227,7 @@ const Landing = () => {
             {[
               {
                 icon: Palette,
-                title: "Готові шаблони на ваш смак",
+                title: "Готові шаблони на будь-який смак",
                 desc: "Від класичних до сучасних — кожен шаблон продуманий до найменшої деталі та повністю кастомізується під вас.",
               },
               {
@@ -251,7 +251,7 @@ const Landing = () => {
                   <f.icon className="h-7 w-7" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-2 font-geologica">{f.title}</h3>
-                <p className="text-foreground/65 leading-relaxed">{f.desc}</p>
+                <p className="text-foreground/65 leading-relaxed text-justify">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -330,22 +330,24 @@ const Landing = () => {
               Можливості
             </span>
             <h2 className="text-4xl md:text-6xl font-bold font-geologica leading-tight tracking-tight">
-              Змінна палітра кольорів дизайну, основна інформація про весілля, місце проведення, історія кохання, програма подій, кольори дрескоду, посилання та QR-код запрошення.
+              Все необхідне для{" "}
+              <span
+                className="italic text-pink-500"
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 700 }}
+              >
+                ідеального запрошення
+              </span>
             </h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {[
-              { icon: Sparkles, title: "Простий редактор", desc: "Інтуїтивний інтерфейс, яким може користуватися кожен" },
-              { icon: Palette, title: "Широкий вибір шаблонів", desc: "Красиві дизайни готові до налаштування" },
-              { icon: Heart, title: "Завантаження фото", desc: "Додайте свої фотографії з легкістю" },
-              {
-                icon: Check,
-                title: "Можливість редагування скільки завгодно раз",
-                desc: "Відредагуйте ваш запрошення будь-коли, скільки завгодно разів",
-              },
-              { icon: Clock, title: "Попередній перегляд у реальному часі", desc: "Бачте зміни миттєво під час дизайну" },
-              { icon: Star, title: "Повна кастомізація", desc: "Налаштуйте кожну деталь за вашими побажаннями" },
+              { icon: Palette, title: "Палітра кольорів дизайну", desc: "Оберіть кольорову гаму, що відображає стиль вашого весілля" },
+              { icon: Sparkles, title: "Основна інформація про весілля", desc: "Імена пари, дата та всі ключові деталі вашого особливого дня" },
+              { icon: Star, title: "Місце проведення", desc: "Адреса та опис локації, щоб гості знали, куди прибути" },
+              { icon: Heart, title: "Історія кохання", desc: "Розкажіть свою унікальну історію з фотографіями та текстом" },
+              { icon: Clock, title: "Програма подій", desc: "Детальний тайм-лайн дня — від церемонії до святкування" },
+              { icon: Check, title: "Посилання та QR-код", desc: "Поділіться запрошенням одним посиланням або QR-кодом" },
             ].map((feature, idx) => (
               <div
                 key={idx}
@@ -358,7 +360,7 @@ const Landing = () => {
                   <feature.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-semibold font-geologica mb-2">{feature.title}</h3>
-                <p className="text-foreground/65 text-base leading-relaxed">{feature.desc}</p>
+                <p className="text-foreground/65 text-base leading-relaxed text-justify">{feature.desc}</p>
               </div>
             ))}
           </div>
