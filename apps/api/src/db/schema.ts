@@ -3,7 +3,8 @@ import { pgTable, uuid, text, integer, timestamp, jsonb, boolean } from 'drizzle
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: text('email').unique().notNull(),
-  passwordHash: text('password_hash').notNull(),
+  passwordHash: text('password_hash'),
+  googleId: text('google_id').unique(),
   subscriptionStatus: text('subscription_status').notNull().default('none'),
   subscriptionEndDate: timestamp('subscription_end_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

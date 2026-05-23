@@ -93,7 +93,7 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
-    setServerError("Google-авторизація тимчасово недоступна");
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   };
 
   return (
