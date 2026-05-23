@@ -42,9 +42,11 @@ paymentRoutes.post('/lifetime', requireAuth, async (c) => {
 
   await grantLifetime(user.sub);
 
-  sendPurchaseConfirmationEmail(user.email).catch((err) =>
-    console.error('[email] purchase confirmation failed:', err)
-  );
+  try {
+    await sendPurchaseConfirmationEmail(user.email);
+  } catch (err) {
+    console.error('[email] purchase confirmation failed:', err);
+  }
 
   return c.json({ ok: true, paymentId: payment.id }, 201);
 });

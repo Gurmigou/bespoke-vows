@@ -10,7 +10,7 @@ import { hashPassword, verifyPassword } from '../lib/password.js';
 import { toUserDto } from '../lib/serialize.js';
 import { requireAuth } from '../middleware/auth.js';
 import { generateResetToken, hashResetToken, RESET_TOKEN_TTL_MS } from '../lib/passwordReset.js';
-import { sendPasswordResetEmail } from '../lib/email.js';
+import { sendPasswordResetEmail, sendWelcomeEmail } from '../lib/email.js';
 
 export const authRoutes = new Hono();
 
@@ -130,9 +130,11 @@ authRoutes.post('/forgot-password', async (c) => {
     });
     const webOrigin = process.env.WEB_ORIGIN ?? 'http://localhost:8080';
     const link = `${webOrigin}/reset-password?token=${raw}`;
-    sendPasswordResetEmail(user.email, link).catch((err) =>
-      console.error('[email] password reset failed:', err)
-    );
+    try {
+      await sendPasswordResetEmail(user.email, link);
+    } catch (err) {
+      console.error('[email] password reset failed:', err);
+    }
   }
 
   return c.json({ ok: true });
@@ -246,6 +248,11 @@ authRoutes.get('/google/callback', async (c) => {
         .insert(users)
         .values({ email, googleId, passwordHash: null })
         .returning();
+      try {
+        await sendWelcomeEmail(user.email);
+      } catch (err) {
+        console.error('[email] welcome failed:', err);
+      }
     }
   }
 

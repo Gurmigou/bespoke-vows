@@ -40,6 +40,24 @@ export async function sendPasswordResetEmail(to: string, resetLink: string): Pro
   });
 }
 
+export async function sendWelcomeEmail(to: string): Promise<void> {
+  const webOrigin = process.env.WEB_ORIGIN ?? 'https://beloved-invite.com';
+  await send({
+    to,
+    subject: 'Ласкаво просимо до Beloved 💌',
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; color: #1a1a1a;">
+        <h2 style="margin-top: 0;">Вітаємо у Beloved!</h2>
+        <p>Ваш акаунт створено. Тепер ви можете побудувати красиве цифрове запрошення на ваше весілля.</p>
+        <a href="${webOrigin}/builder" style="display: inline-block; margin: 16px 0; padding: 12px 24px; background: #c8a97e; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+          Створити запрошення
+        </a>
+        <p style="font-size: 13px; color: #666;">З любов'ю, команда Beloved 💌</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPurchaseConfirmationEmail(to: string): Promise<void> {
   await send({
     to,
