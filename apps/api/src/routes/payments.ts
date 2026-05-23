@@ -8,6 +8,7 @@ import type { JwtPayload } from '../lib/jwt.js';
 import type { InvitationData } from '@bespoke-vows/shared';
 import { PRICE_LIFETIME_CENTS, PRICING_CURRENCY } from '../lib/pricing.js';
 import { grantLifetime, userHasLifetime } from '../lib/entitlements.js';
+import { sendPurchaseConfirmationEmail } from '../lib/email.js';
 
 type Variables = { user: JwtPayload };
 
@@ -40,6 +41,10 @@ paymentRoutes.post('/lifetime', requireAuth, async (c) => {
     .returning();
 
   await grantLifetime(user.sub);
+
+  sendPurchaseConfirmationEmail(user.email).catch((err) =>
+    console.error('[email] purchase confirmation failed:', err)
+  );
 
   return c.json({ ok: true, paymentId: payment.id }, 201);
 });

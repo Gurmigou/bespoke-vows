@@ -21,7 +21,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen font-geologica overflow-x-hidden">
       {/* ======================= HERO ======================= */}
-      <section className="relative isolate overflow-hidden bg-[hsl(32,30%,97%)] pt-20 pb-24 md:pt-28 md:pb-32 px-4">
+      <section className="relative isolate overflow-hidden bg-[hsl(32,30%,97%)] pt-16 pb-24 md:pt-16 md:pb-32 px-4">
         {/* Decorative gradient blobs */}
         <div className="pointer-events-none absolute -top-32 -left-32 h-[28rem] w-[28rem] rounded-full bg-pink-300/30 blur-3xl" />
         <div className="pointer-events-none absolute -top-20 right-[-10rem] h-[32rem] w-[32rem] rounded-full bg-amber-200/40 blur-3xl" />

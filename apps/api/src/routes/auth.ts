@@ -10,6 +10,7 @@ import { hashPassword, verifyPassword } from '../lib/password.js';
 import { toUserDto } from '../lib/serialize.js';
 import { requireAuth } from '../middleware/auth.js';
 import { generateResetToken, hashResetToken, RESET_TOKEN_TTL_MS } from '../lib/passwordReset.js';
+import { sendPasswordResetEmail } from '../lib/email.js';
 
 export const authRoutes = new Hono();
 
@@ -129,7 +130,9 @@ authRoutes.post('/forgot-password', async (c) => {
     });
     const webOrigin = process.env.WEB_ORIGIN ?? 'http://localhost:8080';
     const link = `${webOrigin}/reset-password?token=${raw}`;
-    console.log('[password-reset] link change password that have to be sent to email to console temporary:', link);
+    sendPasswordResetEmail(user.email, link).catch((err) =>
+      console.error('[email] password reset failed:', err)
+    );
   }
 
   return c.json({ ok: true });
