@@ -117,15 +117,6 @@ const Builder = () => {
       });
   }, [urlInvitationId, navigate]);
 
-  // Remember builder URL so post-login (incl. Google OAuth roundtrip) returns here
-  useEffect(() => {
-    if (user) return;
-    sessionStorage.setItem(
-      "bv:loginReturnTo",
-      location.pathname + location.search,
-    );
-  }, [location.pathname, location.search, user]);
-
   // Mirror anon draft into localStorage with templateId so login can claim it
   useEffect(() => {
     if (invitationId) return;
@@ -322,7 +313,10 @@ const Builder = () => {
                 Дані шаблону збережені у Вашому браузері.{" "}
                 <button
                   type="button"
-                  onClick={() => navigate("/login")}
+                  onClick={() => {
+                    sessionStorage.setItem("bv:loginReturnTo", location.pathname + location.search);
+                    navigate("/login");
+                  }}
                   className="font-semibold underline underline-offset-2"
                   style={{ color: accent }}
                 >

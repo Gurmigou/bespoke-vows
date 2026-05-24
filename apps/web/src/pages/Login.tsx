@@ -106,6 +106,14 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
+    const returnTo =
+      sessionStorage.getItem("bv:loginReturnTo") ??
+      (fromState && isSafeReturnTo(fromState) ? fromState : null);
+    if (returnTo && isSafeReturnTo(returnTo)) {
+      sessionStorage.setItem("bv:postOAuthReturn", returnTo);
+    } else {
+      sessionStorage.removeItem("bv:postOAuthReturn");
+    }
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   };
 

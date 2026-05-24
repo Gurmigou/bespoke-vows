@@ -54,9 +54,11 @@ const PostOAuthRedirect = () => {
   useEffect(() => {
     if (loading || !user) return;
     if (!LANDING_PATHS.has(location.pathname)) return;
-    const returnTo = sessionStorage.getItem("bv:loginReturnTo");
-    if (!returnTo || !isSafeReturnTo(returnTo)) return;
+    const returnTo = sessionStorage.getItem("bv:postOAuthReturn");
+    if (!returnTo) return;
+    sessionStorage.removeItem("bv:postOAuthReturn");
     sessionStorage.removeItem("bv:loginReturnTo");
+    if (!isSafeReturnTo(returnTo)) return;
     navigate(returnTo, { replace: true });
   }, [user, loading, location.pathname, navigate]);
   return null;
