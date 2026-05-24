@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import type {
   InvitationData,
@@ -11,7 +11,18 @@ import { BuilderPanel } from "@/components/builder/BuilderPanel";
 import { InvitationPreview } from "@/components/invitation/InvitationPreview";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Pencil } from "lucide-react";
+import { Pencil, RotateCcw, Send, Info } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { getTemplateDefinition, getTemplateId } from "@/components/invitation/templates/registry";
 import { PRESETS } from "@/components/builder/TemplateColorPicker";
 import { invitations as invApi, ApiError } from "@/lib/api";
@@ -44,6 +55,7 @@ function buildDefaultInvitationData(): InvitationData {
 
 const Builder = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const [editorOpen, setEditorOpen] = useState(false);
   const { user, loading: authLoading } = useAuth();
@@ -95,6 +107,7 @@ const Builder = () => {
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
+          sessionStorage.setItem("bv:loginReturnTo", location.pathname + location.search);
           navigate("/login");
         } else if (err instanceof ApiError && err.code === 'invitation_deleted') {
           navigate("/invitation-deleted");
@@ -103,6 +116,15 @@ const Builder = () => {
         }
       });
   }, [urlInvitationId, navigate]);
+
+  // Remember builder URL so post-login (incl. Google OAuth roundtrip) returns here
+  useEffect(() => {
+    if (user) return;
+    sessionStorage.setItem(
+      "bv:loginReturnTo",
+      location.pathname + location.search,
+    );
+  }, [location.pathname, location.search, user]);
 
   // Mirror anon draft into localStorage with templateId so login can claim it
   useEffect(() => {
@@ -198,6 +220,7 @@ const Builder = () => {
       navigate(`/preview/${token}`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
+        sessionStorage.setItem("bv:loginReturnTo", location.pathname + location.search);
         navigate("/login");
       } else if (err instanceof ApiError && err.code === 'invitation_deleted') {
         navigate("/invitation-deleted");
@@ -255,35 +278,75 @@ const Builder = () => {
           </div>
         )}
 
-        <div className="sticky top-0 z-30 flex flex-col gap-1.5 px-3 pt-2 pb-2 bg-white/85 backdrop-blur-md border-b" style={{ borderColor: `${accent}22` }}>
-          <div className="flex items-center justify-center gap-2 text-[12px] text-slate-600">
-            <span
-              className="inline-block w-2 h-2 rounded-full"
-              style={{ backgroundColor: isUpdate ? "#10b981" : "#94a3b8" }}
-            />
-            <span className="font-medium">
-              {isUpdate ? "Активне запрошення" : "Чернетка"}
-            </span>
+        <div className="px-4 pt-3 pb-3 flex flex-col gap-2 border-b" style={{ borderColor: `${accent}22` }}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-1.5 text-[12px] text-slate-500">
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: isUpdate ? "#10b981" : "#94a3b8" }}
+              />
+              <span>{isUpdate ? "Активне запрошення" : "Чернетка"}</span>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-[12px] text-slate-400 hover:text-rose-500 transition-colors"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Скинути
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Скинути всі зміни?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Всі поля повернуться до початкових значень. Цю дію не можна скасувати.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Скасувати</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetToDefault}>Скинути</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
+
           {showAnonHint && (
             <div
-              className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 text-[11.5px] leading-snug"
-              style={{ backgroundColor: `${accent}14`, color: "#475569" }}
+              className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-[12px] leading-snug text-slate-700"
+              style={{ backgroundColor: `${accent}12`, border: `1px solid ${accent}28` }}
             >
-              <span className="shrink-0">💾</span>
+              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
               <span>
-                Дані збережено лише у браузері.{" "}
+                Дані шаблону збережені у Вашому браузері.{" "}
                 <button
                   type="button"
                   onClick={() => navigate("/login")}
                   className="font-semibold underline underline-offset-2"
                   style={{ color: accent }}
                 >
-                  Увійдіть
+                  Увійдіть в акаунт
                 </button>
-                , щоб не втратити їх.
+                , щоб їх не втратити.
               </span>
             </div>
+          )}
+
+          {!isUpdate && (
+            <button
+              type="button"
+              onClick={async () => { await handlePreview(); }}
+              disabled={actionBusy}
+              className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-full font-semibold text-white text-[14px] shadow-md active:scale-[0.98] transition-all"
+              style={{
+                backgroundColor: accent,
+                boxShadow: `0 8px 20px -8px ${accent}cc`,
+              }}
+            >
+              <Send className="w-4 h-4" />
+              Далі
+            </button>
           )}
         </div>
 

@@ -24,6 +24,19 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
+function isSafeReturnTo(path: string): boolean {
+  if (!path.startsWith("/")) return false;
+  if (path.startsWith("//")) return false;
+  if (path === "/login" || path === "/register") return false;
+  return (
+    path.startsWith("/preview") ||
+    path.startsWith("/builder") ||
+    path.startsWith("/invitations") ||
+    path.startsWith("/account") ||
+    path.startsWith("/checkout")
+  );
+}
+
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
     <path
@@ -75,7 +88,7 @@ export default function Register() {
         return;
       }
       const returnTo = sessionStorage.getItem("bv:loginReturnTo");
-      if (returnTo && returnTo.startsWith("/preview")) {
+      if (returnTo && isSafeReturnTo(returnTo)) {
         sessionStorage.removeItem("bv:loginReturnTo");
         navigate(returnTo, { replace: true });
         return;

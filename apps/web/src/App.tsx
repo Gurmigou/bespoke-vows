@@ -2,7 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuth } from "./contexts/AuthContext";
 import Header from "@/components/Header";
 import Landing from "./pages/Landing";
 import Builder from "./pages/Builder";
@@ -30,6 +32,36 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
+const LANDING_PATHS = new Set(["/", "/uk", "/en"]);
+
+function isSafeReturnTo(path: string): boolean {
+  if (!path.startsWith("/")) return false;
+  if (path.startsWith("//")) return false;
+  if (path === "/login" || path === "/register") return false;
+  return (
+    path.startsWith("/preview") ||
+    path.startsWith("/builder") ||
+    path.startsWith("/invitations") ||
+    path.startsWith("/account") ||
+    path.startsWith("/checkout")
+  );
+}
+
+const PostOAuthRedirect = () => {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (loading || !user) return;
+    if (!LANDING_PATHS.has(location.pathname)) return;
+    const returnTo = sessionStorage.getItem("bv:loginReturnTo");
+    if (!returnTo || !isSafeReturnTo(returnTo)) return;
+    sessionStorage.removeItem("bv:loginReturnTo");
+    navigate(returnTo, { replace: true });
+  }, [user, loading, location.pathname, navigate]);
+  return null;
+};
+
 const AppRoutes = () => {
   const location = useLocation();
   const hideHeader =
@@ -45,6 +77,7 @@ const AppRoutes = () => {
     location.pathname === "/payment-success";
   return (
     <>
+      <PostOAuthRedirect />
       {!hideHeader && <Header />}
       <Routes>
           <Route path="/" element={<Landing />} />

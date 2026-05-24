@@ -126,10 +126,10 @@ export const BuilderPanel = ({
                 )}
                 {saveSuccess ? "Збережено" : embedded ? "Зберегти" : "Зберегти зміни"}
               </Button>
-            ) : (
+            ) : !embedded ? (
               <Button
                 onClick={onPublish}
-                className={`${embedded ? "h-12 px-7 text-[15px]" : "h-12 px-7 text-[15px]"} rounded-full font-semibold text-white shadow-lg hover:shadow-xl hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 gap-2 ring-1 ring-white/20`}
+                className="h-12 px-7 text-[15px] rounded-full font-semibold text-white shadow-lg hover:shadow-xl hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 gap-2 ring-1 ring-white/20"
                 style={{
                   backgroundImage: `linear-gradient(135deg, ${accent} 0%, ${accent} 60%, color-mix(in srgb, ${accent} 80%, #ffffff) 100%)`,
                   backgroundColor: accent,
@@ -139,7 +139,7 @@ export const BuilderPanel = ({
                 <Send className="w-[18px] h-[18px]" />
                 Далі
               </Button>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -193,7 +193,7 @@ export const BuilderPanel = ({
           >
             <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
             <span>
-              Дані шаблону збережені у Вашому браузері. Увійдіть в акаунт та опублікуйте запрошення, щоб їх не втратити.
+              Дані шаблону збережені у Вашому браузері. Увійдіть в акаунт, щоб їх не втратити.
             </span>
           </div>
         )}
@@ -215,20 +215,6 @@ export const BuilderPanel = ({
               </span>
             </div>
           )}
-          {showDraftNotice && embedded && (
-            <div
-              className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-[12px] leading-snug text-slate-700"
-              style={{
-                backgroundColor: `${accent}12`,
-                border: `1px solid ${accent}28`,
-              }}
-            >
-              <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
-              <span>
-                Дані шаблону збережені у Вашому браузері. Увійдіть в акаунт та опублікуйте запрошення, щоб їх не втратити.
-              </span>
-            </div>
-          )}
           <TemplateColorPicker data={data} setData={setData} />
           <BasicInfoForm data={data} setData={setData} />
           <VenueForm data={data} setData={setData} />
@@ -236,26 +222,6 @@ export const BuilderPanel = ({
           <EventsForm data={data} setData={setData} />
           <ColorsForm data={data} setData={setData} />
 
-          {embedded && (
-            <div className="pt-4 mt-2 border-t border-slate-300/60">
-              <p className="text-[12px] text-slate-500 mb-2 leading-snug">
-                Очистити всі поля й повернутися до початкових значень.
-              </p>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
-                    type="button"
-                    className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-xl border bg-white text-rose-600 font-medium text-[14px] shadow-sm hover:bg-rose-50 active:scale-[0.99] transition-all"
-                    style={{ borderColor: "#fecdd3" }}
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    Скинути до початкових налаштувань
-                  </button>
-                </AlertDialogTrigger>
-                {resetDialog}
-              </AlertDialog>
-            </div>
-          )}
         </div>
       </ScrollArea>
     </div>
