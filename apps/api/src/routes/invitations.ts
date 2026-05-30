@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, count } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { invitations, templates, payments } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 import { canPublish, derivedStatus, LIFETIME_ACTIVE_UNTIL } from '../lib/status.js';
 import { userHasLifetime, getProEntitlement } from '../lib/entitlements.js';
 import { PRICE_INVITATION_1Y_CENTS, PRICING_CURRENCY } from '../lib/pricing.js';
@@ -15,6 +16,7 @@ import { buildDefaultInvitationData } from '@bespoke-vows/shared';
 
 type Variables = { user: JwtPayload };
 
+const MAX_INVITATIONS_PER_USER = 15;
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -45,7 +47,11 @@ async function dtoFor(row: typeof invitations.$inferSelect) {
 
 export const invitationRoutes = new Hono<{ Variables: Variables }>();
 
-invitationRoutes.post('/', requireAuth, async (c) => {
+invitationRoutes.post(
+  '/',
+  requireAuth,
+  rateLimit({ name: 'invitation-create', limit: 30, window: '1 h' }),
+  async (c) => {
   const user = c.get('user');
   const body = await c.req
     .json<{ templateId?: string; config?: Partial<InvitationData> }>()
@@ -58,6 +64,22 @@ invitationRoutes.post('/', requireAuth, async (c) => {
   const template = await resolveTemplate(body.templateId);
   if (!template) {
     return c.json({ error: 'template_not_found' }, 400);
+  }
+
+  const [{ value: existingCount }] = await db
+    .select({ value: count() })
+    .from(invitations)
+    .where(and(eq(invitations.userId, user.sub), isNull(invitations.deletedAt)));
+
+  if (existingCount >= MAX_INVITATIONS_PER_USER) {
+    return c.json(
+      {
+        error: 'invitation_limit_reached',
+        limit: MAX_INVITATIONS_PER_USER,
+        message: `Ви досягли ліміту ${MAX_INVITATIONS_PER_USER} запрошень. Видаліть одне з наявних запрошень (чернетку або активне), щоб створити нове.`,
+      },
+      409,
+    );
   }
 
   const config = { ...(template.defaultData as InvitationData), ...(body.config ?? {}) };
@@ -113,7 +135,7 @@ async function patchConfig(c: Context<{ Variables: Variables }>) {
   const [updated] = await db
     .update(invitations)
     .set({ config: merged, updatedAt: new Date() })
-    .where(eq(invitations.id, id))
+    .where(and(eq(invitations.id, id), eq(invitations.userId, user.sub)))
     .returning();
 
   return c.json(await dtoFor(updated));
@@ -139,7 +161,7 @@ invitationRoutes.post('/:id/reset', requireAuth, async (c) => {
   const [updated] = await db
     .update(invitations)
     .set({ config: defaultConfig, updatedAt: new Date() })
-    .where(eq(invitations.id, id))
+    .where(and(eq(invitations.id, id), eq(invitations.userId, user.sub)))
     .returning();
 
   return c.json(toInvitationDto(updated, template.slug));
@@ -157,7 +179,7 @@ invitationRoutes.delete('/:id', requireAuth, async (c) => {
   await db
     .update(invitations)
     .set({ deletedAt: now, updatedAt: now })
-    .where(eq(invitations.id, id));
+    .where(and(eq(invitations.id, id), eq(invitations.userId, user.sub)));
 
   return c.json({ ok: true });
 });
@@ -185,7 +207,7 @@ invitationRoutes.post('/:id/hide', requireAuth, async (c) => {
   const [updated] = await db
     .update(invitations)
     .set({ visible: body.visible, visibleStatusChangedAt: now, updatedAt: now })
-    .where(eq(invitations.id, id))
+    .where(and(eq(invitations.id, id), eq(invitations.userId, user.sub)))
     .returning();
 
   return c.json(await dtoFor(updated));
@@ -218,13 +240,17 @@ invitationRoutes.post('/:id/publish', requireAuth, async (c) => {
       visible: true,
       updatedAt: now,
     })
-    .where(eq(invitations.id, id))
+    .where(and(eq(invitations.id, id), eq(invitations.userId, user.sub)))
     .returning();
 
   return c.json(await dtoFor(updated));
 });
 
-invitationRoutes.post('/:id/pay', requireAuth, async (c) => {
+invitationRoutes.post(
+  '/:id/pay',
+  requireAuth,
+  rateLimit({ name: 'invitation-pay', limit: 20, window: '1 h' }),
+  async (c) => {
   const user = c.get('user');
   const { id } = c.req.param();
   const body = await c.req
@@ -267,7 +293,7 @@ invitationRoutes.post('/:id/pay', requireAuth, async (c) => {
       visible: true,
       updatedAt: now,
     })
-    .where(eq(invitations.id, id))
+    .where(and(eq(invitations.id, id), eq(invitations.userId, user.sub)))
     .returning();
 
   return c.json(await dtoFor(updated));

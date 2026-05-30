@@ -21,7 +21,11 @@ export function readAnonDraft(): AnonDraft | null {
 }
 
 export function writeAnonDraft(draft: AnonDraft) {
-  localStorage.setItem(ANON_DRAFT_KEY, JSON.stringify(draft));
+  try {
+    localStorage.setItem(ANON_DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    // Quota exceeded (e.g. large base64 images) — skip persisting rather than crash.
+  }
 }
 
 export function clearAnonDraft() {

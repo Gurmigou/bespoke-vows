@@ -16,6 +16,8 @@ interface TemplateRendererProps {
   prepend?: (theme: ResolvedTheme) => ReactNode;
   /** Id assigned to the first section wrapper so prepend content can scroll to it. */
   contentAnchorId?: string;
+  /** Render in natural document flow (no internal 100vh scroll container). Use when nested inside another scroll context. */
+  fitContent?: boolean;
 }
 
 const resolveBg = (bg: SectionBg | undefined, theme: TemplateTheme, primaryColor: string): string => {
@@ -43,7 +45,7 @@ const buildScopedFontStyles = (theme: TemplateTheme, scope: string, displayClass
   `;
 };
 
-export const TemplateRenderer = ({ template, data, prepend, contentAnchorId }: TemplateRendererProps) => {
+export const TemplateRenderer = ({ template, data, prepend, contentAnchorId, fitContent }: TemplateRendererProps) => {
   const reactId = useId();
   const scope = `tpl-${reactId.replace(/[^a-zA-Z0-9]/g, "")}`;
   const displayClass = `${scope}-display`;
@@ -63,7 +65,7 @@ export const TemplateRenderer = ({ template, data, prepend, contentAnchorId }: T
     <>
       <style>{styles}</style>
       <div
-        className={`${scope} ${bodyClass} h-screen overflow-y-auto`}
+        className={`${scope} ${bodyClass} ${fitContent ? "" : "h-screen overflow-y-auto"}`}
         style={{ backgroundColor: data.templateColors.primary, color: data.templateColors.text }}
       >
         {prepend?.(theme)}

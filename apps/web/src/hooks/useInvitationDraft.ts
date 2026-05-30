@@ -22,7 +22,11 @@ function readLocal(id: string | null): StoredDraft | null {
 }
 
 function writeLocal(id: string | null, draft: StoredDraft) {
-  localStorage.setItem(draftKey(id), JSON.stringify(draft));
+  try {
+    localStorage.setItem(draftKey(id), JSON.stringify(draft));
+  } catch {
+    // Quota exceeded (e.g. large base64 images) — skip persisting rather than crash.
+  }
 }
 
 function clearLocal(id: string | null) {
@@ -90,15 +94,15 @@ export function useInvitationDraft({ invitationId, templateId, initial, serverUp
 
   const update = useCallback(
     (next: InvitationData | ((prev: InvitationData) => InvitationData)) => {
-      setData((prev) => {
-        const computed = typeof next === 'function' ? (next as (p: InvitationData) => InvitationData)(prev) : next;
-        const stored: StoredDraft = {
-          templateId,
-          config: computed,
-          updatedAt: new Date().toISOString(),
-        };
-        writeLocal(invitationId, stored);
-        return computed;
+      const computed =
+        typeof next === 'function'
+          ? (next as (p: InvitationData) => InvitationData)(dataRef.current)
+          : next;
+      setData(computed);
+      writeLocal(invitationId, {
+        templateId,
+        config: computed,
+        updatedAt: new Date().toISOString(),
       });
       dirtyRef.current = true;
       if (timerRef.current) clearTimeout(timerRef.current);

@@ -27,10 +27,16 @@ export class ApiError extends Error {
   }
 }
 
+const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD']);
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
+  }
+  const method = (init.method ?? 'GET').toUpperCase();
+  if (!CSRF_SAFE_METHODS.has(method)) {
+    headers.set('X-CSRF', '1');
   }
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -40,7 +46,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
   if (!res.ok) {
-    throw new ApiError(data?.error ?? `HTTP ${res.status}`, res.status, data?.error);
+    throw new ApiError(data?.message ?? data?.error ?? `HTTP ${res.status}`, res.status, data?.error);
   }
   return data as T;
 }
@@ -88,7 +94,12 @@ export const upload = {
   image: async (file: File): Promise<{ url: string }> => {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch(`${API_URL}/upload`, { method: 'POST', credentials: 'include', body: form });
+    const res = await fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'X-CSRF': '1' },
+      body: form,
+    });
     const data = await res.json();
     if (!res.ok) throw new ApiError(data?.error ?? `HTTP ${res.status}`, res.status, data?.error);
     return data;

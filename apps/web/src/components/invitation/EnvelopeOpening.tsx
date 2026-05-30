@@ -58,9 +58,15 @@ const findScrollableAncestor = (el: HTMLElement | null): HTMLElement | null => {
 
 const initialOf = (name: string) => name?.trim().charAt(0).toUpperCase() || "";
 
-const SECTION_VH = 320;
+// Total scroll length of the reveal, in viewport heights.
+const SECTION_VH = 250;
 
-// Smooth 0/1 crossfade with a soft ramp around `mid`.
+// TEMP: flip to compare the two intros, then delete the flag + the losing branch.
+//   "flap"      — closed envelope whose flap opens, then the paper rises.
+//   "preopened" — envelope already open, only the paper rises.
+const OPENING_STYLE: "flap" | "preopened" = "flap";
+
+// Smooth 0/1 crossfade with a soft ramp between `lo` and `hi`.
 const smoothBand = (v: number, lo: number, hi: number) => {
   if (v <= lo) return 0;
   if (v >= hi) return 1;
@@ -119,6 +125,8 @@ export const EnvelopeOpening = ({
     };
   }, [passed]);
 
+  // One-way reveal: once passed, snap to the invitation top and never come back
+  // this page load (the envelope section is unmounted below).
   useLayoutEffect(() => {
     if (!passed) return;
     const scroller = scrollerRef.current;
@@ -130,84 +138,69 @@ export const EnvelopeOpening = ({
 
   if (passed) return null;
 
-  // Phased timeline: seal fades first, flap opens, then card slides up.
-  const rawSeal = Math.min(1, progress / 0.18);
-  const rawFlap = Math.max(0, Math.min(1, (progress - 0.12) / 0.45));
-  const rawCard = Math.max(0, Math.min(1, (progress - 0.4) / 0.5));
+  const isFlap = OPENING_STYLE === "flap";
 
-  const sealProgress = easeInOut(rawSeal);
+  // --- Phased timeline (driven by scroll progress 0 → 1) ---
+  // flap:      0.00–0.30 flap opens · 0.20–0.85 paper rises · 0.85–1.0 hand off
+  // preopened: flap static-open     · 0.00–0.85 paper rises · 0.85–1.0 hand off
+  const rawFlap = isFlap ? Math.max(0, Math.min(1, progress / 0.3)) : 1;
   const flapProgress = easeInOutCubic(rawFlap);
-  const cardProgress = easeOut(rawCard);
 
-  const sealOpacity = Math.max(0, 1 - sealProgress * 1.05);
-  const sealTranslateY = 18 * sealProgress; // moves slightly down as it fades
-  const sealScale = 1 - 0.18 * sealProgress;
+  const paperStart = isFlap ? 0.2 : 0.0;
+  const rawPaper = Math.max(0, Math.min(1, (progress - paperStart) / (0.85 - paperStart)));
+  const paperProgress = easeOut(rawPaper);
 
-  // Two flap halves that crossfade so a flap silhouette is always on screen:
-  //  - "closed" flap covers the top half of the envelope, hinged at top edge,
-  //    rotating from 0° (flat closed) down to -90° (edge-on) as it opens.
-  //  - "open" flap sits above the envelope, hinged at the envelope's top edge
-  //    too, rotating from +90° (edge-on, hidden) to 0° (fully upright triangle
-  //    pointing up).
-  const closedFlapAngle = -90 * flapProgress;
-  const openFlapAngle = 90 - 90 * flapProgress;
-  const openOpacity = smoothBand(flapProgress, 0.42, 0.62);
-  const closedOpacity = 1 - smoothBand(flapProgress, 0.42, 0.62);
-  const cardY = -78 * cardProgress;
-  const cardMessageOpacity = Math.max(0, Math.min(1, (cardProgress - 0.45) / 0.45));
+  // Wax seal lives on the closed flap; gone before the paper starts to rise.
+  const sealProgress = easeInOut(Math.max(0, Math.min(1, progress / 0.16)));
+  const sealOpacity = isFlap ? Math.max(0, 1 - sealProgress * 1.1) : 0;
+  const sealScale = 1 - 0.16 * sealProgress;
 
-  const hintOpacity = Math.max(0, 1 - progress * 4);
-  const finalReached = progress > 0.85;
-  const finalHintOpacity =
-    progress > 0.8
-      ? Math.max(0, Math.min(1, (progress - 0.8) / 0.08) - smoothBand(progress, 0.9, 0.98))
-      : 0;
-  // Long, gentle fade as the envelope hands off to the invitation. Starts
-  // before scroll completes so the wrapper is invisible by the time we
-  // unmount and snap to the invitation top — eliminating any visible jump.
-  const outroProgress = smoothBand(progress, 0.86, 1);
+  // Flap folds up and back (hinged at the top edge). Static-open for preopened.
+  const FLAP_OPEN_ANGLE = -162;
+  const flapAngle = FLAP_OPEN_ANGLE * flapProgress;
+  const flapShadeProgress = isFlap ? flapProgress : 1;
+
+  // Paper translateY, in % of the paper's own height: tucked (down, hidden
+  // behind the pocket) → risen (up, mostly above the envelope top edge).
+  const paperY = 40 - 84 * paperProgress;
+  const paperTextOpacity = Math.max(0, Math.min(1, (paperProgress - 0.35) / 0.4));
+
+  // Long, gentle scene fade so the wrapper is invisible by the time we unmount
+  // and snap to the invitation top — no visible jump.
+  const outroProgress = smoothBand(progress, 0.85, 1);
   const sceneOpacity = 1 - outroProgress;
   const sceneScale = 1 - outroProgress * 0.06;
   const sceneTranslate = -outroProgress * 24;
-  const flapShadowOpacity = Math.min(1, flapProgress * 1.4);
+
+  const hintOpacity = Math.max(0, 1 - progress * 4);
+  const finalReached = progress > 0.9;
+
   const SMOOTH = "transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms ease-out";
-  const SMOOTH_CARD =
-    "transform 1100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms, opacity 700ms ease-out 120ms";
 
   const accent = colors.accent;
   const text = colors.text;
   const isPrimaryDark = !isLightHex(colors.primary);
 
-  // Three distinct envelope tones derived from primary.
-  // Body (back panel + side/bottom folds) = main tone.
-  // Flap = lighter (catches light from above).
-  // Inside = darker (deep interior visible behind X seam).
+  // Envelope tones derived from primary.
   const bodyTone = colors.primary;
-  const flapTone = isPrimaryDark
-    ? shadeHex(colors.primary, 0.14)
-    : shadeHex(colors.primary, -0.06);
-  const flapHighlight = isPrimaryDark
-    ? shadeHex(colors.primary, 0.24)
-    : shadeHex(colors.primary, 0.1);
-  const flapShadow = shadeHex(colors.primary, -0.32);
-  const innerShadow = shadeHex(colors.primary, -0.55);
-  // Back panel = the visible "inside" of the envelope behind the X folds.
-  // Use the template's primary colour (slightly darker on light primaries
-  // so it still reads as deeper/inside, but never close to black).
-  const backTone = isPrimaryDark
-    ? shadeHex(colors.primary, 0.04)
-    : shadeHex(colors.primary, -0.18);
-  const foldShadow = shadeHex(colors.primary, -0.18);
-  const foldHighlight = isPrimaryDark
-    ? shadeHex(colors.primary, 0.06)
-    : shadeHex(colors.primary, -0.02);
+  const flapTone = isPrimaryDark ? shadeHex(colors.primary, 0.12) : shadeHex(colors.primary, -0.05);
+  const flapHighlight = isPrimaryDark ? shadeHex(colors.primary, 0.22) : shadeHex(colors.primary, 0.1);
+  const flapShadow = shadeHex(colors.primary, -0.3);
+  // Interior (visible in the mouth once the flap lifts) — darker than the front.
+  const backTone = isPrimaryDark ? shadeHex(colors.primary, 0.05) : shadeHex(colors.primary, -0.17);
+  // Front pocket — the panel that keeps the paper's base tucked inside.
+  const pocketTone = bodyTone;
+  const pocketShadow = shadeHex(colors.primary, -0.16);
+  const pocketHighlight = isPrimaryDark ? shadeHex(colors.primary, 0.06) : shadeHex(colors.primary, 0.04);
 
-  const isPrimaryLight = isLightHex(colors.primary);
-  const namesColor = isPrimaryLight
-    ? hexWithAlpha("#1a1a1a", 0.85)
-    : hexWithAlpha("#fdfaf3", 0.92);
   const sealTextColor = isLightHex(accent) ? "#111111" : "#ffffff";
-  const seamColor = hexWithAlpha("#000", 0.32);
+  const monogram = (
+    <>
+      {initialOf(hisName)}
+      <span className="mx-1 opacity-70">&amp;</span>
+      {initialOf(herName)}
+    </>
+  );
 
   return (
     <section
@@ -219,13 +212,9 @@ export const EnvelopeOpening = ({
       <style>{`
         @keyframes envelopeFinalSway {
           0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-          25% { transform: translate3d(0, -6px, 0) rotate(-0.5deg); }
-          50% { transform: translate3d(0, 4px, 0) rotate(0.4deg); }
-          75% { transform: translate3d(0, -3px, 0) rotate(-0.3deg); }
-        }
-        @keyframes envelopeFinalHintBob {
-          0%, 100% { transform: translateY(0); opacity: 0.6; }
-          50% { transform: translateY(8px); opacity: 1; }
+          25% { transform: translate3d(0, -5px, 0) rotate(-0.4deg); }
+          50% { transform: translate3d(0, 4px, 0) rotate(0.3deg); }
+          75% { transform: translate3d(0, -2px, 0) rotate(-0.2deg); }
         }
       `}</style>
       <div
@@ -252,7 +241,7 @@ export const EnvelopeOpening = ({
         />
 
         <div
-          className={`${bodyClass} relative z-10 mb-8 text-center transition-opacity`}
+          className={`${bodyClass} relative z-10 mb-10 text-center transition-opacity`}
           style={{ color: text, opacity: 0.85 - progress * 0.85 }}
         >
           <p className="text-[10px] md:text-xs uppercase tracking-[0.5em]">Запрошення на весілля</p>
@@ -266,234 +255,129 @@ export const EnvelopeOpening = ({
             animation: finalReached ? "envelopeFinalSway 2.6s ease-in-out infinite" : undefined,
           }}
         >
+          {/* Envelope box. overflow visible so the risen paper shows above the
+              top edge; strict z-order back→front keeps paper between the back
+              panel and the front pocket so nothing overflows incorrectly. */}
           <div
             className="relative w-full"
-            style={{
-              aspectRatio: "1.5 / 1",
-              transformStyle: "preserve-3d",
-            }}
+            style={{ aspectRatio: "1.5 / 1", transformStyle: "preserve-3d" }}
           >
-            {/* Back panel — uses the template's primary color (slightly
-                darker than the front folds to read as the inside of the
-                envelope behind the X folds) */}
+            {/* (z1) Back panel — the envelope body + visible interior. */}
             <div
               className="absolute inset-0 rounded-[6px] overflow-hidden"
               style={{
                 backgroundColor: backTone,
-                backgroundImage: `linear-gradient(180deg, ${shadeHex(backTone, isPrimaryDark ? 0.04 : -0.05)} 0%, ${backTone} 55%, ${shadeHex(backTone, isPrimaryDark ? -0.06 : -0.1)} 100%)`,
+                backgroundImage: `linear-gradient(180deg, ${shadeHex(backTone, isPrimaryDark ? 0.05 : -0.05)} 0%, ${backTone} 45%, ${shadeHex(backTone, -0.1)} 100%)`,
                 boxShadow: `0 30px 60px -20px ${hexWithAlpha(colors.primary, 0.55)}, inset 0 0 0 1px ${hexWithAlpha("#000", 0.18)}`,
                 zIndex: 1,
               }}
             />
 
-            {/* White invitation card — slides up from inside.
-                Sits above back panel, below the front X folds. */}
+            {/* (z2) Flap — top triangle hinged at the envelope top edge. */}
+            <div
+              className="absolute left-0 right-0 top-0"
+              style={{
+                height: "58%",
+                clipPath: "polygon(0% 0%, 100% 0%, 50% 100%)",
+                backgroundColor: flapTone,
+                backgroundImage: `linear-gradient(180deg, ${flapHighlight} 0%, ${flapTone} 55%, ${flapShadow} 100%)`,
+                transformOrigin: "top center",
+                transform: `rotateX(${flapAngle}deg) translateZ(2px)`,
+                transformStyle: "preserve-3d",
+                backfaceVisibility: "hidden",
+                transition: SMOOTH,
+                willChange: "transform",
+                zIndex: 2,
+                filter: `brightness(${1 - flapShadeProgress * 0.05})`,
+                boxShadow: `0 6px 14px ${hexWithAlpha("#000", 0.2)}, inset 0 -1px 0 ${hexWithAlpha("#000", 0.18)}, inset 0 1px 0 ${hexWithAlpha("#fff", 0.1)}`,
+              }}
+            />
+
+            {/* (z3) Paper / letter — rises out of the pocket. Inset narrower
+                than the pocket so it can never spill out the sides. */}
             <div
               className="absolute rounded-[3px] flex flex-col items-center justify-center text-center px-6"
               style={{
-                left: "6%",
-                right: "6%",
-                top: "10%",
-                bottom: "10%",
+                left: "14%",
+                right: "14%",
+                top: "0%",
+                height: "132%",
                 backgroundColor: "#fdfaf3",
-                backgroundImage:
-                  "linear-gradient(180deg, #ffffff 0%, #fdfaf3 60%, #f5efe2 100%)",
+                backgroundImage: "linear-gradient(180deg, #ffffff 0%, #fdfaf3 60%, #f5efe2 100%)",
                 color: "#2a2620",
-                transform: `translateY(${cardY}%)`,
-                transition: SMOOTH_CARD,
+                transform: `translateY(${paperY}%)`,
+                transition: SMOOTH,
                 willChange: "transform",
-                zIndex: cardProgress > 0 ? 35 : 5,
+                zIndex: 3,
                 boxShadow: `0 14px 30px -10px ${hexWithAlpha("#000", 0.35)}, inset 0 0 0 1px ${hexWithAlpha("#000", 0.05)}`,
               }}
             >
               <div
                 className="flex flex-col items-center"
                 style={{
-                  opacity: cardMessageOpacity,
-                  transform: `translateY(${(1 - cardMessageOpacity) * 6}px)`,
+                  opacity: paperTextOpacity,
+                  transform: `translateY(${(1 - paperTextOpacity) * 8}px)`,
                   transition: "opacity 500ms ease-out, transform 500ms ease-out",
                 }}
               >
                 <span
-                  className={`${bodyClass} text-[10px] md:text-xs uppercase tracking-[0.5em]`}
-                  style={{ color: hexWithAlpha("#2a2620", 0.55) }}
+                  className={`${displayClass} leading-none`}
+                  style={{ color: "#2a2620", fontSize: "clamp(40px, 11vw, 88px)" }}
                 >
-                  {hisName} & {herName}
+                  {monogram}
                 </span>
-                <div
-                  className="my-3 h-px w-10"
-                  style={{ backgroundColor: hexWithAlpha(accent, 0.7) }}
-                />
-                <p
-                  className={`${displayClass} italic text-2xl md:text-4xl leading-tight`}
-                  style={{ color: "#2a2620" }}
-                >
-                  Вас запрошено
-                </p>
+                <div className="mt-5 h-px w-12" style={{ backgroundColor: hexWithAlpha(accent, 0.7) }} />
               </div>
             </div>
 
-            {/* === Front X-shaped folds: 4 triangular panels meeting at center === */}
-
-            {/* Left fold */}
+            {/* (z4) Front pocket — bottom panel with a shallow V mouth. Sits in
+                front of the paper so the paper's base reads as tucked inside. */}
             <div
               className="absolute inset-0"
               style={{
-                clipPath: "polygon(0% 0%, 50% 50%, 0% 100%)",
-                backgroundColor: bodyTone,
-                backgroundImage: `linear-gradient(90deg, ${foldHighlight} 0%, ${bodyTone} 60%, ${foldShadow} 100%)`,
-                zIndex: 22,
+                clipPath: "polygon(0% 42%, 50% 52%, 100% 42%, 100% 100%, 0% 100%)",
+                backgroundColor: pocketTone,
+                backgroundImage: `linear-gradient(180deg, ${pocketHighlight} 0%, ${pocketTone} 45%, ${pocketShadow} 100%)`,
+                boxShadow: `inset 0 2px 6px ${hexWithAlpha("#000", 0.12)}`,
+                zIndex: 4,
               }}
             />
-            {/* Right fold */}
-            <div
-              className="absolute inset-0"
-              style={{
-                clipPath: "polygon(100% 0%, 100% 100%, 50% 50%)",
-                backgroundColor: bodyTone,
-                backgroundImage: `linear-gradient(270deg, ${foldHighlight} 0%, ${bodyTone} 60%, ${foldShadow} 100%)`,
-                zIndex: 22,
-              }}
-            />
-            {/* Bottom fold (carries the names label) */}
-            <div
-              className="absolute inset-0 flex items-end justify-center pb-[6%]"
-              style={{
-                clipPath: "polygon(0% 100%, 50% 50%, 100% 100%)",
-                backgroundColor: bodyTone,
-                backgroundImage: `linear-gradient(180deg, ${foldShadow} 0%, ${bodyTone} 55%, ${shadeHex(bodyTone, -0.04)} 100%)`,
-                zIndex: 23,
-              }}
-            >
-              <span
-                className={`${displayClass} italic`}
+
+            {/* (z6) Wax seal — flap variant only; fades before the paper rises. */}
+            {isFlap && sealOpacity > 0.01 && (
+              <div
+                className="absolute rounded-full flex items-center justify-center pointer-events-none"
                 style={{
-                  color: namesColor,
-                  fontSize: "clamp(14px, 2.6vw, 22px)",
-                  letterSpacing: "0.02em",
-                  textShadow: `0 1px 2px ${hexWithAlpha("#000", 0.25)}`,
+                  width: "20%",
+                  aspectRatio: "1",
+                  top: "44%",
+                  left: "50%",
+                  transform: `translate3d(-50%, -50%, 8px) scale(${sealScale})`,
+                  opacity: sealOpacity,
+                  transition: SMOOTH,
+                  willChange: "transform, opacity",
+                  backgroundColor: accent,
+                  backgroundImage: `radial-gradient(circle at 30% 30%, ${hexWithAlpha("#ffffff", 0.45)}, transparent 55%), radial-gradient(circle at 70% 80%, ${hexWithAlpha("#000000", 0.28)}, transparent 60%)`,
+                  border: `2px solid ${hexWithAlpha(shadeHex(accent, -0.25), 0.85)}`,
+                  boxShadow: `0 6px 16px ${hexWithAlpha("#000", 0.35)}, inset 0 0 0 4px ${hexWithAlpha(shadeHex(accent, 0.15), 0.6)}, inset 0 -2px 4px ${hexWithAlpha("#000", 0.25)}, inset 0 2px 4px ${hexWithAlpha("#fff", 0.25)}`,
+                  zIndex: 6,
                 }}
               >
-                {hisName} &amp; {herName}
-              </span>
-            </div>
-
-            {/* X seam lines — diagonals from each corner to the center */}
-            <svg
-              aria-hidden
-              className="absolute inset-0 w-full h-full pointer-events-none"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              style={{ zIndex: 52 }}
-            >
-              <line x1="0" y1="0" x2="50" y2="50" stroke={seamColor} strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
-              <line x1="100" y1="0" x2="50" y2="50" stroke={seamColor} strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
-              <line x1="0" y1="100" x2="50" y2="50" stroke={seamColor} strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
-              <line x1="100" y1="100" x2="50" y2="50" stroke={seamColor} strokeWidth="0.4" vectorEffect="non-scaling-stroke" />
-            </svg>
-
-            {/* Shadow that the opening flap casts on the front + interior.
-                Strongest mid-rotation when the flap is edge-on. */}
-            <div
-              className="absolute left-0 right-0 top-0 pointer-events-none"
-              style={{
-                height: "100%",
-                background: `linear-gradient(180deg, ${hexWithAlpha("#000", 0.45)} 0%, ${hexWithAlpha("#000", 0)} 60%)`,
-                opacity: flapShadowOpacity * 0.55 * (1 - flapProgress * 0.6),
-                transition: "opacity 320ms ease-out",
-                zIndex: 53,
-                mixBlendMode: "multiply",
-              }}
-            />
-
-            {/* Closed flap — covers top half of envelope. Hinged at the top
-                edge, rotates from 0° (closed, flat) down to -90° (edge-on)
-                as the envelope opens. Crossfades into the open flap so the
-                silhouette never disappears. */}
-            <div
-              className="absolute left-0 right-0 top-0"
-              style={{
-                height: "50%",
-                clipPath: "polygon(0% 0%, 100% 0%, 50% 100%)",
-                backgroundColor: flapTone,
-                backgroundImage: `linear-gradient(180deg, ${flapHighlight} 0%, ${flapTone} 60%, ${flapShadow} 100%)`,
-                transformOrigin: "top center",
-                transform: `translateZ(6px) rotateX(${closedFlapAngle}deg)`,
-                transformStyle: "preserve-3d",
-                backfaceVisibility: "hidden",
-                transition: SMOOTH,
-                willChange: "transform, opacity",
-                zIndex: 60,
-                opacity: closedOpacity,
-                filter: `brightness(${1 - flapProgress * 0.04})`,
-                boxShadow: `0 6px 14px ${hexWithAlpha("#000", 0.22)}, inset 0 -1px 0 ${hexWithAlpha("#000", 0.18)}, inset 0 1px 0 ${hexWithAlpha("#fff", 0.12)}`,
-              }}
-            />
-
-            {/* Open flap — upward-pointing triangle sitting above the envelope.
-                Hinged at its bottom edge (= the envelope's top edge), rotates
-                from +90° (edge-on, hidden) to 0° (fully upright). */}
-            <div
-              className="absolute left-0 right-0"
-              style={{
-                top: "-50%",
-                height: "50%",
-                clipPath: "polygon(0% 100%, 100% 100%, 50% 0%)",
-                backgroundColor: flapTone,
-                backgroundImage: `linear-gradient(0deg, ${flapHighlight} 0%, ${flapTone} 60%, ${flapShadow} 100%)`,
-                transformOrigin: "bottom center",
-                transform: `rotateX(${openFlapAngle}deg)`,
-                transformStyle: "preserve-3d",
-                backfaceVisibility: "hidden",
-                transition: SMOOTH,
-                willChange: "transform, opacity",
-                zIndex: 30,
-                opacity: openOpacity,
-                filter: `brightness(${0.96 + flapProgress * 0.04})`,
-                boxShadow: `0 -6px 14px ${hexWithAlpha("#000", 0.22)}, inset 0 1px 0 ${hexWithAlpha("#000", 0.18)}, inset 0 -1px 0 ${hexWithAlpha("#fff", 0.12)}`,
-              }}
-            />
-
-            {/* Wax seal — sits at the center where the X meets.
-                Fades out and drifts down as the envelope opens. */}
-            <div
-              className="absolute rounded-full flex items-center justify-center pointer-events-none"
-              style={{
-                width: "20%",
-                aspectRatio: "1",
-                top: "50%",
-                left: "50%",
-                transform: `translate3d(-50%, calc(-50% + ${sealTranslateY}%), 14px) scale(${sealScale})`,
-                opacity: sealOpacity,
-                transition: SMOOTH,
-                willChange: "transform, opacity",
-                backgroundColor: accent,
-                backgroundImage: `radial-gradient(circle at 30% 30%, ${hexWithAlpha("#ffffff", 0.45)}, transparent 55%), radial-gradient(circle at 70% 80%, ${hexWithAlpha("#000000", 0.28)}, transparent 60%)`,
-                border: `2px solid ${hexWithAlpha(shadeHex(accent, -0.25), 0.85)}`,
-                boxShadow: `0 6px 16px ${hexWithAlpha("#000", 0.35)}, inset 0 0 0 4px ${hexWithAlpha(shadeHex(accent, 0.15), 0.6)}, inset 0 -2px 4px ${hexWithAlpha("#000", 0.25)}, inset 0 2px 4px ${hexWithAlpha("#fff", 0.25)}`,
-                zIndex: 70,
-              }}
-            >
-              <span
-                className={`${displayClass} text-xl md:text-3xl leading-none`}
-                style={{
-                  color: sealTextColor,
-                  textShadow: `0 1px 2px ${hexWithAlpha("#000", 0.4)}`,
-                }}
-              >
-                {initialOf(hisName)}
-                <span className="mx-0.5 opacity-80">&amp;</span>
-                {initialOf(herName)}
-              </span>
-            </div>
+                <span
+                  className={`${displayClass} text-base md:text-2xl leading-none`}
+                  style={{ color: sealTextColor, textShadow: `0 1px 2px ${hexWithAlpha("#000", 0.4)}` }}
+                >
+                  {initialOf(hisName)}
+                  <span className="mx-0.5 opacity-80">&amp;</span>
+                  {initialOf(herName)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* hints */}
-        <div
-          className={`${bodyClass} relative z-10 mt-12 text-center min-h-[64px]`}
-          style={{ color: text }}
-        >
+        {/* scroll hint */}
+        <div className={`${bodyClass} relative z-10 mt-12 text-center min-h-[64px]`} style={{ color: text }}>
           <div
             className="absolute left-1/2 -translate-x-1/2 inline-flex flex-col items-center gap-3"
             style={{ opacity: hintOpacity, transition: "opacity 200ms linear" }}
@@ -501,28 +385,7 @@ export const EnvelopeOpening = ({
             <span className="text-[11px] md:text-xs uppercase tracking-[0.4em] opacity-80">
               Гортайте, щоб відкрити
             </span>
-            <span
-              className="block w-px h-12 animate-bounce"
-              style={{ backgroundColor: accent }}
-            />
-          </div>
-          <div
-            className="absolute left-1/2 -translate-x-1/2 inline-flex flex-col items-center gap-3"
-            style={{
-              opacity: finalHintOpacity,
-              transition: "opacity 320ms ease-out",
-              animation: finalReached
-                ? "envelopeFinalHintBob 1.8s ease-in-out infinite"
-                : undefined,
-            }}
-          >
-            <span className="text-[11px] md:text-xs uppercase tracking-[0.4em] opacity-80">
-              Прокрутіть до запрошення
-            </span>
-            <span
-              className="block w-px h-12"
-              style={{ backgroundColor: accent }}
-            />
+            <span className="block w-px h-12 animate-bounce" style={{ backgroundColor: accent }} />
           </div>
         </div>
       </div>

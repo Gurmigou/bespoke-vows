@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import type { InvitationData, Template } from "@bespoke-vows/shared";
 import { TemplateRenderer } from "@/components/invitation/TemplateRenderer";
+import { envelopePrepend, ENVELOPE_ANCHOR_ID } from "@/components/invitation/envelopePrepend";
 import { getTemplateDefinition } from "@/components/invitation/templates/registry";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Sparkles, Heart, Mail } from "lucide-react";
@@ -24,11 +25,10 @@ const PreviewPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    sessionStorage.setItem(
-      "bv:loginReturnTo",
-      location.pathname + location.search,
-    );
-  }, [location.pathname, location.search]);
+    // Don't store token-based preview URLs — tokens expire and would 401 after OAuth redirect
+    const returnTo = token ? "/invitations" : location.pathname + location.search;
+    sessionStorage.setItem("bv:loginReturnTo", returnTo);
+  }, [location.pathname, location.search, token]);
 
   useEffect(() => {
     if (!token) return;
@@ -127,8 +127,12 @@ const PreviewPage = () => {
           config: localState.data,
         });
         await goPayOrCheckout(created.id);
-      } catch {
-        setError("Не вдалося створити запрошення");
+      } catch (err) {
+        if (err instanceof ApiError && err.code === 'invitation_limit_reached') {
+          setError(err.message);
+        } else {
+          setError("Не вдалося створити запрошення");
+        }
       }
       return;
     }
@@ -169,7 +173,12 @@ const PreviewPage = () => {
           </Button>
         </div>
       )}
-      <TemplateRenderer template={template} data={data} />
+      <TemplateRenderer
+        template={template}
+        data={data}
+        contentAnchorId={ENVELOPE_ANCHOR_ID}
+        prepend={envelopePrepend(data)}
+      />
     </div>
   );
 };

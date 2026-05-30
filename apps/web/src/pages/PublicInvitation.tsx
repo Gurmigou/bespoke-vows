@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import type { InvitationData, Template } from "@bespoke-vows/shared";
 import { TemplateRenderer } from "@/components/invitation/TemplateRenderer";
-import { EnvelopeOpening } from "@/components/invitation/EnvelopeOpening";
+import { envelopePrepend, ENVELOPE_ANCHOR_ID } from "@/components/invitation/envelopePrepend";
 import { publicApi, ApiError } from "@/lib/api";
 
 const PublicInvitation = () => {
@@ -43,17 +43,8 @@ const PublicInvitation = () => {
     <TemplateRenderer
       template={template}
       data={data}
-      contentAnchorId="invitation-content"
-      prepend={(theme) => (
-        <EnvelopeOpening
-          colors={data.templateColors}
-          hisName={data.hisName}
-          herName={data.herName}
-          displayClass={theme.displayClass}
-          bodyClass={theme.bodyClass}
-          scrollTargetId="invitation-content"
-        />
-      )}
+      contentAnchorId={ENVELOPE_ANCHOR_ID}
+      prepend={envelopePrepend(data)}
     />
   );
 };

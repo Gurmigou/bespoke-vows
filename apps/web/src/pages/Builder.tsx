@@ -215,6 +215,8 @@ const Builder = () => {
         navigate("/login");
       } else if (err instanceof ApiError && err.code === 'invitation_deleted') {
         navigate("/invitation-deleted");
+      } else if (err instanceof ApiError && err.code === 'invitation_limit_reached') {
+        setLoadError(err.message);
       } else {
         setLoadError("Не вдалося відкрити перегляд");
       }
@@ -344,8 +346,8 @@ const Builder = () => {
           )}
         </div>
 
-        <div className="min-h-screen">
-          <InvitationPreview data={data} templateId={templateId} />
+        <div>
+          <InvitationPreview data={data} templateId={templateId} fitContent />
         </div>
 
         <Drawer open={editorOpen} onOpenChange={setEditorOpen}>

@@ -9,6 +9,7 @@ import { signJwt } from '../lib/jwt.js';
 import { hashPassword, verifyPassword } from '../lib/password.js';
 import { toUserDto } from '../lib/serialize.js';
 import { requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 import { generateResetToken, hashResetToken, RESET_TOKEN_TTL_MS } from '../lib/passwordReset.js';
 import { sendPasswordResetEmail, sendWelcomeEmail } from '../lib/email.js';
 
@@ -33,7 +34,12 @@ function setSession(c: Context, token: string) {
   });
 }
 
-authRoutes.post('/register', async (c) => {
+const byEmail = (b: { email?: string }) => b?.email;
+
+authRoutes.post(
+  '/register',
+  rateLimit({ name: 'register', limit: 5, window: '1 h' }),
+  async (c) => {
   const body = await c.req
     .json<{ email?: string; password?: string }>()
     .catch(() => ({} as { email?: string; password?: string }));
@@ -61,7 +67,10 @@ authRoutes.post('/register', async (c) => {
   return c.json(toUserDto(user), 201);
 });
 
-authRoutes.post('/login', async (c) => {
+authRoutes.post(
+  '/login',
+  rateLimit({ name: 'login', limit: 10, window: '15 m' }, byEmail),
+  async (c) => {
   const body = await c.req
     .json<{ email?: string; password?: string }>()
     .catch(() => ({} as { email?: string; password?: string }));
@@ -107,7 +116,10 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-authRoutes.post('/forgot-password', async (c) => {
+authRoutes.post(
+  '/forgot-password',
+  rateLimit({ name: 'forgot', limit: 3, window: '1 h' }, byEmail),
+  async (c) => {
   const body = await c.req
     .json<{ email?: string }>()
     .catch(() => ({} as { email?: string }));
@@ -140,7 +152,10 @@ authRoutes.post('/forgot-password', async (c) => {
   return c.json({ ok: true });
 });
 
-authRoutes.post('/reset-password', async (c) => {
+authRoutes.post(
+  '/reset-password',
+  rateLimit({ name: 'reset', limit: 10, window: '1 h' }),
+  async (c) => {
   const body = await c.req
     .json<{ token?: string; password?: string }>()
     .catch(() => ({} as { token?: string; password?: string }));

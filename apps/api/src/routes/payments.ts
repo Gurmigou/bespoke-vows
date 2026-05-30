@@ -3,6 +3,7 @@ import { eq, and, isNull, desc } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { payments, invitations, templates, users } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 import { toPaymentDto } from '../lib/serialize.js';
 import type { JwtPayload } from '../lib/jwt.js';
 import type { InvitationData } from '@bespoke-vows/shared';
@@ -14,7 +15,11 @@ type Variables = { user: JwtPayload };
 
 export const paymentRoutes = new Hono<{ Variables: Variables }>();
 
-paymentRoutes.post('/lifetime', requireAuth, async (c) => {
+paymentRoutes.post(
+  '/lifetime',
+  requireAuth,
+  rateLimit({ name: 'pay-lifetime', limit: 20, window: '1 h' }),
+  async (c) => {
   const user = c.get('user');
   const body = await c.req
     .json<{ amount?: number; currency?: string }>()

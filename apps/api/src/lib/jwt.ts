@@ -36,7 +36,7 @@ export async function signPreviewToken(args: { invitationId: string; ownerId: st
   const jti = crypto.randomUUID();
   return new SignJWT({ inv: args.invitationId, sub: args.ownerId, jti, kind: 'preview' })
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('15m')
+    .setExpirationTime('2h')
     .sign(getSecret());
 }
 
