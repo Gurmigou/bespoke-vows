@@ -64,7 +64,7 @@ const SECTION_VH = 250;
 // TEMP: flip to compare the two intros, then delete the flag + the losing branch.
 //   "flap"      — closed envelope whose flap opens, then the paper rises.
 //   "preopened" — envelope already open, only the paper rises.
-const OPENING_STYLE: "flap" | "preopened" = "flap";
+const OPENING_STYLE: "flap" | "preopened" = "preopened";
 
 // Smooth 0/1 crossfade with a soft ramp between `lo` and `hi`.
 const smoothBand = (v: number, lo: number, hi: number) => {
