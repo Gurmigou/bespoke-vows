@@ -160,9 +160,11 @@ export const EnvelopeOpening = ({
   const flapAngle = FLAP_OPEN_ANGLE * flapProgress;
   const flapShadeProgress = isFlap ? flapProgress : 1;
 
-  // Paper translateY, in % of the paper's own height: tucked (down, hidden
-  // behind the pocket) → risen (up, mostly above the envelope top edge).
-  const paperY = 40 - 84 * paperProgress;
+  // Paper translateY, in % of the paper's own height. The paper is taller than
+  // the envelope and clipped at the envelope bottom (see clip wrapper below), so
+  // it lives *inside* and only its top emerges. Tucked (top behind the pocket
+  // mouth) → risen (top well above the envelope top edge, base still tucked).
+  const paperY = 43 - 70 * paperProgress;
   const paperTextOpacity = Math.max(0, Math.min(1, (paperProgress - 0.35) / 0.4));
 
   // Long, gentle scene fade so the wrapper is invisible by the time we unmount
@@ -293,40 +295,47 @@ export const EnvelopeOpening = ({
               }}
             />
 
-            {/* (z3) Paper / letter — rises out of the pocket. Inset narrower
-                than the pocket so it can never spill out the sides. */}
+            {/* (z3) Clip wrapper — pins the cut to the envelope bottom so the
+                tall letter never spills below the envelope; open at the top so
+                it can rise out. The paper inside is inset narrower than the
+                pocket so it can never spill out the sides either. */}
             <div
-              className="absolute rounded-[3px] flex flex-col items-center justify-center text-center px-6"
-              style={{
-                left: "14%",
-                right: "14%",
-                top: "0%",
-                height: "132%",
-                backgroundColor: "#fdfaf3",
-                backgroundImage: "linear-gradient(180deg, #ffffff 0%, #fdfaf3 60%, #f5efe2 100%)",
-                color: "#2a2620",
-                transform: `translateY(${paperY}%)`,
-                transition: SMOOTH,
-                willChange: "transform",
-                zIndex: 3,
-                boxShadow: `0 14px 30px -10px ${hexWithAlpha("#000", 0.35)}, inset 0 0 0 1px ${hexWithAlpha("#000", 0.05)}`,
-              }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ clipPath: "inset(-400% 0 0 0)", zIndex: 3 }}
             >
               <div
-                className="flex flex-col items-center"
+                className="absolute rounded-[3px] flex flex-col items-center text-center px-6"
                 style={{
-                  opacity: paperTextOpacity,
-                  transform: `translateY(${(1 - paperTextOpacity) * 8}px)`,
-                  transition: "opacity 500ms ease-out, transform 500ms ease-out",
+                  left: "14%",
+                  right: "14%",
+                  top: "0%",
+                  height: "130%",
+                  paddingTop: "13%",
+                  backgroundColor: "#fdfaf3",
+                  backgroundImage: "linear-gradient(180deg, #ffffff 0%, #fdfaf3 60%, #f5efe2 100%)",
+                  color: "#2a2620",
+                  transform: `translateY(${paperY}%)`,
+                  transition: SMOOTH,
+                  willChange: "transform",
+                  boxShadow: `0 14px 30px -10px ${hexWithAlpha("#000", 0.35)}, inset 0 0 0 1px ${hexWithAlpha("#000", 0.05)}`,
                 }}
               >
-                <span
-                  className={`${displayClass} leading-none`}
-                  style={{ color: "#2a2620", fontSize: "clamp(40px, 11vw, 88px)" }}
+                <div
+                  className="flex flex-col items-center"
+                  style={{
+                    opacity: paperTextOpacity,
+                    transform: `translateY(${(1 - paperTextOpacity) * 8}px)`,
+                    transition: "opacity 500ms ease-out, transform 500ms ease-out",
+                  }}
                 >
-                  {monogram}
-                </span>
-                <div className="mt-5 h-px w-12" style={{ backgroundColor: hexWithAlpha(accent, 0.7) }} />
+                  <span
+                    className={`${displayClass} leading-none`}
+                    style={{ color: "#2a2620", fontSize: "clamp(40px, 11vw, 88px)" }}
+                  >
+                    {monogram}
+                  </span>
+                  <div className="mt-5 h-px w-12" style={{ backgroundColor: hexWithAlpha(accent, 0.7) }} />
+                </div>
               </div>
             </div>
 
