@@ -61,11 +61,6 @@ const initialOf = (name: string) => name?.trim().charAt(0).toUpperCase() || "";
 // Total scroll length of the reveal, in viewport heights.
 const SECTION_VH = 250;
 
-// TEMP: flip to compare the two intros, then delete the flag + the losing branch.
-//   "flap"      — closed envelope whose flap opens, then the paper rises.
-//   "preopened" — envelope already open, only the paper rises.
-const OPENING_STYLE: "flap" | "preopened" = "preopened";
-
 // Smooth 0/1 crossfade with a soft ramp between `lo` and `hi`.
 const smoothBand = (v: number, lo: number, hi: number) => {
   if (v <= lo) return 0;
@@ -138,27 +133,23 @@ export const EnvelopeOpening = ({
 
   if (passed) return null;
 
-  const isFlap = OPENING_STYLE === "flap";
-
   // --- Phased timeline (driven by scroll progress 0 → 1) ---
-  // flap:      0.00–0.30 flap opens · 0.20–0.85 paper rises · 0.85–1.0 hand off
-  // preopened: flap static-open     · 0.00–0.85 paper rises · 0.85–1.0 hand off
-  const rawFlap = isFlap ? Math.max(0, Math.min(1, progress / 0.3)) : 1;
+  // 0.00–0.30 flap opens · 0.20–0.85 paper rises · 0.85–1.0 hand off
+  const rawFlap = Math.max(0, Math.min(1, progress / 0.3));
   const flapProgress = easeInOutCubic(rawFlap);
 
-  const paperStart = isFlap ? 0.2 : 0.0;
+  const paperStart = 0.2;
   const rawPaper = Math.max(0, Math.min(1, (progress - paperStart) / (0.85 - paperStart)));
   const paperProgress = easeOut(rawPaper);
 
   // Wax seal lives on the closed flap; gone before the paper starts to rise.
   const sealProgress = easeInOut(Math.max(0, Math.min(1, progress / 0.16)));
-  const sealOpacity = isFlap ? Math.max(0, 1 - sealProgress * 1.1) : 0;
+  const sealOpacity = Math.max(0, 1 - sealProgress * 1.1);
   const sealScale = 1 - 0.16 * sealProgress;
 
-  // Flap folds up and back (hinged at the top edge). Static-open for preopened.
+  // Flap folds up and back (hinged at the top edge).
   const FLAP_OPEN_ANGLE = -162;
   const flapAngle = FLAP_OPEN_ANGLE * flapProgress;
-  const flapShadeProgress = isFlap ? flapProgress : 1;
 
   // Paper translateY, in % of the paper's own height. The paper is taller than
   // the envelope and clipped at the envelope bottom (see clip wrapper below), so
@@ -290,7 +281,7 @@ export const EnvelopeOpening = ({
                 transition: SMOOTH,
                 willChange: "transform",
                 zIndex: 2,
-                filter: `brightness(${1 - flapShadeProgress * 0.05})`,
+                filter: `brightness(${1 - flapProgress * 0.05})`,
                 boxShadow: `0 6px 14px ${hexWithAlpha("#000", 0.2)}, inset 0 -1px 0 ${hexWithAlpha("#000", 0.18)}, inset 0 1px 0 ${hexWithAlpha("#fff", 0.1)}`,
               }}
             />
@@ -352,8 +343,8 @@ export const EnvelopeOpening = ({
               }}
             />
 
-            {/* (z6) Wax seal — flap variant only; fades before the paper rises. */}
-            {isFlap && sealOpacity > 0.01 && (
+            {/* (z6) Wax seal — on the closed flap; fades before the paper rises. */}
+            {sealOpacity > 0.01 && (
               <div
                 className="absolute rounded-full flex items-center justify-center pointer-events-none"
                 style={{
