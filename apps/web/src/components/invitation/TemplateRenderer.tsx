@@ -20,8 +20,21 @@ interface TemplateRendererProps {
   fitContent?: boolean;
 }
 
+// Multiply each RGB channel by `factor` (<1 darkens, >1 lightens).
+const shadeHex = (hex: string, factor: number): string => {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+  const r = clamp(((n >> 16) & 0xff) * factor);
+  const g = clamp(((n >> 8) & 0xff) * factor);
+  const b = clamp((n & 0xff) * factor);
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
+};
+
 const resolveBg = (bg: SectionBg | undefined, theme: TemplateTheme, primaryColor: string): string => {
   if (!bg || bg === "background") return primaryColor;
+  if (bg === "background-dark") return shadeHex(primaryColor, 0.82);
   if (bg === "surface") return theme.surface;
   if (typeof bg === "object" && "color" in bg) return bg.color;
   return primaryColor;

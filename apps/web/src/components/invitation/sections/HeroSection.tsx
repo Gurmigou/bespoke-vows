@@ -305,6 +305,82 @@ const Botanical = ({ data, theme, config, background }: Props) => {
   );
 };
 
+// Full-bleed background video with the couple's names overlaid in the display
+// script. Text is always light (ivory + accent) for legibility over the footage,
+// regardless of the template palette. Used by the royal template.
+const Cinematic = ({ data, theme, config }: Props) => {
+  const accent = data.templateColors.accent;
+  const connector = config.copy.connector ?? "&";
+  const ivory = "#F6ECD6";
+  const video = config.media?.video;
+  const overlay = config.media?.overlay ?? 0.5;
+
+  return (
+    <section className="relative h-screen w-full overflow-hidden flex items-center justify-center px-6 text-center">
+      {video && (
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src={video}
+          poster={config.media?.poster}
+          autoPlay
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden
+        />
+      )}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `linear-gradient(180deg, rgba(0,0,0,${overlay * 0.75}) 0%, rgba(0,0,0,${
+            overlay * 0.35
+          }) 45%, rgba(0,0,0,${overlay}) 100%)`,
+        }}
+      />
+
+      <div className="absolute top-20 md:top-24 left-0 right-0 z-10 flex flex-col items-center gap-6 px-6 max-w-2xl mx-auto animate-in fade-in duration-1000" style={{ color: ivory }}>
+        {config.copy.eyebrow && (
+          <p
+            className={`${theme.bodyClass} text-center text-[10px] md:text-xs uppercase tracking-[0.45em] font-normal`}
+            style={{ color: "#FFFFFF" }}
+          >
+            {config.copy.eyebrow}
+          </p>
+        )}
+
+        <h1
+          className={`${theme.displayClass} text-center leading-[0.95]`}
+          style={{ fontSize: "clamp(3.5rem, 13vw, 8rem)", textShadow: "0 2px 40px rgba(0,0,0,0.45)" }}
+        >
+          {data.herName}
+          <span className="block my-1" style={{ color: accent, fontSize: "0.6em" }}>
+            {connector}
+          </span>
+          {data.hisName}
+        </h1>
+      </div>
+
+      <div
+        className="absolute bottom-12 left-0 right-0 z-10 flex flex-col items-center gap-6 animate-in fade-in duration-1000"
+        style={{ color: ivory }}
+      >
+        <div className="flex items-center justify-center gap-4" aria-hidden>
+          <span className="h-px w-12" style={{ backgroundColor: accent, opacity: 0.7 }} />
+          <span style={{ color: accent }}>❦</span>
+          <span className="h-px w-12" style={{ backgroundColor: accent, opacity: 0.7 }} />
+        </div>
+
+        <div className={`${theme.bodyClass} space-y-2 text-center`} style={{ textShadow: "0 1px 12px rgba(0,0,0,0.7)" }}>
+          <p className="text-sm md:text-base uppercase tracking-[0.35em]">{data.weddingDate}</p>
+          <p className="text-xs md:text-sm uppercase tracking-[0.3em]" style={{ opacity: 0.8 }}>
+            {data.weddingPlace}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const HeroSection = (props: Props) => {
   switch (props.config.variant) {
     case "split":
@@ -313,6 +389,8 @@ export const HeroSection = (props: Props) => {
       return <Framed {...props} />;
     case "botanical":
       return <Botanical {...props} />;
+    case "cinematic":
+      return <Cinematic {...props} />;
     case "centered":
     default:
       return <Centered {...props} />;

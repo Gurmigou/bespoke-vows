@@ -2,6 +2,7 @@ import type { TemplateDefinition, TemplateThumbnail, TemplateColors } from "@bes
 import { classicTemplate } from "./definitions/classic";
 import { modernTemplate } from "./definitions/modern";
 import { floralTemplate } from "./definitions/floral";
+import { royalTemplate } from "./definitions/royal";
 
 /**
  * Adding a new template:
@@ -12,9 +13,12 @@ import { floralTemplate } from "./definitions/floral";
  * existing section types + variants. To add a brand-new layout, register a new
  * section type in `../sections/registry.ts` first, then reference it here.
  */
-export const TEMPLATES: TemplateDefinition[] = [classicTemplate, modernTemplate, floralTemplate];
+// Усі шаблони лишаються в коді, але показуємо лише королівський.
+const ALL_TEMPLATES: TemplateDefinition[] = [classicTemplate, modernTemplate, floralTemplate, royalTemplate];
 
-const TEMPLATE_BY_ID: Record<string, TemplateDefinition> = TEMPLATES.reduce(
+export const TEMPLATES: TemplateDefinition[] = [royalTemplate];
+
+const TEMPLATE_BY_ID: Record<string, TemplateDefinition> = ALL_TEMPLATES.reduce(
   (acc, t) => ({ ...acc, [t.id]: t }),
   {}
 );

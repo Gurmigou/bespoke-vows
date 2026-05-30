@@ -68,7 +68,7 @@ const Pricing = () => {
         <div className="pointer-events-none absolute -bottom-20 -right-32 h-[24rem] w-[24rem] rounded-full bg-amber-200/30 blur-3xl" />
 
         <div className="container mx-auto max-w-5xl relative">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch max-w-3xl mx-auto">
 
             {/* Free trial */}
             <div className="group relative bg-white/80 backdrop-blur-sm border border-foreground/5 rounded-3xl shadow-sm hover:shadow-elegant hover:-translate-y-1 transition-all duration-500 overflow-hidden flex flex-col">
@@ -140,8 +140,8 @@ const Pricing = () => {
               </div>
             </div>
 
-            {/* Усі шаблони назавжди — Рекомендовано */}
-            <div className="relative flex flex-col h-full">
+            {/* Усі шаблони назавжди — Рекомендовано (приховано) */}
+            <div className="hidden relative flex-col h-full">
               <div className="absolute -inset-2 bg-gradient-to-br from-pink-400/40 via-rose-300/30 to-amber-300/30 rounded-[2rem] blur-2xl opacity-70 pointer-events-none" />
 
               <div className="relative bg-gradient-to-br from-white via-white to-pink-50/60 backdrop-blur-sm border border-pink-200/50 rounded-3xl shadow-elegant overflow-hidden flex flex-col h-full hover:-translate-y-1 transition-transform duration-500">

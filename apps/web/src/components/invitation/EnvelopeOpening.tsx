@@ -168,8 +168,6 @@ export const EnvelopeOpening = ({
   const hintOpacity = Math.max(0, 1 - progress * 4);
   const finalReached = progress > 0.9;
 
-  const SMOOTH = "transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 700ms ease-out";
-
   const accent = colors.accent;
   const text = colors.text;
   const isPrimaryDark = !isLightHex(colors.primary);
@@ -218,9 +216,8 @@ export const EnvelopeOpening = ({
             0.1
           )} 55%, transparent 100%)`,
           opacity: sceneOpacity,
-          transform: `translateY(${sceneTranslate}px) scale(${sceneScale})`,
+          transform: `translate3d(0, ${sceneTranslate}px, 0) scale(${sceneScale})`,
           transformOrigin: "center top",
-          transition: "opacity 600ms ease-out, transform 600ms ease-out",
           willChange: "opacity, transform",
         }}
       >
@@ -278,7 +275,6 @@ export const EnvelopeOpening = ({
                 transform: `rotateX(${flapAngle}deg) translateZ(2px)`,
                 transformStyle: "preserve-3d",
                 backfaceVisibility: "hidden",
-                transition: SMOOTH,
                 willChange: "transform",
                 zIndex: 2,
                 filter: `brightness(${1 - flapProgress * 0.05})`,
@@ -305,8 +301,7 @@ export const EnvelopeOpening = ({
                   backgroundColor: "#fdfaf3",
                   backgroundImage: "linear-gradient(180deg, #ffffff 0%, #fdfaf3 60%, #f5efe2 100%)",
                   color: "#2a2620",
-                  transform: `translateY(${paperY}%)`,
-                  transition: SMOOTH,
+                  transform: `translate3d(0, ${paperY}%, 0)`,
                   willChange: "transform",
                   boxShadow: `0 14px 30px -10px ${hexWithAlpha("#000", 0.35)}, inset 0 0 0 1px ${hexWithAlpha("#000", 0.05)}`,
                 }}
@@ -354,7 +349,6 @@ export const EnvelopeOpening = ({
                   left: "50%",
                   transform: `translate3d(-50%, -50%, 8px) scale(${sealScale})`,
                   opacity: sealOpacity,
-                  transition: SMOOTH,
                   willChange: "transform, opacity",
                   backgroundColor: accent,
                   backgroundImage: `radial-gradient(circle at 30% 30%, ${hexWithAlpha("#ffffff", 0.45)}, transparent 55%), radial-gradient(circle at 70% 80%, ${hexWithAlpha("#000000", 0.28)}, transparent 60%)`,

@@ -100,8 +100,16 @@ const Ornamented = ({ data, theme, config, background }: Props) => {
   const ornament = config.ornament ?? theme.ornament ?? "flourish";
 
   return (
-    <section className="py-20 px-6" style={{ backgroundColor: background }}>
-      <div className="max-w-2xl mx-auto text-center space-y-8">
+    <section
+      className="relative py-20 px-6 overflow-hidden"
+      style={{
+        backgroundImage: `url(${countdownBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0" style={{ backgroundColor: background, opacity: 0.6 }} />
+      <div className="relative max-w-2xl mx-auto text-center space-y-8">
         {config.copy.title && (
           <h2 className={`${theme.displayClass} text-6xl md:text-7xl`} style={{ color: text }}>
             {config.copy.title}

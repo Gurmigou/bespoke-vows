@@ -91,7 +91,7 @@ export interface TemplateTheme {
   ornament?: 'none' | 'hairline' | 'flourish' | 'frame';
 }
 
-export type SectionBg = 'background' | 'surface' | { color: string } | { image: string };
+export type SectionBg = 'background' | 'background-dark' | 'surface' | { color: string } | { image: string };
 
 export interface SectionBase {
   bg?: SectionBg;
@@ -102,11 +102,21 @@ export interface SectionBase {
 
 export interface HeroSection extends SectionBase {
   type: 'hero';
-  variant: 'centered' | 'split' | 'framed' | 'botanical';
+  variant: 'centered' | 'split' | 'framed' | 'botanical' | 'cinematic';
   copy: {
     eyebrow?: string;
     connector?: string;
     closing?: string;
+  };
+  /**
+   * Full-bleed background media for the `cinematic` variant.
+   * `video` is a public asset path (e.g. `/royal-hero.mp4`) or absolute URL.
+   * `overlay` is the darkening overlay opacity (0–1) for text legibility.
+   */
+  media?: {
+    video: string;
+    poster?: string;
+    overlay?: number;
   };
 }
 

@@ -7,6 +7,7 @@ import { users, templates, invitations, payments } from './schema.js';
 import { classicTemplate } from '../../../web/src/components/invitation/templates/definitions/classic.js';
 import { modernTemplate } from '../../../web/src/components/invitation/templates/definitions/modern.js';
 import { floralTemplate } from '../../../web/src/components/invitation/templates/definitions/floral.js';
+import { royalTemplate } from '../../../web/src/components/invitation/templates/definitions/royal.js';
 import type { InvitationData, TemplateDefinition } from '@bespoke-vows/shared';
 
 const scryptAsync = promisify(scrypt);
@@ -42,7 +43,7 @@ async function main() {
   await db.delete(templates);
   await db.delete(users);
 
-  const defs: TemplateDefinition[] = [classicTemplate, modernTemplate, floralTemplate];
+  const defs: TemplateDefinition[] = [classicTemplate, modernTemplate, floralTemplate, royalTemplate];
 
   for (const def of defs) {
     await db.insert(templates).values({
